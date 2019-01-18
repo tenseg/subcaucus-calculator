@@ -1,0 +1,33 @@
+{
+  "name": "primereact-tyepscript-quickstart",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "classnames": "^2.2.6",
+    "node-sass": "^4.11.0",
+    "primeicons": "1.0.0-beta.9",
+    "primereact": "2.0.0-beta.9",
+    "react": "^16.6.0",
+    "react-dom": "^16.6.0",
+    "react-scripts": "^2.1.3"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  },
+  "devDependencies": {
+    "@types/jest": "23.3.9",
+    "@types/node": "10.12.1",
+    "@types/react": "16.4.18",
+    "@types/react-dom": "16.0.9",
+    "typescript": "3.1.5"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
+}
