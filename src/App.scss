@@ -1,23 +1,176 @@
+
+$form-margin: 0.8rem;
+$form-overhang: 0 - $form-margin;
+$phone: "only screen and (max-width : 400px)";
+
+$meeting-info-color: #daddff;
+$rule-color: #aaa;
+$header-color: #0005a8;
+$body-color: #8f1731;
+$card-color: #f9edcb;
+$summary-color: #cccccc;
+
+body {
+    background-color: $body-color;
+    
+    .p-component {
+        font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+    }
+    
+}
+
+.background-blocker {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.50);
+}
+
+.app {
+    position: relative;
+    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+    
+    .p-card {
+        position: absolute;
+        top: ( 5 * $form-margin );
+        left: $form-margin;
+        right: $form-margin;
+        min-width: 300px;
+        max-width: 500px;
+        margin: auto;
+        background-color: $card-color;
+        
+        .p-card-content {
+            input {
+                width: 100%;
+            }
+        }
+
+        .p-button {
+            margin-right: $form-margin;
+        }
+    
+    }
+    
+}
+
 .app-content {
-  padding: 20px;
+    position: relative;
+    margin: auto;
+    max-width: 600px;
+    padding: 0 20px;
 }
 
 .app-logo {
-  height: 80px;
+    height: 80px;
 }
 
 .app-header {
-  background-color: #222;
-  height: 120px;
-  padding: 20px;
-  color: white;
-  text-align: center;
+    background-color: $header-color;
+    width: 100%;
+    padding: 0 $form-margin;
+    overflow: hidden;
+    color: white;
+    text-align: left;
+    font-size: 14px;
 }
 
 .app-intro {
-  font-size: large;
+    font-size: large;
 }
 
 .p-float-label {
-  display: inline-block;
+    display: inline-block;
+}
+
+#meeting-info {
+    
+    button.p-button {
+        display: block;
+        width: 100%;
+        padding: $form-margin;
+        border-radius: 0;
+        border: none;
+        border-bottom: 1px solid $rule-color;
+        background-color: $meeting-info-color;
+        color: black;
+        font-size: 18px;
+        font-weight: 900;
+        
+        &:hover {
+            background-color: darken($meeting-info-color, 10%)
+        }
+    }
+    
+    #meeting-name {
+        text-align: left;
+    }
+    
+    #delegates-allowed {
+        text-align: right;
+    }
+    
+    .p-button.p-button-text-only .p-button-text {
+        padding: 0;
+    }
+
+}
+
+.row {
+    display: flex;
+    padding-top: 10px;
+    background-color: $meeting-info-color;
+    border-top: 1px solid $rule-color;
+    border-bottom: 1px solid $rule-color;
+    
+    .cell {
+        width: 1px;
+        flex-grow: 3;
+        margin: $form-margin;
+        
+        @media #{$phone} {
+            flex-grow: 2;
+        }
+        
+        &.number {
+            flex-grow: 1;
+            
+            label {
+                text-align: right;
+            }
+        }
+        
+        label {
+            right: 0.25em;
+            white-space: nowrap;
+        }
+        
+        input {
+            width: 100%;
+            padding: 0 0.25em;
+            border: none;
+            background-color: transparent;
+            
+            &.number {
+                text-align: right;
+            }
+        }
+    }
+    
+    &.meeting-info {
+        padding-bottom: 0;
+        
+        .cell {
+            margin-bottom: 0.15em;
+
+            input {
+                margin-top: -0.5em;
+                padding-bottom: 0;
+                font-size: 18px;
+                font-weight: 900;                
+            }
+        }       
+    }
 }

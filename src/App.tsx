@@ -1,18 +1,21 @@
 import * as React from 'react';
 import { Button } from 'primereact/button';
-import { InputText } from 'primereact/inputtext';
+import { ValueCard } from './ValueCard';
+// import { InputText } from 'primereact/inputtext';
 import 'primereact/resources/primereact.min.css';
 import 'primereact/resources/themes/nova-light/theme.css';
 import 'primeicons/primeicons.css';
 import './App.scss';
 
-const logo = require('./primereact-logo.png');
+// const logo = require('./primereact-logo.png');
 
 interface AppProps { }
 interface AppState {
-    count: number;
-    name: string;
-    allowed: number;
+    name: string
+    allowed: number
+    dateCreated: Date
+    changingName: boolean
+    changingDelegates: boolean
 }
 
 class App extends React.Component<AppProps, AppState> {
@@ -20,96 +23,104 @@ class App extends React.Component<AppProps, AppState> {
     constructor(props: AppProps) {
         super(props);
         this.state = {
-            count: 0,
-            name: '',
-            allowed: 0,
+            name: 'Debugging',
+            allowed: 0, // make zero for release
+            dateCreated: new Date(),
+            changingName: false,
+            changingDelegates: false,
         };
-        this.increment = this.increment.bind(this);
     }
 
-    increment() {
-        this.setState({
-            count: this.state.count + 1
-        });
+    defaultName = (): string => {
+        return "Meeting on " + this.state.dateCreated.toLocaleDateString("en-US")
+    }
+
+    allowedString = (): string => {
+        return `${this.state.allowed} delegates to be elected`
     }
 
     handleChange = (name: string) => (event: React.FormEvent<HTMLInputElement>) => {
         switch (name) {
             case 'allowed':
-                this.setState({ allowed: Number(event.currentTarget.value) })
+                var allowed = Number(event.currentTarget.value)
+                if (allowed < 0) {
+                    allowed = 0
+                }
+                this.setState({ allowed: allowed })
                 break;
-            case 'name': {
+            case 'name':
                 this.setState({ name: event.currentTarget.value })
                 break;
-            }
         }
     }
 
+    focusOnWholeText = () => (event: React.FormEvent<HTMLInputElement>) => {
+        const target = event.currentTarget; // event properties must be copied to use async
+        setTimeout(() => target.setSelectionRange(0, 9999), 0); // do this async to try to make Safari behave
+    }
+
     render() {
+
+        const showNameCard = ((this.state.name == '') || this.state.changingName)
+        const nameCard = showNameCard ?
+            <ValueCard
+                title="What is the name of your meeting?"
+                description='Most meetings have a name, like the "Ward 4 Precinct 7 Caucus" or the "Saint Paul City Convention". Specify the name of your meeting here.'
+                value={this.state.name ? this.state.name : this.defaultName()}
+                onSave={(value: string) => {
+                    this.setState({
+                        name: value,
+                        changingName: false,
+                    })
+                }}
+            />
+            : <></>
+
+        const showDelegateCard = ((!showNameCard && !this.state.allowed) || this.state.changingDelegates)
+        const delegateCard = showDelegateCard ?
+            <ValueCard
+                title="Number of delegates allowed?"
+                description="Specify the number of delegates that your meeting or caucus is allowed to send on to the next level. This is the number of delegates to be elected by your meeting."
+                type="positive integer"
+                value={this.state.allowed.toString()}
+                onSave={(value: string) => {
+                    this.setState({
+                        allowed: Number(value),
+                        changingDelegates: false,
+                    })
+                }}
+            />
+            : <></>
+
         return (
             <div className="app">
-                <div className="app-header">
-                    <img src={logo} className="app-logo" alt="logo" />
-                </div>
                 <div className="app-content">
-                    <Button label="Hello, World" icon="pi pi-check" onClick={this.increment} />
-                    <p>Number of Clicks: {this.state.count}</p>
-                    <span className="p-float-label">
-                        <InputText id="meeting-name" type="text" size={50} value={this.state.name} onChange={this.handleChange('name')} />
-                        <label htmlFor="meeting-name">Meeting or Caucus Name</label>
-                    </span>
-                    <span className="p-float-label">
-                        <InputText id="delegates-allowed" keyfilter="pint" type="text" size={30} value={this.state.allowed} onChange={this.handleChange('allowed')} />
-                        <label htmlFor="delegates-allowed">Delegates Allowed</label>
-                    </span>
-                    {/* 
-                    <Button>Hello, World</Button>
-                    <Button>{__webpack_hash__}</Button>
-                    <Button variant="contained" color="secondary" className={classes.button}>		{__webpack_hash__}
-                    </Button>
-                    <IconButton color="secondary" className={classes.button} aria-label="Add an alarm">
-                        <Icon>alarm</Icon>
-                    </IconButton>
-                    <div className={classes.container}>
-                        <TextField
-                            id="caucus-name"
-                            label="Meeting or Caucus"
-                            placeholder="Name"
-                            margin="normal"
-                            variant="outlined"
-                            style={{
-                                flexGrow: 4,
-                                width: '10em',
-                            }}
-                            InputLabelProps={{
-                                shrink: true,
+                    <div className="app-header">
+                        <p><strong>Minnesota DFL Subcaucus Calculator</strong></p>
+                    </div>
+                    <div id="meeting-info">
+                        <Button
+                            id="meeting-name"
+                            label={this.state.name ? this.state.name : this.defaultName()}
+                            onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
+                                console.log("show the name card")
+                                this.setState({
+                                    changingName: true,
+                                })
                             }}
                         />
-                        <TextField
+                        <Button
                             id="delegates-allowed"
-                            label="Delegates"
-                            value={this.state.delegatesAllowed || ''}
-                            onChange={this.handleChange('delegatesAllowed')}
-                            type="number"
-                            className={classes.field}
-                            style={{
-                                flexGrow: 1,
-                                width: '5em',
+                            label={this.allowedString()}
+                            onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
+                                console.log("show the delegate card")
+                                this.setState({
+                                    changingDelegates: true,
+                                })
                             }}
-                            inputProps={{
-                                pattern: "\\d*"
-                            }}
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
-                            margin="normal"
-                            variant="outlined"
-                            onFocus={this.handleFocusOnFullText()}
                         />
                     </div>
-                    <Fab variant="extended" className={classes.button} aria-label="Add Subcaucus"><Icon className={classes.marginRight}>add</Icon> Add a Subcaucus</Fab>
-                    <br></br>
-                    <Fab size="medium" className={classes.button} color="secondary" aria-label="Remove Subcaucus"><Icon>remove</Icon></Fab> */}
+                    {delegateCard}{nameCard}
                 </div>
             </div>
         );
