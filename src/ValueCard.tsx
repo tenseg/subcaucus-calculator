@@ -144,6 +144,8 @@ export class ValueCard extends React.Component<Props, State> {
 
         return (
             <div className="valuecard-wrapper">
+                <div className="background-blocker">
+                </div>
                 <Card id={this.idPlus("valuecard")}
                     className={`valuecard ${this.idPlus("valuecard")}`}
                     title={this.props.title}
@@ -176,8 +178,6 @@ export class ValueCard extends React.Component<Props, State> {
                         : <></>
                     }
                 </Card>
-                <div className="background-blocker">
-                </div>
             </div>
         )
     }
