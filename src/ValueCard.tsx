@@ -1,7 +1,9 @@
 import * as React from 'react';
+import * as ReactDOM from 'react-dom';
 import { Button } from 'primereact/button';
 import { Card } from 'primereact/card';
 import { InputText } from 'primereact/inputtext';
+import { debug } from './App'
 
 // const logo = require('./primereact-logo.png');
 
@@ -22,6 +24,7 @@ export class ValueCard extends React.Component<CardProps, CardState> {
     type: 'text' | 'positive integer' = 'text'
     isPositiveInt = false
     originalValue = ''
+    textFieldRef: React.RefObject<any> = React.createRef();
 
     constructor(props: CardProps) {
         super(props);
@@ -60,6 +63,14 @@ export class ValueCard extends React.Component<CardProps, CardState> {
         }
     }
 
+    handleKey = () => (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter') {
+            if (this.props.onSave) {
+                this.props.onSave(this.trim(this.state.value))
+            }
+        }
+    }
+
     focusOnWholeText = () => (event: React.FormEvent<HTMLInputElement>) => {
         // event properties must be copied to use async
         const target = event.currentTarget;
@@ -78,6 +89,25 @@ export class ValueCard extends React.Component<CardProps, CardState> {
     save = (value: string) => (event: React.MouseEvent<HTMLButtonElement>) => {
         if (this.props.onSave) {
             this.props.onSave(this.trim(value))
+        }
+    }
+
+    componentDidMount = () => {
+        debug("card mounted")
+        const target = ReactDOM.findDOMNode(this.textFieldRef.current)
+        if (this.textFieldRef.current instanceof InputText && target != null) {
+            switch (this.type) {
+                case 'text':
+                case 'positive integer':
+                    try {
+                        debug("selecting", target)
+                        // @ts-ignore
+                        target.select();
+                    } catch {
+                        console.log("oops")
+                    }
+                    break;
+            }
         }
     }
 
@@ -122,10 +152,12 @@ export class ValueCard extends React.Component<CardProps, CardState> {
                         className={this.isPositiveInt ? "number" : "text"}
                         keyfilter={this.isPositiveInt ? "pint" : ""}
                         type="text"
-                        pattern={this.isPositiveInt ? '\d*' : undefined}
+                        pattern={this.isPositiveInt ? "\\d*" : undefined}
                         value={this.state.value}
                         onChange={this.handleChange()}
                         onFocus={this.isPositiveInt ? this.focusOnWholeText() : undefined}
+                        onKeyUp={this.handleKey()}
+                        ref={this.textFieldRef}
                     />
                 </Card>
             </div>

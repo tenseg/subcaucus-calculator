@@ -18,7 +18,7 @@ interface AppState {
     changingDelegates: boolean
 }
 
-class App extends React.Component<AppProps, AppState> {
+export class App extends React.Component<AppProps, AppState> {
 
     constructor(props: AppProps) {
         super(props);
@@ -103,7 +103,7 @@ class App extends React.Component<AppProps, AppState> {
                             id="meeting-name"
                             label={this.state.name ? this.state.name : this.defaultName()}
                             onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
-                                console.log("show the name card")
+                                debug("show the name card")
                                 this.setState({
                                     changingName: true,
                                 })
@@ -113,7 +113,7 @@ class App extends React.Component<AppProps, AppState> {
                             id="delegates-allowed"
                             label={this.allowedString()}
                             onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
-                                console.log("show the delegate card")
+                                debug("show the delegate card")
                                 this.setState({
                                     changingDelegates: true,
                                 })
@@ -127,4 +127,9 @@ class App extends React.Component<AppProps, AppState> {
     }
 }
 
-export default App;
+export function debug(message?: any, ...optionalParams: any[]) {
+    if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
+        console.log(message, ...optionalParams)
+    }
+}
+
