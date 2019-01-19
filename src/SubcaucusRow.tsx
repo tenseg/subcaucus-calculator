@@ -53,7 +53,7 @@ export class SubcaucusRow extends React.Component<Props, State> {
 	}
 
 	handleKey = () => (event: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-		if (event.key === 'Enter') {
+		if (event.key === 'Enter' || event.key === 'Tab') {
 			if (this.props.onChange) {
 				this.props.onChange(this.subcaucus, 'enter')
 			}
@@ -85,6 +85,7 @@ export class SubcaucusRow extends React.Component<Props, State> {
 				<Button id={this.idPlus("row-remove-button")}
 					className="subcaucus-remove-button p-button-danger"
 					icon="pi pi-minus"
+					onClick={this.remove()}
 				/>
 				<InputTextarea id={this.idPlus("row-name")}
 					className="subcaucus-field subcaucus-name"

@@ -72,7 +72,24 @@ export class App extends React.Component<Props, State> {
         setTimeout(() => target.setSelectionRange(0, 9999), 0) // do this async to try to make Safari behave
     }
 
+    handleSubcaucusChange = (subcaucus: Subcaucus, action?: 'remove' | 'enter') => {
+        _u.debug("subcaucus changed", subcaucus.id, action)
+        const id = subcaucus.id
+        switch (action) {
+            case 'remove':
+                this.setState({
+                    subcaucuses: this.state.subcaucuses.filter((subcaucus) => {
+                        _u.debug(subcaucus.id, "!=", id, subcaucus.id != id)
+                        return subcaucus.id != id
+                    })
+                })
+                break
+        }
+    }
+
     render() {
+
+        _u.debug("rendering", this.state.subcaucuses)
 
         // we start with an empty card, then change the value of card as circumstances warrent
         // note that the last card set "wins" in the case where multiple cards are possible
@@ -157,6 +174,7 @@ export class App extends React.Component<Props, State> {
             return (
                 <SubcaucusRow
                     subcaucus={subcaucus}
+                    onChange={this.handleSubcaucusChange}
                 />
             )
         })
@@ -205,7 +223,12 @@ export class App extends React.Component<Props, State> {
                         <Button id="add-subcaucus-button"
                             label="Add a Subcaucus"
                             icon="pi pi-plus"
-                            onClick={() => this.setState({ subcaucuses: [...this.state.subcaucuses, new Subcaucus(this.nextSubcaucusID())] })}
+                            onClick={() => this.setState({
+                                subcaucuses: [
+                                    ...this.state.subcaucuses,
+                                    new Subcaucus(this.nextSubcaucusID())
+                                ]
+                            })}
                         />
                     </div>
                     <Button id="app-byline"
@@ -215,6 +238,13 @@ export class App extends React.Component<Props, State> {
                     />
                     {card}
                 </div>
+                {_u.isDebugging()
+                    ? <div className="debugging">
+                        <pre>{"" + new Date}</pre>
+                        <pre>{JSON.stringify(this.state, null, 2)}</pre>
+                    </div>
+                    : <></>
+                }
             </div>
         )
     }

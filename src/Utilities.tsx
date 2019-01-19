@@ -38,9 +38,13 @@ String.prototype.trim = function (): string {
  * 
  */
 export function debug(message?: any, ...optionalParams: any[]) {
-	if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
+	if (isDebugging()) {
 		console.log(message, ...optionalParams)
 	}
+}
+
+export function isDebugging(): boolean {
+	return !process.env.NODE_ENV || process.env.NODE_ENV === 'development'
 }
 
 /**
