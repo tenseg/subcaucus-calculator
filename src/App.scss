@@ -23,14 +23,29 @@ body {
     position: relative;
     font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
     
-    #app-header {
+    #app-byline,
+    #app-about-button {
         background-color: $header-color;
         width: 100%;
-        padding: 0 $form-margin;
+        padding: $form-margin;
+        border: none;
         overflow: hidden;
         color: white;
         text-align: left;
-        font-size: 14px;
+        
+        .p-button-text {
+            padding: 0;
+        }
+        
+        &:hover {
+            background-color: lighten($header-color, 25%)
+        }
+    }
+    
+    #app-byline {
+        display: block;
+        font-size: 9px;
+        text-align: right;
     }
     
     #app-content {
@@ -47,7 +62,6 @@ body {
                 padding: $form-margin;
                 border-radius: 0;
                 border: none;
-                border-bottom: 1px solid $rule-color;
                 background-color: $meeting-info-color;
                 color: black;
                 font-size: 18px;
@@ -59,6 +73,7 @@ body {
             }
             
             #meeting-name {
+                border-bottom: 1px solid $rule-color;
                 text-align: left;
             }
             
@@ -163,6 +178,7 @@ body {
                     flex-grow: 0;
                     margin-right: 0;
                     border: none;
+                    border-radius: 0;
                     color: $body-color;
                     font-size: 18px;
                     font-weight: 900;
@@ -176,6 +192,7 @@ body {
             
             #add-subcaucus-button {
                 margin: $form-margin;
+                border: none;
                 background-color: $header-color;
                 
                 &:hover {

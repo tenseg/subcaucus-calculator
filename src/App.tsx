@@ -121,9 +121,11 @@ export class App extends React.Component<Props, State> {
         return (
             <div id="app">
                 <div id="app-content">
-                    <div id="app-header">
-                        <p><strong>Minnesota DFL Subcaucus Calculator</strong></p>
-                    </div>
+                    <Button id="app-about-button"
+                        label="Minnesota DFL Subcaucus Calculator"
+                        icon="pi pi-info-circle"
+                        iconPos="right"
+                    />
                     <div id="meeting-info">
                         <Button id="meeting-name"
                             label={this.state.name ? this.state.name : this.defaultName()}
@@ -171,6 +173,10 @@ export class App extends React.Component<Props, State> {
                             icon="pi pi-plus"
                         />
                     </div>
+                    <Button id="app-byline"
+                        label="Brought to you by Tenseg LLC"
+                        href="https://tenseg.net"
+                    />
                     {card}
                 </div>
             </div>
