@@ -9,11 +9,12 @@ interface Props {
     id?: string
     title: string
     description?: string
+    header?: any
     type?: 'text' | 'positive integer'
     value?: string
     defaultValue?: string
     allowEmpty?: boolean
-    onSave?: ((value: string) => void)
+    onSave?: ((value?: string) => void)
 }
 interface State {
     value: string
@@ -76,9 +77,13 @@ export class ValueCard extends React.Component<Props, State> {
         return empty
     }
 
-    save = (value: string) => (event: React.MouseEvent<HTMLButtonElement>) => {
+    save = (value: string | null) => (event: React.MouseEvent<HTMLButtonElement>) => {
         if (this.props.onSave) {
-            this.props.onSave(value.trim())
+            if (value == null) {
+                this.props.onSave()
+            } else {
+                this.props.onSave(value.trim())
+            }
         }
     }
 
@@ -109,21 +114,26 @@ export class ValueCard extends React.Component<Props, State> {
 
         const illegallyEmpty = (this.isEmpty(this.state.value) && this.isEmpty(this.defaultValue) && !this.props.allowEmpty)
 
-        const saveButton =
-            <Button id={this.idPlus("save-button")}
+        const saveButton = (this.props.value != undefined)
+            ? <Button id={this.idPlus("save-button")}
                 label="Save"
                 icon="pi pi-check"
                 disabled={illegallyEmpty}
                 onClick={this.save(this.state.value ? this.state.value : this.defaultValue)}
             />
+            : <Button id={this.idPlus("close-button")}
+                label="Close"
+                icon="pi pi-times"
+                onClick={this.save(null)}
+            />
 
-        const cancelButton = this.isEmpty(this.originalValue)
+        const cancelButton = this.isEmpty(this.originalValue) || (!this.props.value)
             ? <></>
             : <Button id={this.idPlus("cancel-button")}
                 label="Cancel"
                 icon="pi pi-times"
                 className="p-button-secondary"
-                onClick={this.save(this.originalValue)}
+                onClick={this.save(null)}
             />
 
         const cardFooter = (
@@ -133,28 +143,41 @@ export class ValueCard extends React.Component<Props, State> {
         )
 
         return (
-            <div className="background-blocker">
-                <Card id={this.idPlus("card")}
-                    className={`value-card ${this.idPlus("card")}`}
+            <div className="valuecard-wrapper">
+                <Card id={this.idPlus("valuecard")}
+                    className={`valuecard ${this.idPlus("valuecard")}`}
                     title={this.props.title}
+                    header={this.props.header}
                     footer={cardFooter}
                 >
-                    {this.props.description
-                        ? <p>{this.props.description}</p>
+                    {this.props.children
+                        ? <div id={this.idPlus("valuecard-children")} className="valuecard-children">
+                            {this.props.children}
+                        </div>
                         : <></>}
-                    <InputText id={this.idPlus("card-field")}
-                        className={this.isPositiveInt ? "number" : "text"}
-                        keyfilter={this.isPositiveInt ? "pint" : ""}
-                        type="text"
-                        pattern={this.isPositiveInt ? "\\d*" : undefined}
-                        value={this.state.value}
-                        placeholder={this.defaultValue}
-                        onChange={this.handleChange()}
-                        onFocus={this.isPositiveInt ? this.focusOnWholeText() : undefined}
-                        onKeyUp={this.handleKey()}
-                        ref={this.textFieldRef}
-                    />
+                    {this.props.description
+                        ? <div id={this.idPlus("valuecard-description")} className="valuecard-description">
+                            <p>{this.props.description}</p>
+                        </div>
+                        : <></>}
+                    {this.props.value != undefined
+                        ? <InputText id={this.idPlus("card-field")}
+                            className={this.isPositiveInt ? "number" : "text"}
+                            keyfilter={this.isPositiveInt ? "pint" : ""}
+                            type="text"
+                            pattern={this.isPositiveInt ? "\\d*" : undefined}
+                            value={this.state.value}
+                            placeholder={this.defaultValue}
+                            onChange={this.handleChange()}
+                            onFocus={this.isPositiveInt ? this.focusOnWholeText() : undefined}
+                            onKeyUp={this.handleKey()}
+                            ref={this.textFieldRef}
+                        />
+                        : <></>
+                    }
                 </Card>
+                <div className="background-blocker">
+                </div>
             </div>
         )
     }

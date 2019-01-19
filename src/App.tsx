@@ -5,7 +5,7 @@ import 'primereact/resources/primereact.min.css'
 import 'primereact/resources/themes/nova-light/theme.css'
 import 'primeicons/primeicons.css'
 import './App.scss'
-import { debug } from './Utilities'
+// import { debug } from './Utilities'
 import { Subcaucus } from './Subcaucus'
 import { SubcaucusRow } from './SubcaucusRow'
 
@@ -17,6 +17,8 @@ interface State {
     changingName: boolean
     changingDelegates: boolean
     subcaucuses: Array<Subcaucus>
+    showingAbout: boolean
+    showingBy: boolean
 }
 
 export class App extends React.Component<Props, State> {
@@ -29,6 +31,8 @@ export class App extends React.Component<Props, State> {
             dateCreated: new Date(),
             changingName: false,
             changingDelegates: false,
+            showingAbout: false,
+            showingBy: false,
             subcaucuses: [
                 new Subcaucus(this.nextSubcaucusID()),
                 new Subcaucus(this.nextSubcaucusID()),
@@ -74,6 +78,31 @@ export class App extends React.Component<Props, State> {
         // note that the last card set "wins" in the case where multiple cards are possible
         var card = <></>
 
+        if (this.state.showingAbout) {
+            card = (
+                <ValueCard id="about-card"
+                    title="Minnesota DFL Subcaucus Calculator"
+                    onSave={() => this.setState({ showingAbout: false })}
+                >
+                    <p>This app assists convenors of precinct caucuses and conventions in Minnesota. The Minnesota Democratic Farmer Labor (DFL) party uses a wonderful, but bit arcane, “walking subcaucus” process that is simple enough to do, but rather difficult to tabulate.</p>
+                    <p>This app calculates the number of delegates each subcaucus gets when you enter the total number of delegates your precinct or convention is allowed and how many people are in each subcaucus. The rules it follows appeared on page 4 of the <a href="http://www.sd64dfl.org/more/caucus2014printing/2014-Official-Call.pdf">DFL 2014 Official Call</a>, including the proper treatment of remainders. It makes the math involved in a walking subcaucus disappear.</p>
+                    <p>The app could be used to facilitate a “walking subcaucus” or “<a href="https://en.wikipedia.org/wiki/Proportional_representation">proportional representation</a>” system for any group.</p>
+                </ValueCard>
+            )
+        }
+
+        if (this.state.showingBy) {
+            card = (
+                <ValueCard id="by-card"
+                    title="Brought to you by Tenseg LLC"
+                    onSave={() => this.setState({ showingBy: false })}
+                >
+                    <p>We love the walking subcaucus process and it makes us a bit sad that the squirrelly math required to calculate who gets how many delegate discourages meetings and caucuses from using the process. We hope this calculator makes it easier for you to get to know your neighbors as you work together to change the world!</p>
+                    <p>Please check us out at <a href="https://tenseg.net">tenseg.net</a> if you need help building a website or making appropriate use of technology.</p>
+                </ValueCard>
+            )
+        }
+
         // show a delegates allowed card there are none allowed or we are trying to change the number
         if (!this.state.allowed || this.state.changingDelegates) {
             card = (
@@ -82,11 +111,17 @@ export class App extends React.Component<Props, State> {
                     description="Specify the number of delegates that your meeting or caucus is allowed to send on to the next level. This is the number of delegates to be elected by your meeting."
                     type="positive integer"
                     value={this.state.allowed.toString()}
-                    onSave={(value: string) => {
-                        this.setState({
-                            allowed: Number(value),
-                            changingDelegates: false,
-                        })
+                    onSave={(value?: string) => {
+                        if (value == undefined) {
+                            this.setState({
+                                changingDelegates: false,
+                            })
+                        } else {
+                            this.setState({
+                                allowed: Number(value),
+                                changingDelegates: false,
+                            })
+                        }
                     }}
                 />
             )
@@ -100,11 +135,17 @@ export class App extends React.Component<Props, State> {
                     description='Most meetings have a name, like the "Ward 4 Precinct 7 Caucus" or the "Saint Paul City Convention". Specify the name of your meeting here.'
                     value={this.state.name ? this.state.name : this.defaultName()}
                     defaultValue={this.defaultName()}
-                    onSave={(value: string) => {
-                        this.setState({
-                            name: value,
-                            changingName: false,
-                        })
+                    onSave={(value?: string) => {
+                        if (value == undefined) {
+                            this.setState({
+                                changingName: false,
+                            })
+                        } else {
+                            this.setState({
+                                name: value,
+                                changingName: false,
+                            })
+                        }
                     }}
                 />
             )
@@ -125,25 +166,16 @@ export class App extends React.Component<Props, State> {
                         label="Minnesota DFL Subcaucus Calculator"
                         icon="pi pi-info-circle"
                         iconPos="right"
+                        onClick={() => this.setState({ showingAbout: true })}
                     />
                     <div id="meeting-info">
                         <Button id="meeting-name"
                             label={this.state.name ? this.state.name : this.defaultName()}
-                            onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
-                                debug("show the name card")
-                                this.setState({
-                                    changingName: true,
-                                })
-                            }}
+                            onClick={() => this.setState({ changingName: true })}
                         />
                         <Button id="delegates-allowed"
                             label={this.allowedString()}
-                            onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
-                                debug("show the delegate card")
-                                this.setState({
-                                    changingDelegates: true,
-                                })
-                            }}
+                            onClick={() => this.setState({ changingDelegates: true })}
                         />
                     </div>
                     <div id="subcaucus-container">
@@ -176,6 +208,7 @@ export class App extends React.Component<Props, State> {
                     <Button id="app-byline"
                         label="Brought to you by Tenseg LLC"
                         href="https://tenseg.net"
+                        onClick={() => this.setState({ showingBy: true })}
                     />
                     {card}
                 </div>
