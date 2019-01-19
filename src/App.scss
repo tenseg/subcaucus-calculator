@@ -213,6 +213,23 @@ body {
         margin: auto;
         background-color: $card-color;
         
+        .picture-container {
+            position: relative;
+            
+            .p-button {
+                position: absolute;
+                top: 0;
+                right: 0;
+                margin: 0;
+                border: none;
+                background-color: transparent;
+                color: white;
+                
+                &:hover {
+                    color: $card-color;
+                }
+            }
+        }
         .p-card-content {
             input {
                 width: 100%;

@@ -3,13 +3,14 @@ import * as ReactDOM from 'react-dom'
 import { Button } from 'primereact/button'
 import { Card } from 'primereact/card'
 import { InputText } from 'primereact/inputtext'
-import { debug } from './Utilities'
+import * as _u from './Utilities'
 
 interface Props {
     id?: string
     title: string
     description?: string
-    header?: any
+    image?: string
+    alt?: string
     type?: 'text' | 'positive integer'
     value?: string
     defaultValue?: string
@@ -32,8 +33,8 @@ export class ValueCard extends React.Component<Props, State> {
         super(props)
         this.type = (this.props.type == undefined ? 'text' : this.props.type)
         this.isPositiveInt = (this.type == 'positive integer')
-        this.originalValue = (this.props.value == undefined ? '' : this.props.value)
-        this.defaultValue = (this.props.defaultValue == undefined ? '' : this.props.defaultValue)
+        this.originalValue = _u.unwrapString(this.props.value)
+        this.defaultValue = _u.unwrapString(this.props.defaultValue)
         this.state = {
             value: this.originalValue,
         }
@@ -88,14 +89,14 @@ export class ValueCard extends React.Component<Props, State> {
     }
 
     componentDidMount = () => {
-        debug("card mounted")
+        _u.debug("card mounted")
         const target = ReactDOM.findDOMNode(this.textFieldRef.current)
         if (this.textFieldRef.current instanceof InputText && target != null) {
             switch (this.type) {
                 case 'text':
                 case 'positive integer':
                     try {
-                        debug("selecting", target)
+                        _u.debug("selecting", target)
                         // @ts-ignore
                         target.select()
                     } catch {
@@ -119,7 +120,7 @@ export class ValueCard extends React.Component<Props, State> {
                 label="Save"
                 icon="pi pi-check"
                 disabled={illegallyEmpty}
-                onClick={this.save(this.state.value ? this.state.value : this.defaultValue)}
+                onClick={this.save(_u.unwrapString(this.state.value, this.defaultValue))}
             />
             : <Button id={this.idPlus("close-button")}
                 label="Close"
@@ -149,7 +150,22 @@ export class ValueCard extends React.Component<Props, State> {
                 <Card id={this.idPlus("valuecard")}
                     className={`valuecard ${this.idPlus("valuecard")}`}
                     title={this.props.title}
-                    header={this.props.header}
+                    header={this.props.image
+                        ? <div id={this.idPlus("picture-container")}
+                            className="picture-container"
+                        >
+                            <img
+                                alt={`${this.props.alt}`}
+                                src={`${this.props.image}`}
+                            />
+                            <Button
+                                id={this.idPlus("picture-close-button")}
+                                icon="pi pi-times"
+                                onClick={this.save(null)}
+                            />
+                        </div>
+                        : undefined
+                    }
                     footer={cardFooter}
                 >
                     {this.props.children
