@@ -19,18 +19,172 @@ body {
     
 }
 
-.background-blocker {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    background-color: rgba(0, 0, 0, 0.50);
-}
-
-.app {
+#app {
     position: relative;
     font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+    
+    #app-header {
+        background-color: $header-color;
+        width: 100%;
+        padding: 0 $form-margin;
+        overflow: hidden;
+        color: white;
+        text-align: left;
+        font-size: 14px;
+    }
+    
+    #app-content {
+        position: relative;
+        margin: auto;
+        max-width: 600px;
+        padding: 0;
+
+        #meeting-info {
+    
+            button.p-button {
+                display: block;
+                width: 100%;
+                padding: $form-margin;
+                border-radius: 0;
+                border: none;
+                border-bottom: 1px solid $rule-color;
+                background-color: $meeting-info-color;
+                color: black;
+                font-size: 18px;
+                font-weight: 900;
+                
+                &:hover {
+                    background-color: darken($meeting-info-color, 10%)
+                }
+            }
+            
+            #meeting-name {
+                text-align: left;
+            }
+            
+            #delegates-allowed {
+                text-align: right;
+            }
+            
+            .p-button.p-button-text-only .p-button-text {
+                padding: 0;
+            }
+        
+        }
+        
+        #subcaucus-container {
+            background: white;
+            
+            #subcaucus-header {
+                display: flex;
+                
+                #subcaucus-management-head {
+                    width: 3em;
+                    flex-grow: 0;
+                }
+                
+                #subcaucus-name-head {
+                    width: 1em;
+                    flex-grow: 8;
+                }
+                
+                #subcaucus-count-head {
+                    width: 1em;
+                    flex-grow: 3;
+                    text-align: right;
+                }
+                
+                #subcaucus-delegates-head {
+                    width: 1em;
+                    flex-grow: 3;
+                    text-align: right;
+                }
+                
+                button.p-button {
+                    border: none;
+                    border-radius: 0;
+                    background-color: black;
+                    text-align: left;
+                    
+                    &.p-disabled {
+                        opacity: 1;
+                        filter: none;
+                    }
+                }
+                
+                .pi-circle-off {
+                    color: #555;
+                }
+            }
+            
+            .subcaucus-row {
+                display: flex;
+                border-bottom: 1px solid $rule-color;
+                
+                textarea,
+                input[type='text'] {
+                    border: none;
+                }
+                
+                textarea {
+                    resize: none;
+                }
+                
+                .subcaucus-remove-button {
+                    flex-grow: 0;
+                    margin: $form-margin;
+                    border: none;
+                    background-color: $body-color;
+                    
+                    &:hover {
+                        background-color: lighten($body-color, 25%)
+                    }
+                }
+                
+                .subcaucus-field {
+                    width: 1em;
+                    flex-grow: 5;
+                    margin-right: $form-margin;
+                    font-size: 18px;
+                }
+                
+                .subcaucus-name {
+                    margin-top: 0;
+                    padding-top: 17px;
+                }
+                
+                .subcaucus-count {
+                    flex-grow: 1;
+                    text-align: right;
+                }
+                
+                .subcaucus-delegates-button {
+                    width: 4em;
+                    flex-grow: 0;
+                    margin-right: 0;
+                    border: none;
+                    color: $body-color;
+                    font-size: 18px;
+                    font-weight: 900;
+                    
+                    &.has-delegates {
+                        background-color: green;
+                        color: white;
+                    }
+                }
+            }
+            
+            #add-subcaucus-button {
+                margin: $form-margin;
+                background-color: $header-color;
+                
+                &:hover {
+                    background-color: lighten($header-color, 25%)
+                }
+            }
+        }
+        
+    }
     
     .p-card {
         position: absolute;
@@ -56,66 +210,13 @@ body {
     
 }
 
-.app-content {
-    position: relative;
-    margin: auto;
-    max-width: 600px;
-    padding: 0;
-}
-
-.app-logo {
-    height: 80px;
-}
-
-.app-header {
-    background-color: $header-color;
-    width: 100%;
-    padding: 0 $form-margin;
-    overflow: hidden;
-    color: white;
-    text-align: left;
-    font-size: 14px;
-}
-
-.app-intro {
-    font-size: large;
-}
-
-.p-float-label {
-    display: inline-block;
-}
-
-#meeting-info {
-    
-    button.p-button {
-        display: block;
-        width: 100%;
-        padding: $form-margin;
-        border-radius: 0;
-        border: none;
-        border-bottom: 1px solid $rule-color;
-        background-color: $meeting-info-color;
-        color: black;
-        font-size: 18px;
-        font-weight: 900;
-        
-        &:hover {
-            background-color: darken($meeting-info-color, 10%)
-        }
-    }
-    
-    #meeting-name {
-        text-align: left;
-    }
-    
-    #delegates-allowed {
-        text-align: right;
-    }
-    
-    .p-button.p-button-text-only .p-button-text {
-        padding: 0;
-    }
-
+.background-blocker {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.50);
 }
 
 .row {

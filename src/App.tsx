@@ -1,33 +1,44 @@
-import * as React from 'react';
-import { Button } from 'primereact/button';
-import { ValueCard } from './ValueCard';
-// import { InputText } from 'primereact/inputtext';
-import 'primereact/resources/primereact.min.css';
-import 'primereact/resources/themes/nova-light/theme.css';
-import 'primeicons/primeicons.css';
-import './App.scss';
+import * as React from 'react'
+import { Button } from 'primereact/button'
+import { ValueCard } from './ValueCard'
+import 'primereact/resources/primereact.min.css'
+import 'primereact/resources/themes/nova-light/theme.css'
+import 'primeicons/primeicons.css'
+import './App.scss'
+import { debug } from './Utilities'
+import { Subcaucus } from './Subcaucus'
+import { SubcaucusRow } from './SubcaucusRow'
 
-interface AppProps { }
-interface AppState {
+interface Props { }
+interface State {
     name: string
     allowed: number
     dateCreated: Date
     changingName: boolean
     changingDelegates: boolean
+    subcaucuses: Array<Subcaucus>
 }
 
-export class App extends React.Component<AppProps, AppState> {
+export class App extends React.Component<Props, State> {
 
-    constructor(props: AppProps) {
-        super(props);
+    constructor(props: Props) {
+        super(props)
         this.state = {
             name: 'Debugging',
-            allowed: 0, // make zero for release
+            allowed: 10, // make zero for release
             dateCreated: new Date(),
             changingName: false,
             changingDelegates: false,
-        };
+            subcaucuses: [
+                new Subcaucus(this.nextSubcaucusID()),
+                new Subcaucus(this.nextSubcaucusID()),
+                new Subcaucus(this.nextSubcaucusID())
+            ],
+        }
     }
+
+    private _currentSubcaucusID = 1
+    nextSubcaucusID = () => this._currentSubcaucusID++
 
     defaultName = (): string => {
         return "Meeting on " + this.state.dateCreated.toLocaleDateString("en-US")
@@ -45,61 +56,76 @@ export class App extends React.Component<AppProps, AppState> {
                     allowed = 0
                 }
                 this.setState({ allowed: allowed })
-                break;
+                break
             case 'name':
                 this.setState({ name: event.currentTarget.value })
-                break;
+                break
         }
     }
 
     focusOnWholeText = () => (event: React.FormEvent<HTMLInputElement>) => {
-        const target = event.currentTarget; // event properties must be copied to use async
-        setTimeout(() => target.setSelectionRange(0, 9999), 0); // do this async to try to make Safari behave
+        const target = event.currentTarget // event properties must be copied to use async
+        setTimeout(() => target.setSelectionRange(0, 9999), 0) // do this async to try to make Safari behave
     }
 
     render() {
 
-        const showNameCard = ((this.state.name == '') || this.state.changingName)
-        const nameCard = showNameCard ?
-            <ValueCard
-                title="What is the name of your meeting?"
-                description='Most meetings have a name, like the "Ward 4 Precinct 7 Caucus" or the "Saint Paul City Convention". Specify the name of your meeting here.'
-                value={this.state.name ? this.state.name : this.defaultName()}
-                defaultValue={this.defaultName()}
-                onSave={(value: string) => {
-                    this.setState({
-                        name: value,
-                        changingName: false,
-                    })
-                }}
-            />
-            : <></>
+        // we start with an empty card, then change the value of card as circumstances warrent
+        // note that the last card set "wins" in the case where multiple cards are possible
+        var card = <></>
 
-        const showDelegateCard = ((!showNameCard && !this.state.allowed) || this.state.changingDelegates)
-        const delegateCard = showDelegateCard ?
-            <ValueCard
-                title="Number of delegates allowed?"
-                description="Specify the number of delegates that your meeting or caucus is allowed to send on to the next level. This is the number of delegates to be elected by your meeting."
-                type="positive integer"
-                value={this.state.allowed.toString()}
-                onSave={(value: string) => {
-                    this.setState({
-                        allowed: Number(value),
-                        changingDelegates: false,
-                    })
-                }}
-            />
-            : <></>
+        // show a delegates allowed card there are none allowed or we are trying to change the number
+        if (!this.state.allowed || this.state.changingDelegates) {
+            card = (
+                <ValueCard id="delegate-value"
+                    title="Number of delegates allowed?"
+                    description="Specify the number of delegates that your meeting or caucus is allowed to send on to the next level. This is the number of delegates to be elected by your meeting."
+                    type="positive integer"
+                    value={this.state.allowed.toString()}
+                    onSave={(value: string) => {
+                        this.setState({
+                            allowed: Number(value),
+                            changingDelegates: false,
+                        })
+                    }}
+                />
+            )
+        }
+
+        // show a name card if the meeting name is empty or we are trying to change the name
+        if ((this.state.name == '') || this.state.changingName) {
+            card = (
+                <ValueCard id="name-value"
+                    title="What is the name of your meeting?"
+                    description='Most meetings have a name, like the "Ward 4 Precinct 7 Caucus" or the "Saint Paul City Convention". Specify the name of your meeting here.'
+                    value={this.state.name ? this.state.name : this.defaultName()}
+                    defaultValue={this.defaultName()}
+                    onSave={(value: string) => {
+                        this.setState({
+                            name: value,
+                            changingName: false,
+                        })
+                    }}
+                />
+            )
+        }
+
+        const subcaucusRows = this.state.subcaucuses.map((subcaucus, index, number) => {
+            return (
+                <SubcaucusRow
+                    subcaucus={subcaucus}
+                />
+            )
+        })
 
         return (
-            <div className="app">
-                <div className="app-content">
-                    <div className="app-header">
+            <div id="app">
+                <div id="app-content">
+                    <div id="app-header">
                         <p><strong>Minnesota DFL Subcaucus Calculator</strong></p>
                     </div>
                     <div id="meeting-info">
-                        <Button
-                            id="meeting-name"
+                        <Button id="meeting-name"
                             label={this.state.name ? this.state.name : this.defaultName()}
                             onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
                                 debug("show the name card")
@@ -108,8 +134,7 @@ export class App extends React.Component<AppProps, AppState> {
                                 })
                             }}
                         />
-                        <Button
-                            id="delegates-allowed"
+                        <Button id="delegates-allowed"
                             label={this.allowedString()}
                             onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
                                 debug("show the delegate card")
@@ -119,16 +144,36 @@ export class App extends React.Component<AppProps, AppState> {
                             }}
                         />
                     </div>
-                    {delegateCard}{nameCard}
+                    <div id="subcaucus-container">
+                        <div id="subcaucus-header">
+                            <Button id="subcaucus-management-head"
+                                label="&nbsp;"
+                                disabled={true}
+                            />
+                            <Button id="subcaucus-name-head"
+                                label="Subcaucus"
+                                icon="pi pi-circle-off"
+                            />
+                            <Button id="subcaucus-count-head"
+                                label="Count"
+                                iconPos="right"
+                                icon="pi pi-circle-off"
+                            />
+                            <Button id="subcaucus-delegate-head"
+                                label="Del"
+                            />
+                        </div>
+                        <div id="subcaucus-list">
+                            {subcaucusRows}
+                        </div>
+                        <Button id="add-subcaucus-button"
+                            label="Add a Subcaucus"
+                            icon="pi pi-plus"
+                        />
+                    </div>
+                    {card}
                 </div>
             </div>
-        );
+        )
     }
 }
-
-export function debug(message?: any, ...optionalParams: any[]) {
-    if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
-        console.log(message, ...optionalParams)
-    }
-}
-

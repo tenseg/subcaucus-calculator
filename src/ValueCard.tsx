@@ -1,11 +1,12 @@
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-import { Button } from 'primereact/button';
-import { Card } from 'primereact/card';
-import { InputText } from 'primereact/inputtext';
-import { debug } from './App'
+import * as React from 'react'
+import * as ReactDOM from 'react-dom'
+import { Button } from 'primereact/button'
+import { Card } from 'primereact/card'
+import { InputText } from 'primereact/inputtext'
+import { debug } from './Utilities'
 
-interface CardProps {
+interface Props {
+    id?: string
     title: string
     description?: string
     type?: 'text' | 'positive integer'
@@ -14,39 +15,27 @@ interface CardProps {
     allowEmpty?: boolean
     onSave?: ((value: string) => void)
 }
-interface CardState {
+interface State {
     value: string
 }
 
-export class ValueCard extends React.Component<CardProps, CardState> {
+export class ValueCard extends React.Component<Props, State> {
 
     type: 'text' | 'positive integer' = 'text'
     isPositiveInt = false
     originalValue = ''
     defaultValue = ''
-    textFieldRef: React.RefObject<any> = React.createRef();
+    textFieldRef: React.RefObject<any> = React.createRef()
 
-    constructor(props: CardProps) {
-        super(props);
+    constructor(props: Props) {
+        super(props)
         this.type = (this.props.type == undefined ? 'text' : this.props.type)
         this.isPositiveInt = (this.type == 'positive integer')
-        this.originalValue = (this.props.value == undefined ? '' : this.props.value);
-        this.defaultValue = (this.props.defaultValue == undefined ? '' : this.props.defaultValue);
+        this.originalValue = (this.props.value == undefined ? '' : this.props.value)
+        this.defaultValue = (this.props.defaultValue == undefined ? '' : this.props.defaultValue)
         this.state = {
             value: this.originalValue,
-        };
-    }
-
-    // see http://blog.stevenlevithan.com/archives/faster-trim-javascript
-    trim = (str: string): string => {
-        str = str.replace(/^\s+/, '');
-        for (var i = str.length - 1; i >= 0; i--) {
-            if (/\S/.test(str.charAt(i))) {
-                str = str.substring(0, i + 1);
-                break;
-            }
         }
-        return str;
     }
 
     handleChange = () => (event: React.FormEvent<HTMLInputElement>) => {
@@ -57,26 +46,26 @@ export class ValueCard extends React.Component<CardProps, CardState> {
                     num = 0
                 }
                 this.setState({ value: String(num) })
-                break;
+                break
             case 'text':
                 this.setState({ value: event.currentTarget.value })
-                break;
+                break
         }
     }
 
     handleKey = () => (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter') {
             if (this.props.onSave) {
-                this.props.onSave(this.trim(this.state.value))
+                this.props.onSave(this.state.value.trim())
             }
         }
     }
 
     focusOnWholeText = () => (event: React.FormEvent<HTMLInputElement>) => {
         // event properties must be copied to use async
-        const target = event.currentTarget;
+        const target = event.currentTarget
         // do this async to try to make Safari behave
-        setTimeout(() => target.setSelectionRange(0, 9999), 0);
+        setTimeout(() => target.setSelectionRange(0, 9999), 0)
     }
 
     isEmpty = (value: string): boolean => {
@@ -89,7 +78,7 @@ export class ValueCard extends React.Component<CardProps, CardState> {
 
     save = (value: string) => (event: React.MouseEvent<HTMLButtonElement>) => {
         if (this.props.onSave) {
-            this.props.onSave(this.trim(value))
+            this.props.onSave(value.trim())
         }
     }
 
@@ -103,13 +92,17 @@ export class ValueCard extends React.Component<CardProps, CardState> {
                     try {
                         debug("selecting", target)
                         // @ts-ignore
-                        target.select();
+                        target.select()
                     } catch {
                         console.log("oops")
                     }
-                    break;
+                    break
             }
         }
+    }
+
+    idPlus = (suffix: string): string | undefined => {
+        return this.props.id ? `${this.props.id}-${suffix}` : undefined
     }
 
     render() {
@@ -117,7 +110,7 @@ export class ValueCard extends React.Component<CardProps, CardState> {
         const illegallyEmpty = (this.isEmpty(this.state.value) && this.isEmpty(this.defaultValue) && !this.props.allowEmpty)
 
         const saveButton =
-            <Button
+            <Button id={this.idPlus("save-button")}
                 label="Save"
                 icon="pi pi-check"
                 disabled={illegallyEmpty}
@@ -126,7 +119,7 @@ export class ValueCard extends React.Component<CardProps, CardState> {
 
         const cancelButton = this.isEmpty(this.originalValue)
             ? <></>
-            : <Button
+            : <Button id={this.idPlus("cancel-button")}
                 label="Cancel"
                 icon="pi pi-times"
                 className="p-button-secondary"
@@ -137,19 +130,19 @@ export class ValueCard extends React.Component<CardProps, CardState> {
             <span>
                 {saveButton}{cancelButton}
             </span>
-        );
+        )
 
         return (
             <div className="background-blocker">
-                <Card
-                    className="value-card"
+                <Card id={this.idPlus("card")}
+                    className={`value-card ${this.idPlus("card")}`}
                     title={this.props.title}
                     footer={cardFooter}
                 >
                     {this.props.description
                         ? <p>{this.props.description}</p>
                         : <></>}
-                    <InputText
+                    <InputText id={this.idPlus("card-field")}
                         className={this.isPositiveInt ? "number" : "text"}
                         keyfilter={this.isPositiveInt ? "pint" : ""}
                         type="text"
@@ -163,6 +156,6 @@ export class ValueCard extends React.Component<CardProps, CardState> {
                     />
                 </Card>
             </div>
-        );
+        )
     }
 }
