@@ -205,6 +205,7 @@ export class App extends React.Component<Props, State> {
                         <Button id="add-subcaucus-button"
                             label="Add a Subcaucus"
                             icon="pi pi-plus"
+                            onClick={() => this.setState({ subcaucuses: [...this.state.subcaucuses, new Subcaucus(this.nextSubcaucusID())] })}
                         />
                     </div>
                     <Button id="app-byline"
