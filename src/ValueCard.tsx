@@ -5,13 +5,12 @@ import { Card } from 'primereact/card';
 import { InputText } from 'primereact/inputtext';
 import { debug } from './App'
 
-// const logo = require('./primereact-logo.png');
-
 interface CardProps {
     title: string
     description?: string
     type?: 'text' | 'positive integer'
     value?: string
+    defaultValue?: string
     allowEmpty?: boolean
     onSave?: ((value: string) => void)
 }
@@ -24,6 +23,7 @@ export class ValueCard extends React.Component<CardProps, CardState> {
     type: 'text' | 'positive integer' = 'text'
     isPositiveInt = false
     originalValue = ''
+    defaultValue = ''
     textFieldRef: React.RefObject<any> = React.createRef();
 
     constructor(props: CardProps) {
@@ -31,6 +31,7 @@ export class ValueCard extends React.Component<CardProps, CardState> {
         this.type = (this.props.type == undefined ? 'text' : this.props.type)
         this.isPositiveInt = (this.type == 'positive integer')
         this.originalValue = (this.props.value == undefined ? '' : this.props.value);
+        this.defaultValue = (this.props.defaultValue == undefined ? '' : this.props.defaultValue);
         this.state = {
             value: this.originalValue,
         };
@@ -113,14 +114,14 @@ export class ValueCard extends React.Component<CardProps, CardState> {
 
     render() {
 
-        const illegallyEmpty = (this.isEmpty(this.state.value) && !this.props.allowEmpty)
+        const illegallyEmpty = (this.isEmpty(this.state.value) && this.isEmpty(this.defaultValue) && !this.props.allowEmpty)
 
         const saveButton =
             <Button
                 label="Save"
                 icon="pi pi-check"
                 disabled={illegallyEmpty}
-                onClick={this.save(this.state.value)}
+                onClick={this.save(this.state.value ? this.state.value : this.defaultValue)}
             />
 
         const cancelButton = this.isEmpty(this.originalValue)
@@ -148,12 +149,13 @@ export class ValueCard extends React.Component<CardProps, CardState> {
                     {this.props.description
                         ? <p>{this.props.description}</p>
                         : <></>}
-                    <InputText id="delegates-allowed"
+                    <InputText
                         className={this.isPositiveInt ? "number" : "text"}
                         keyfilter={this.isPositiveInt ? "pint" : ""}
                         type="text"
                         pattern={this.isPositiveInt ? "\\d*" : undefined}
                         value={this.state.value}
+                        placeholder={this.defaultValue}
                         onChange={this.handleChange()}
                         onFocus={this.isPositiveInt ? this.focusOnWholeText() : undefined}
                         onKeyUp={this.handleKey()}

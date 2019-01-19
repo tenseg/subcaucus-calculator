@@ -7,8 +7,6 @@ import 'primereact/resources/themes/nova-light/theme.css';
 import 'primeicons/primeicons.css';
 import './App.scss';
 
-// const logo = require('./primereact-logo.png');
-
 interface AppProps { }
 interface AppState {
     name: string
@@ -67,6 +65,7 @@ export class App extends React.Component<AppProps, AppState> {
                 title="What is the name of your meeting?"
                 description='Most meetings have a name, like the "Ward 4 Precinct 7 Caucus" or the "Saint Paul City Convention". Specify the name of your meeting here.'
                 value={this.state.name ? this.state.name : this.defaultName()}
+                defaultValue={this.defaultName()}
                 onSave={(value: string) => {
                     this.setState({
                         name: value,
