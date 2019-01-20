@@ -5,7 +5,7 @@ import { InputTextarea } from 'primereact/inputtextarea'
 import * as _u from './Utilities'
 import { Subcaucus } from './Subcaucus'
 
-export type SubcaucusRowAction = 'sync' | 'remove' | 'enter' | State
+export type SubcaucusRowAction = 'sync' | 'enter' | State
 
 interface Props {
 	id: number
@@ -70,11 +70,6 @@ export class SubcaucusRow extends React.Component<Props, State> {
 		setTimeout(() => target.setSelectionRange(0, 9999), 0)
 	}
 
-	remove = () => (event: React.MouseEvent<HTMLButtonElement>) => {
-		this.props.exchange(this.props.id, 'remove')
-		this.forceUpdate()
-	}
-
 	idPlus = (suffix: string): string | undefined => {
 		return `subcaucus-${this.props.id}-${suffix}`
 	}
@@ -86,11 +81,7 @@ export class SubcaucusRow extends React.Component<Props, State> {
 
 		return (
 			<div id={this.idPlus("row")} className="subcaucus-row">
-				<Button id={this.idPlus("row-remove-button")}
-					className="subcaucus-remove-button p-button-danger"
-					icon="pi pi-times"
-					onClick={this.remove()}
-				/>
+				{_u.isDebugging ? <div className="subcaucus-id">{this.props.id}</div> : ''}
 				<InputTextarea id={this.idPlus("row-name")}
 					className="subcaucus-field subcaucus-name"
 					type="text"

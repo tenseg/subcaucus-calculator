@@ -10,6 +10,12 @@ import * as _u from './Utilities'
 import { Subcaucus } from './Subcaucus'
 import { SubcaucusRow, SubcaucusRowAction } from './SubcaucusRow'
 
+enum SortOrder {
+    None = 0,
+    Ascending,
+    Descending,
+}
+
 interface Props { }
 interface State {
     name: string
@@ -19,6 +25,9 @@ interface State {
     changingDelegates: boolean
     showingAbout: boolean
     showingBy: boolean
+    showInstructions: boolean
+    sortName: SortOrder
+    sortCount: SortOrder
 }
 
 export class App extends React.Component<Props, State> {
@@ -27,27 +36,30 @@ export class App extends React.Component<Props, State> {
 
     constructor(props: Props) {
         super(props)
-        this.addSubcaucus()
-        this.addSubcaucus()
-        this.addSubcaucus()
+        this.addSubcaucus(false)
+        this.addSubcaucus(false)
+        this.addSubcaucus(false)
         this.state = {
-            name: 'Debugging',
-            allowed: 10, // make zero for release
+            name: 'Debugging', // make '' for release
+            allowed: 10, // make 0 for release
             dateCreated: new Date(),
             changingName: false,
             changingDelegates: false,
             showingAbout: false,
             showingBy: false,
+            showInstructions: false, // make true for release
+            sortName: SortOrder.None,
+            sortCount: SortOrder.None,
         }
     }
 
     private _currentSubcaucusID = 1
     nextSubcaucusID = () => this._currentSubcaucusID++
 
-    addSubcaucus = () => {
+    addSubcaucus = (forceUpdate = true) => {
         const newSubcaucus = new Subcaucus(this.nextSubcaucusID())
         this.subcaucuses.set(newSubcaucus.id, newSubcaucus)
-        this.forceUpdate()
+        if (forceUpdate) this.forceUpdate()
     }
 
     defaultName = (): string => {
@@ -101,6 +113,18 @@ export class App extends React.Component<Props, State> {
         }
     }
 
+    sortOrderIcon = (order: SortOrder): string => {
+        return ["pi pi-circle-off", "pi pi-chevron-circle-up", "pi pi-chevron-circle-down"][order]
+    }
+
+    nextSortOrder = (currentOrder: SortOrder, direction = 1): SortOrder => {
+        let nextOrder = (currentOrder + direction) % 3
+        if (nextOrder < 0) {
+            nextOrder += 3 // needed to cycle backwards
+        }
+        return nextOrder
+    }
+
     render() {
 
         _u.debug("rendering", this.subcaucuses)
@@ -108,6 +132,21 @@ export class App extends React.Component<Props, State> {
         // we start with an empty card, then change the value of card as circumstances warrent
         // note that the last card set "wins" in the case where multiple cards are possible
         var card = <></>
+
+        if (this.state.showInstructions) {
+            card = (
+                <ValueCard id="instructions-card"
+                    title="Fill in the Subcaucuses"
+                    image="walking.jpg"
+                    onSave={() => this.setState({ showInstructions: false })}
+                >
+                    <p>Now it is time to fill in the subcaucus information. Just add each subcaucus name and the count of participants. Usually a convention or cacucus will solicit the names of subcaucuses first, feel free to enter them right away without a count. Then people will be encouraged to walk around the room and congregate with the subcaucus that most closely represents their views. Then, when each subcacus reports how many people they include, you can enter that as the count for that subcaucus.</p>
+                    <p>As soon as you start entering subcaucus counts, the calculator will go to work determining how many delegates each subcaucus will be assigned. You can ignore those numbers until you have finished entering and confirming all the subcaucus counts. At that point, the delegate numbers can be reported to the chair of your convention or caucus.</p>
+                    <p>Since most conventions or caucuses will go through more than one round of "walking", you can just keep reusing your subcaucus list for each round. However, you might want to consider emailing a report for each round to yourself and/or the chair of the meeting just so that everyone has a clear record of the process.</p>
+                    <p>Have fun!</p>
+                </ValueCard>
+            )
+        }
 
         if (this.state.showingAbout) {
             card = (
@@ -184,9 +223,56 @@ export class App extends React.Component<Props, State> {
             )
         }
 
-        const subcaucusRows = this.subcaucuses.map((subcaucus, ) => {
+        // determine how the subcaucus rows should be sorted
+        let sort = (a: Subcaucus, b: Subcaucus) => {
+            return a.id - b.id
+        }
+
+        if (this.state.sortName != SortOrder.None) {
+            sort = (a: Subcaucus, b: Subcaucus) => {
+                const direction = this.state.sortName == SortOrder.Ascending ? 1 : -1
+                // fall back to order of entry
+                let comparison = a.id - b.id
+                const nameA = a.name.toUpperCase();
+                const nameB = b.name.toUpperCase();
+                if (nameA < nameB) {
+                    comparison = -1;
+                }
+                if (nameA > nameB) {
+                    comparison = 1;
+                }
+                return comparison * direction
+            }
+        }
+
+        if (this.state.sortCount != SortOrder.None) {
+            sort = (a: Subcaucus, b: Subcaucus) => {
+                const direction = this.state.sortCount == SortOrder.Ascending ? 1 : -1
+                // fall back to order of entry or names
+                let comparison = a.id - b.id
+                const nameA = a.name.toUpperCase();
+                const nameB = b.name.toUpperCase();
+                if (nameA < nameB) {
+                    comparison = -1;
+                }
+                if (nameA > nameB) {
+                    comparison = 1;
+                }
+                // start with delegates, then check on count, then fall back if needed
+                let countComparison = a.delegates - b.delegates
+                if (countComparison == 0) {
+                    countComparison = a.count - b.count
+                }
+                if (countComparison == 0) {
+                    countComparison = comparison
+                }
+                return countComparison * direction
+            }
+        }
+
+        const subcaucusRows = this.subcaucuses.values().sort(sort).map((subcaucus) => {
             return (
-                <SubcaucusRow
+                <SubcaucusRow key={subcaucus.id}
                     id={subcaucus.id}
                     exchange={this.handleSubcaucusChange}
                 />
@@ -196,12 +282,17 @@ export class App extends React.Component<Props, State> {
         return (
             <div id="app">
                 <div id="app-content">
-                    <Button id="app-about-button"
-                        label="Minnesota DFL Subcaucus Calculator"
-                        icon="pi pi-info-circle"
-                        iconPos="right"
-                        onClick={() => this.setState({ showingAbout: true })}
-                    />
+                    <div id="app-header">
+                        <Button id="app-about-button"
+                            label="Minnesota DFL Subcaucus Calculator"
+                            iconPos="right"
+                            onClick={() => this.setState({ showingAbout: true })}
+                        />
+                        <Button id="app-instruction-button"
+                            icon="pi pi-info-circle"
+                            onClick={() => this.setState({ showInstructions: true })}
+                        />
+                    </div>
                     <div id="meeting-info">
                         <Button id="meeting-name"
                             label={this.state.name ? this.state.name : this.defaultName()}
@@ -214,18 +305,22 @@ export class App extends React.Component<Props, State> {
                     </div>
                     <div id="subcaucus-container">
                         <div id="subcaucus-header">
-                            <Button id="subcaucus-management-head"
-                                label="&nbsp;"
-                                disabled={true}
-                            />
                             <Button id="subcaucus-name-head"
                                 label="Subcaucus"
-                                icon="pi pi-circle-off"
+                                icon={this.sortOrderIcon(this.state.sortName)}
+                                onClick={() => this.setState({
+                                    sortName: this.nextSortOrder(this.state.sortName),
+                                    sortCount: SortOrder.None
+                                })}
                             />
                             <Button id="subcaucus-count-head"
                                 label="Count"
                                 iconPos="right"
-                                icon="pi pi-circle-off"
+                                icon={this.sortOrderIcon(this.state.sortCount)}
+                                onClick={() => this.setState({
+                                    sortName: SortOrder.None,
+                                    sortCount: this.nextSortOrder(this.state.sortCount, -1)
+                                })}
                             />
                             <Button id="subcaucus-delegate-head"
                                 label="Del"
@@ -234,11 +329,18 @@ export class App extends React.Component<Props, State> {
                         <div id="subcaucus-list">
                             {subcaucusRows}
                         </div>
-                        <Button id="add-subcaucus-button"
-                            label="Add a Subcaucus"
-                            icon="pi pi-plus"
-                            onClick={() => this.addSubcaucus()}
-                        />
+                        <div id="subcaucus-footer">
+                            <Button id="add-subcaucus-button"
+                                label="Add a Subcaucus"
+                                icon="pi pi-plus"
+                                onClick={() => this.addSubcaucus()}
+                            />
+                            <Button id="remove-empty-subcaucuses-button"
+                                label="Remove Empties"
+                                icon="pi pi-times"
+                                onClick={() => this.addSubcaucus()}
+                            />
+                        </div>
                     </div>
                     <Button id="app-byline"
                         label="Brought to you by Tenseg LLC"
