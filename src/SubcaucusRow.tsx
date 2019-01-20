@@ -88,7 +88,7 @@ export class SubcaucusRow extends React.Component<Props, State> {
 			<div id={this.idPlus("row")} className="subcaucus-row">
 				<Button id={this.idPlus("row-remove-button")}
 					className="subcaucus-remove-button p-button-danger"
-					icon="pi pi-minus"
+					icon="pi pi-times"
 					onClick={this.remove()}
 				/>
 				<InputTextarea id={this.idPlus("row-name")}
@@ -100,7 +100,8 @@ export class SubcaucusRow extends React.Component<Props, State> {
 					// PrimeReact has a bug with the InputTextarea placeholder
 					// for now, it will not update this placeholder
 					// see: https://github.com/primefaces/primereact/issues/747
-					placeholder={`Subcaucus ${this.props.id}`}
+					// placeholder={`Subcaucus ${this.props.id}`}
+					placeholder={`Subcaucus name`}
 					onChange={this.handleName()}
 					onKeyUp={this.handleKey()}
 				/>
@@ -117,7 +118,7 @@ export class SubcaucusRow extends React.Component<Props, State> {
 				/>
 				<Button id={this.idPlus("row-delegates")}
 					className={`subcaucus-delegates-button ${delegates > 0 ? "has-delegates p-button-success" : "p-button-secondary"}`}
-					label={`${delegates}`}
+					label={`${delegates ? delegates : "—"}`}
 				/>
 			</div>
 		)
