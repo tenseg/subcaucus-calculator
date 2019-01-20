@@ -2,15 +2,17 @@ import * as React from 'react'
 import { Button } from 'primereact/button'
 import { InputText } from 'primereact/inputtext'
 import { InputTextarea } from 'primereact/inputtextarea'
-// import { debug } from './Utilities'
+import * as _u from './Utilities'
 import { Subcaucus } from './Subcaucus'
 
+export type SubcaucusRowAction = 'sync' | 'remove' | 'enter' | State
+
 interface Props {
-	subcaucus: Subcaucus
-	onChange?: ((subcaucus: Subcaucus, action?: 'remove' | 'enter') => void)
-}
-interface State {
 	id: number
+	exchange: ((subcaucusID: number, action: SubcaucusRowAction) => Subcaucus | undefined)
+}
+
+interface State {
 	name: string
 	count: number
 	delegates: number
@@ -18,26 +20,32 @@ interface State {
 
 export class SubcaucusRow extends React.Component<Props, State> {
 
-	subcaucus: Subcaucus
-
 	constructor(props: Props) {
 		super(props)
-		this.subcaucus = { ...this.props.subcaucus }
 		this.state = {
-			id: this.subcaucus.id,
-			name: this.subcaucus.name,
-			count: this.subcaucus.count,
-			delegates: this.subcaucus.delegates,
+			name: '',
+			count: 0,
+			delegates: 0,
 		}
+	}
+
+	static getDerivedStateFromProps(nextProps: Props, prevState: State) {
+		let newState = {}
+		const subcaucus = nextProps.exchange(nextProps.id, 'sync')
+		if (subcaucus) {
+			newState = {
+				name: subcaucus.name,
+				count: subcaucus.count,
+				delegates: subcaucus.delegates
+			}
+		}
+		return newState
 	}
 
 	handleName = () => (event: React.FormEvent<HTMLTextAreaElement>) => {
 		var value = event.currentTarget.value
-		this.subcaucus.name = value.trim()
 		this.setState({ name: value })
-		if (this.props.onChange) {
-			this.props.onChange(this.subcaucus)
-		}
+		this.props.exchange(this.props.id, { ...this.state, name: value })
 	}
 
 	handleCount = () => (event: React.FormEvent<HTMLInputElement>) => {
@@ -45,18 +53,13 @@ export class SubcaucusRow extends React.Component<Props, State> {
 		if (num < 0) {
 			num = 0
 		}
-		this.subcaucus.count = num
 		this.setState({ count: num })
-		if (this.props.onChange) {
-			this.props.onChange(this.subcaucus)
-		}
+		this.props.exchange(this.props.id, { ...this.state, count: num })
 	}
 
 	handleKey = () => (event: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
 		if (event.key === 'Enter' || event.key === 'Tab') {
-			if (this.props.onChange) {
-				this.props.onChange(this.subcaucus, 'enter')
-			}
+			this.props.exchange(this.props.id, 'enter')
 		}
 	}
 
@@ -68,16 +71,17 @@ export class SubcaucusRow extends React.Component<Props, State> {
 	}
 
 	remove = () => (event: React.MouseEvent<HTMLButtonElement>) => {
-		if (this.props.onChange) {
-			this.props.onChange(this.subcaucus, 'remove')
-		}
+		this.props.exchange(this.props.id, 'remove')
+		this.forceUpdate()
 	}
 
 	idPlus = (suffix: string): string | undefined => {
-		return `subcaucus-${this.subcaucus.id}-${suffix}`
+		return `subcaucus-${this.props.id}-${suffix}`
 	}
 
 	render() {
+		_u.debug("render row", this.props.id, this.state)
+
 		const { name, count, delegates } = this.state
 
 		return (
@@ -93,7 +97,10 @@ export class SubcaucusRow extends React.Component<Props, State> {
 					value={name}
 					rows={1}
 					cols={1}
-					placeholder={`Subcaucus ${this.state.id}`}
+					// PrimeReact has a bug with the InputTextarea placeholder
+					// for now, it will not update this placeholder
+					// see: https://github.com/primefaces/primereact/issues/747
+					placeholder={`Subcaucus ${this.props.id}`}
 					onChange={this.handleName()}
 					onKeyUp={this.handleKey()}
 				/>
@@ -103,7 +110,7 @@ export class SubcaucusRow extends React.Component<Props, State> {
 					type="text"
 					pattern="\\d*"
 					value={count ? count : ''}
-					placeholder="&mdash;"
+					placeholder={`—`}
 					onChange={this.handleCount()}
 					onFocus={this.focusOnWholeText()}
 					onKeyUp={this.handleKey()}

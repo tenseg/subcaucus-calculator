@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { TSMap } from 'typescript-map'
 import { Button } from 'primereact/button'
 import { ValueCard } from './ValueCard'
 import 'primereact/resources/primereact.min.css'
@@ -7,7 +8,7 @@ import 'primeicons/primeicons.css'
 import './App.scss'
 import * as _u from './Utilities'
 import { Subcaucus } from './Subcaucus'
-import { SubcaucusRow } from './SubcaucusRow'
+import { SubcaucusRow, SubcaucusRowAction } from './SubcaucusRow'
 
 interface Props { }
 interface State {
@@ -16,15 +17,19 @@ interface State {
     dateCreated: Date
     changingName: boolean
     changingDelegates: boolean
-    subcaucuses: Array<Subcaucus>
     showingAbout: boolean
     showingBy: boolean
 }
 
 export class App extends React.Component<Props, State> {
 
+    subcaucuses = new TSMap<number, Subcaucus>()
+
     constructor(props: Props) {
         super(props)
+        this.addSubcaucus()
+        this.addSubcaucus()
+        this.addSubcaucus()
         this.state = {
             name: 'Debugging',
             allowed: 10, // make zero for release
@@ -33,16 +38,17 @@ export class App extends React.Component<Props, State> {
             changingDelegates: false,
             showingAbout: false,
             showingBy: false,
-            subcaucuses: [
-                new Subcaucus(this.nextSubcaucusID()),
-                new Subcaucus(this.nextSubcaucusID()),
-                new Subcaucus(this.nextSubcaucusID())
-            ],
         }
     }
 
     private _currentSubcaucusID = 1
     nextSubcaucusID = () => this._currentSubcaucusID++
+
+    addSubcaucus = () => {
+        const newSubcaucus = new Subcaucus(this.nextSubcaucusID())
+        this.subcaucuses.set(newSubcaucus.id, newSubcaucus)
+        this.forceUpdate()
+    }
 
     defaultName = (): string => {
         return "Meeting on " + this.state.dateCreated.toLocaleDateString("en-US")
@@ -72,24 +78,32 @@ export class App extends React.Component<Props, State> {
         setTimeout(() => target.setSelectionRange(0, 9999), 0) // do this async to try to make Safari behave
     }
 
-    handleSubcaucusChange = (subcaucus: Subcaucus, action?: 'remove' | 'enter') => {
-        _u.debug("subcaucus changed", subcaucus.id, action)
-        const id = subcaucus.id
+    handleSubcaucusChange = (subcaucusID: number, action: SubcaucusRowAction) => {
+        _u.debug("subcaucus changed", subcaucusID, action)
         switch (action) {
             case 'remove':
-                this.setState({
-                    subcaucuses: this.state.subcaucuses.filter((subcaucus) => {
-                        _u.debug(subcaucus.id, "!=", id, subcaucus.id != id)
-                        return subcaucus.id != id
-                    })
+                this.subcaucuses.filter((subcaucus, key) => {
+                    return key != subcaucusID
                 })
-                break
+                this.forceUpdate()
+                return
+            case 'enter':
+                return
+            case 'sync':
+                return this.subcaucuses.get(subcaucusID)
+            default:
+                // this.subcaucuses[id] = changedSubcaucus
+                const subcaucus = this.subcaucuses.get(subcaucusID)
+                subcaucus.name = action.name
+                subcaucus.count = action.count
+                this.forceUpdate()
+                return
         }
     }
 
     render() {
 
-        _u.debug("rendering", this.state.subcaucuses)
+        _u.debug("rendering", this.subcaucuses)
 
         // we start with an empty card, then change the value of card as circumstances warrent
         // note that the last card set "wins" in the case where multiple cards are possible
@@ -170,11 +184,11 @@ export class App extends React.Component<Props, State> {
             )
         }
 
-        const subcaucusRows = this.state.subcaucuses.map((subcaucus, index, number) => {
+        const subcaucusRows = this.subcaucuses.map((subcaucus, ) => {
             return (
                 <SubcaucusRow
-                    subcaucus={subcaucus}
-                    onChange={this.handleSubcaucusChange}
+                    id={subcaucus.id}
+                    exchange={this.handleSubcaucusChange}
                 />
             )
         })
@@ -223,12 +237,7 @@ export class App extends React.Component<Props, State> {
                         <Button id="add-subcaucus-button"
                             label="Add a Subcaucus"
                             icon="pi pi-plus"
-                            onClick={() => this.setState({
-                                subcaucuses: [
-                                    ...this.state.subcaucuses,
-                                    new Subcaucus(this.nextSubcaucusID())
-                                ]
-                            })}
+                            onClick={() => this.addSubcaucus()}
                         />
                     </div>
                     <Button id="app-byline"
@@ -240,8 +249,9 @@ export class App extends React.Component<Props, State> {
                 </div>
                 {_u.isDebugging()
                     ? <div className="debugging">
-                        <pre>{"" + new Date}</pre>
-                        <pre>{JSON.stringify(this.state, null, 2)}</pre>
+                        <pre>{"rendered App " + (new Date()).toLocaleTimeString()}</pre>
+                        <pre>{"this.state is " + JSON.stringify(this.state, null, 2)}</pre>
+                        <pre>{"this.subcaucuses is " + JSON.stringify(this.subcaucuses, null, 2)}</pre>
                     </div>
                     : <></>
                 }

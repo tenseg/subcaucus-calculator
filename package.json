@@ -10,7 +10,8 @@
     "primereact": "2.0.0-beta.9",
     "react": "^16.6.0",
     "react-dom": "^16.6.0",
-    "react-scripts": "^2.1.3"
+    "react-scripts": "^2.1.3",
+    "typescript-map": "0.0.6"
   },
   "scripts": {
     "start": "react-scripts start",
