@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as ReactDOM from 'react-dom'
+// import * as ReactDOM from 'react-dom'
 import { Button } from 'primereact/button'
 import { Card } from 'primereact/card'
 import { InputText } from 'primereact/inputtext'
@@ -28,7 +28,6 @@ export class ValueCard extends React.Component<Props, State> {
     isPositiveInt = false
     originalValue = ''
     defaultValue = ''
-    textFieldRef: React.RefObject<any> = React.createRef()
 
     constructor(props: Props) {
         super(props)
@@ -89,25 +88,6 @@ export class ValueCard extends React.Component<Props, State> {
         }
     }
 
-    componentDidMount = () => {
-        _u.debug("card mounted")
-        const target = ReactDOM.findDOMNode(this.textFieldRef.current)
-        if (this.textFieldRef.current instanceof InputText && target != null) {
-            switch (this.type) {
-                case 'text':
-                case 'positive integer':
-                    try {
-                        _u.debug("selecting", target)
-                        // @ts-ignore
-                        target.select()
-                    } catch {
-                        console.log("oops")
-                    }
-                    break
-            }
-        }
-    }
-
     idPlus = (suffix: string): string | undefined => {
         return this.props.id ? `${this.props.id}-${suffix}` : undefined
     }
@@ -130,7 +110,7 @@ export class ValueCard extends React.Component<Props, State> {
             />
 
         const cancelButton = this.isEmpty(this.originalValue) || (!this.props.value)
-            ? <></>
+            ? ''
             : <Button id={this.idPlus("cancel-button")}
                 label="Cancel"
                 icon="pi pi-times"
@@ -171,26 +151,26 @@ export class ValueCard extends React.Component<Props, State> {
                         ? <div id={this.idPlus("valuecard-children")} className="valuecard-children">
                             {this.props.children}
                         </div>
-                        : <></>}
+                        : ''}
                     {this.props.description
                         ? <div id={this.idPlus("valuecard-description")} className="valuecard-description">
                             <p>{this.props.description}</p>
                         </div>
-                        : <></>}
+                        : ''}
                     {this.props.value != undefined
                         ? <InputText id={this.idPlus("card-field")}
                             className={this.isPositiveInt ? "number" : "text"}
                             keyfilter={this.isPositiveInt ? "pint" : ""}
                             type="text"
                             pattern={this.isPositiveInt ? "\\d*" : undefined}
-                            value={this.state.value}
+                            value={this.isPositiveInt ? (this.state.value ? this.state.value : '') : this.state.value} // show 0 as blank for positiveInt
                             placeholder={this.defaultValue}
                             onChange={this.handleChange()}
-                            onFocus={this.isPositiveInt ? this.focusOnWholeText() : undefined}
+                            // onFocus={this.isPositiveInt ? this.focusOnWholeText() : undefined}
                             onKeyUp={this.handleKey()}
-                            ref={this.textFieldRef}
+                            autoFocus
                         />
-                        : <></>
+                        : ''
                     }
                 </Card>
             </div>

@@ -12,8 +12,14 @@
 // Prototype extensions
 
 declare global {
+
 	interface String {
 		trim(): string
+	}
+
+	interface Number {
+		toCommaString(): string
+		singularPlural(singular: string, plural: string): string
 	}
 
 	type jsxReact = string | number | true | {} | React.ReactElement<any> | React.ReactNodeArray | React.ReactPortal
@@ -28,6 +34,16 @@ String.prototype.trim = function (): string {
 		}
 	}
 	return str
+}
+
+// see: https://stackoverflow.com/a/2901298
+//     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+Number.prototype.toCommaString = function (): string {
+	return this.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+Number.prototype.singularPlural = function (singular: string, plural: string): string {
+	return `${this} ${this == 1 ? singular : plural}`
 }
 
 // _u functions

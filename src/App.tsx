@@ -18,17 +18,26 @@ enum SortOrder {
 
 interface Props { }
 interface State {
+    dateCreated: Date
     name: string
     allowed: number
-    dateCreated: Date
+    // card status
     changingName: boolean
     changingDelegates: boolean
     removingEmpties: boolean
     showingAbout: boolean
     showingBy: boolean
     showInstructions: boolean
+    // sorting info
     sortName: SortOrder
     sortCount: SortOrder
+    // summary info
+    totalParticipants: number
+    totalDelegates: number
+    viabilityNumber: number
+    peopleNeededForViability: number
+    delegateValue: number
+    peopleInNonViableSubcaucuses: number
 }
 
 export class App extends React.Component<Props, State> {
@@ -38,34 +47,54 @@ export class App extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props)
         this.state = {
-            name: '', // '' for release
-            allowed: 0, // 0 for release
             dateCreated: new Date(),
+            name: '',
+            allowed: 0,
+            // card status
             changingName: false,
             changingDelegates: false,
-            removingEmpties: false, // false for release
+            removingEmpties: false,
             showingAbout: false,
             showingBy: false,
-            showInstructions: false, // true for release
+            showInstructions: false,
+            // sorting info
             sortName: SortOrder.None,
             sortCount: SortOrder.None,
+            // summary info
+            totalParticipants: 0,
+            totalDelegates: 0,
+            viabilityNumber: 0,
+            delegateValue: 0,
+            peopleNeededForViability: 0,
+            peopleInNonViableSubcaucuses: 0,
         }
         if (_u.isDebugging()) {
             this.addSubcaucus(false, "A", 10, 0)
-            this.addSubcaucus(false, "B", 1, 0)
+            this.addSubcaucus(false, "B", 0, 0)
             this.addSubcaucus(false, "C", 100, 5)
+            this.addSubcaucus(false, "D", 1, 0)
+            this.addSubcaucus(false)
             this.state = {
+                dateCreated: new Date(),
                 name: 'Debugging', // '' for release
                 allowed: 10, // 0 for release
-                dateCreated: new Date(),
+                // card status
                 changingName: false,
                 changingDelegates: false,
-                removingEmpties: true, // false for release
+                removingEmpties: false, // false for release
                 showingAbout: false,
                 showingBy: false,
                 showInstructions: false, // true for release
+                // sorting info
                 sortName: SortOrder.None,
                 sortCount: SortOrder.None,
+                // summary info
+                totalParticipants: 1234,
+                totalDelegates: 256,
+                viabilityNumber: 2.124132,
+                delegateValue: 1.92123,
+                peopleNeededForViability: 3,
+                peopleInNonViableSubcaucuses: 3,
             }
         } else {
             this.addSubcaucus(false)
@@ -141,7 +170,8 @@ export class App extends React.Component<Props, State> {
             })
         }
         if (subset == 'unnamed') {
-            this.subcaucuses.filter((subcaucus, key) => {
+            this.subcaucuses.filter((subcaucus, k, i) => {
+                _u.debug("remove?", subcaucus.id, subcaucus.count, subcaucus.name, subcaucus.count > 0 || subcaucus.name != '', "key", k, "index", i)
                 return subcaucus.count > 0 || subcaucus.name != ''
             })
         }
@@ -163,12 +193,13 @@ export class App extends React.Component<Props, State> {
     render() {
 
         _u.debug("rendering", this.subcaucuses)
+        const s = this.state
 
         // we start with an empty card, then change the value of card as circumstances warrent
         // note that the last card set "wins" in the case where multiple cards are possible
         var card = <></>
 
-        if (this.state.showInstructions) {
+        if (s.showInstructions) {
             card = (
                 <ValueCard id="instructions-card"
                     title="Fill in the Subcaucuses"
@@ -183,7 +214,7 @@ export class App extends React.Component<Props, State> {
             )
         }
 
-        if (this.state.showingAbout) {
+        if (s.showingAbout) {
             card = (
                 <ValueCard id="about-card"
                     title="Minnesota DFL Subcaucus Calculator"
@@ -197,7 +228,7 @@ export class App extends React.Component<Props, State> {
             )
         }
 
-        if (this.state.showingBy) {
+        if (s.showingBy) {
             card = (
                 <ValueCard id="by-card"
                     title="Brought to you by Tenseg LLC"
@@ -210,7 +241,7 @@ export class App extends React.Component<Props, State> {
             )
         }
 
-        if (this.state.removingEmpties) {
+        if (s.removingEmpties) {
             card = (
                 <ValueCard id="remove-empties-card"
                     title="Remove Empty Subcaucuses"
@@ -243,13 +274,13 @@ export class App extends React.Component<Props, State> {
         }
 
         // show a delegates allowed card there are none allowed or we are trying to change the number
-        if (!this.state.allowed || this.state.changingDelegates) {
+        if (!s.allowed || s.changingDelegates) {
             card = (
                 <ValueCard id="delegate-value"
                     title="Number of delegates allowed?"
                     description="Specify the number of delegates that your meeting or caucus is allowed to send on to the next level. This is the number of delegates to be elected by your meeting."
                     type="positive integer"
-                    value={this.state.allowed.toString()}
+                    value={s.allowed.toString()}
                     onSave={(value?: string) => {
                         if (value == undefined) {
                             this.setState({
@@ -267,12 +298,12 @@ export class App extends React.Component<Props, State> {
         }
 
         // show a name card if the meeting name is empty or we are trying to change the name
-        if ((this.state.name == '') || this.state.changingName) {
+        if ((s.name == '') || s.changingName) {
             card = (
                 <ValueCard id="name-value"
                     title="What is the name of your meeting?"
                     description='Most meetings have a name, like the "Ward 4 Precinct 7 Caucus" or the "Saint Paul City Convention". Specify the name of your meeting here.'
-                    value={this.state.name ? this.state.name : this.defaultName()}
+                    value={s.name ? s.name : this.defaultName()}
                     defaultValue={this.defaultName()}
                     onSave={(value?: string) => {
                         if (value == undefined) {
@@ -295,9 +326,9 @@ export class App extends React.Component<Props, State> {
             return a.id - b.id
         }
 
-        if (this.state.sortName != SortOrder.None) {
+        if (s.sortName != SortOrder.None) {
             sort = (a: Subcaucus, b: Subcaucus) => {
-                const direction = this.state.sortName == SortOrder.Ascending ? 1 : -1
+                const direction = s.sortName == SortOrder.Ascending ? 1 : -1
                 // fall back to order of entry
                 let comparison = a.id - b.id
                 const nameA = a.name.toUpperCase();
@@ -312,9 +343,9 @@ export class App extends React.Component<Props, State> {
             }
         }
 
-        if (this.state.sortCount != SortOrder.None) {
+        if (s.sortCount != SortOrder.None) {
             sort = (a: Subcaucus, b: Subcaucus) => {
-                const direction = this.state.sortCount == SortOrder.Ascending ? 1 : -1
+                const direction = s.sortCount == SortOrder.Ascending ? 1 : -1
                 // fall back to order of entry or names
                 let comparison = a.id - b.id
                 const nameA = a.name.toUpperCase();
@@ -346,6 +377,55 @@ export class App extends React.Component<Props, State> {
             )
         })
 
+        const summary = ((s.totalParticipants)
+            ? <div id="summary-container">
+                <div className="summary-row">
+                    <div className="summary-label">
+                        Total participants and delegates elected
+                    </div>
+                    <div className="summary-count">
+                        {s.totalParticipants.toCommaString()}
+                    </div>
+                    <div className="summary-delegates">
+                        {s.totalDelegates.toCommaString()}
+                    </div>
+                </div>
+                <div className="summary-row">
+                    <div className="summary-label">
+                        Minimum of <strong>{s.peopleNeededForViability.singularPlural("person", "people")}</strong> needed to make a subcaucus viable
+                    </div>
+                </div>
+                <div className="summary-row">
+                    <div className="summary-label">
+                        Viability number
+                    </div>
+                    <div className="summary-count">
+                        {Math.round(s.viabilityNumber * 1000) / 1000}
+                    </div>
+                </div>
+                {s.peopleInNonViableSubcaucuses
+                    ? <div className="summary-row clickable"
+                        onClick={() => alert("todo")}
+                    >
+                        <div className="summary-label">
+                            Recalculated viability number ({s.peopleInNonViableSubcaucuses.singularPlural("person", "people")} in non-viable subcaucuses)
+                        </div>
+                        <div className="summary-count">
+                            {Math.round(s.delegateValue * 1000) / 1000}
+                        </div>
+                    </div>
+                    : ''
+                }
+            </div>
+            : <div id="summary-container">
+                <div className="summary-row">
+                    <div className="summary-label">
+                        To get a "viability number" just put the count of all the people in the room into a single subcaucus.
+                    </div>
+                </div>
+            </div>
+        )
+
         return (
             <div id="app">
                 <div id="app-content">
@@ -362,7 +442,7 @@ export class App extends React.Component<Props, State> {
                     </div>
                     <div id="meeting-info">
                         <Button id="meeting-name"
-                            label={this.state.name ? this.state.name : this.defaultName()}
+                            label={s.name ? s.name : this.defaultName()}
                             onClick={() => this.setState({ changingName: true })}
                         />
                         <Button id="delegates-allowed"
@@ -374,23 +454,23 @@ export class App extends React.Component<Props, State> {
                         <div id="subcaucus-header">
                             <Button id="subcaucus-name-head"
                                 label="Subcaucus"
-                                icon={this.sortOrderIcon(this.state.sortName)}
+                                icon={this.sortOrderIcon(s.sortName)}
                                 onClick={() => this.setState({
-                                    sortName: this.nextSortOrder(this.state.sortName),
+                                    sortName: this.nextSortOrder(s.sortName),
                                     sortCount: SortOrder.None
                                 })}
                             />
                             <Button id="subcaucus-count-head"
                                 label="Count"
                                 iconPos="right"
-                                icon={this.sortOrderIcon(this.state.sortCount)}
+                                icon={this.sortOrderIcon(s.sortCount)}
                                 onClick={() => this.setState({
                                     sortName: SortOrder.None,
-                                    sortCount: this.nextSortOrder(this.state.sortCount, -1)
+                                    sortCount: this.nextSortOrder(s.sortCount, -1)
                                 })}
                             />
                             <Button id="subcaucus-delegate-head"
-                                label="Del"
+                                label="Dels"
                             />
                         </div>
                         <div id="subcaucus-list">
@@ -409,6 +489,7 @@ export class App extends React.Component<Props, State> {
                             />
                         </div>
                     </div>
+                    {summary}
                     <Button id="app-byline"
                         label="Brought to you by Tenseg LLC"
                         href="https://tenseg.net"

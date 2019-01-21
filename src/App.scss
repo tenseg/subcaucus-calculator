@@ -10,7 +10,8 @@ $body-color: #8f1731;
 $card-color: #f9edcb;
 $summary-color: #cccccc;
 $success-color: rgb(58, 148, 58);
-
+$count-width: 60px;
+$delegate-width: 80px;
 
 body {
     background-color: $body-color;
@@ -114,14 +115,14 @@ body {
                 }
                 
                 #subcaucus-count-head {
-                    flex: 0 0 100px;
-                    width: 100px;
+                    flex: 0 0 ($count-width + 40px);
+                    width: ($count-width + 40px);
                     text-align: right;
                 }
                 
                 #subcaucus-delegate-head {
-                    flex: 0 0 80px;
-                    width: 80px;
+                    flex: 0 0 $delegate-width;
+                    width: $delegate-width;
                     text-align: center;
                 }
                 
@@ -190,15 +191,15 @@ body {
                 }
                 
                 .subcaucus-count {
-                    flex: 0 0 60px;
-                    width: 60px;
+                    flex: 0 0 $count-width;
+                    width: $count-width;
                     padding-top: 14px;
                     text-align: right;
                 }
                 
                 .subcaucus-delegates-button {
-                    flex: 0 0 80px;
-                    width: 80px;
+                    flex: 0 0 $delegate-width;
+                    width: $delegate-width;
                     margin-right: 0;
                     border: none;
                     border-radius: 0;
@@ -206,9 +207,6 @@ body {
                     text-align: center;
                     font-size: 20px;
                     font-weight: 700;
-                    
-                    &.has-delegates {
-                    }
                 }
                 
                 &.has-delegates {
@@ -217,6 +215,10 @@ body {
                     .subcaucus-delegates-button {
                         background-color: $success-color;
                         color: white;
+                        
+                        &:hover {
+                            background-color: lighten($success-color, 25%);
+                        }
                     }
                 }
             }
@@ -245,6 +247,45 @@ body {
             }
         }
         
+        #summary-container {
+            background-color: $summary-color;
+
+            .summary-row {
+                position: relative;
+                display: flex;
+                width: 100%;
+                padding: $form-margin 0;
+                border-top: 1px solid $rule-color;
+                font-size: 18px;
+                
+                &.clickable {
+                    cursor: pointer;
+                    
+                    &:hover {
+                        background-color: lighten($summary-color, 5%)
+                    }
+                }
+                .summary-label {
+                    flex: 1 0 5em;
+                    margin-top: 0;
+                    margin-left: $form-margin;                    
+                }
+                
+                .summary-count {
+                    flex: 0 0 $count-width;
+                    width: $count-width;
+                    padding-right: $form-margin;
+                    text-align: right;
+                }
+                
+                .summary-delegates {
+                    flex: 0 0 $delegate-width;
+                    width: $delegate-width;
+                    padding-right: $form-margin;
+                    text-align: right;
+                }
+            }
+        }
     }
     
     .p-card {
@@ -289,6 +330,9 @@ body {
     
     }
     
+    .success-color {
+        color: $success-color;
+    }
 }
 
 .background-blocker {
