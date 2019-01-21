@@ -249,12 +249,12 @@ export class App extends React.Component<Props, State> {
                         <>
                             <Button id="remove-all-empties-button"
                                 label="Remove All Empties"
-                                icon="pi pi-check"
+                                icon="pi pi-trash"
                                 onClick={() => this.removeEmpties()}
                             />
                             <Button id="remove-some-empties-button"
                                 label="Remove Only Unnamed"
-                                icon="pi pi-check"
+                                icon="pi pi-trash"
                                 className="p-button-warning"
                                 onClick={() => this.removeEmpties('unnamed')}
                             />
@@ -484,7 +484,7 @@ export class App extends React.Component<Props, State> {
                             />
                             <Button id="remove-empty-subcaucuses-button"
                                 label="Remove Empties"
-                                icon="pi pi-times"
+                                icon="pi pi-trash"
                                 onClick={() => this.setState({ removingEmpties: true })}
                             />
                         </div>
