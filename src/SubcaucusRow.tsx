@@ -27,20 +27,28 @@ export class SubcaucusRow extends React.Component<Props, State> {
 			count: 0,
 			delegates: 0,
 		}
-	}
-
-	static getDerivedStateFromProps(nextProps: Props, prevState: State) {
-		let newState = {}
-		const subcaucus = nextProps.exchange(nextProps.id, 'sync')
+		const subcaucus = this.props.exchange(this.props.id, 'sync')
 		if (subcaucus) {
-			newState = {
+			this.state = {
 				name: subcaucus.name,
 				count: subcaucus.count,
 				delegates: subcaucus.delegates
 			}
 		}
-		return newState
 	}
+
+	// static getDerivedStateFromProps(nextProps: Props, prevState: State) {
+	// 	let newState = {}
+	// 	const subcaucus = nextProps.exchange(nextProps.id, 'sync')
+	// 	if (subcaucus) {
+	// 		newState = {
+	// 			name: subcaucus.name,
+	// 			count: subcaucus.count,
+	// 			delegates: subcaucus.delegates
+	// 		}
+	// 	}
+	// 	return newState
+	// }
 
 	handleName = () => (event: React.FormEvent<HTMLTextAreaElement>) => {
 		var value = event.currentTarget.value
@@ -54,7 +62,10 @@ export class SubcaucusRow extends React.Component<Props, State> {
 			num = 0
 		}
 		this.setState({ count: num })
-		this.props.exchange(this.props.id, { ...this.state, count: num })
+	}
+
+	notify = () => (event: React.FormEvent<HTMLInputElement>) => {
+		this.props.exchange(this.props.id, { ...this.state })
 	}
 
 	handleKey = () => (event: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -80,7 +91,9 @@ export class SubcaucusRow extends React.Component<Props, State> {
 		const { name, count, delegates } = this.state
 
 		return (
-			<div id={this.idPlus("row")} className="subcaucus-row">
+			<div id={this.idPlus("row")}
+				className={`subcaucus-row ${delegates > 0 ? "has-delegates" : ""}`}
+			>
 				{_u.isDebugging ? <div className="subcaucus-id">{this.props.id}</div> : ''}
 				<InputTextarea id={this.idPlus("row-name")}
 					className="subcaucus-field subcaucus-name"
@@ -100,15 +113,18 @@ export class SubcaucusRow extends React.Component<Props, State> {
 					className="subcaucus-field subcaucus-count"
 					keyfilter="pint"
 					type="text"
-					pattern="\\d*"
+					pattern="\d*"
 					value={count ? count : ''}
 					placeholder={`—`}
 					onChange={this.handleCount()}
-					onFocus={this.focusOnWholeText()}
+					onBlur={this.notify()}
+					// forcing the selction of the whole text seems to lead to problems
+					// see https://grand.clst.org:3000/tenseg/subcalc-pr/issues/3
+					// onFocus={this.focusOnWholeText()}
 					onKeyUp={this.handleKey()}
 				/>
 				<Button id={this.idPlus("row-delegates")}
-					className={`subcaucus-delegates-button ${delegates > 0 ? "has-delegates p-button-success" : "p-button-secondary"}`}
+					className={`subcaucus-delegates-button ${delegates > 0 ? "p-button-success" : "p-button-secondary"}`}
 					label={`${delegates ? delegates : "—"}`}
 				/>
 			</div>

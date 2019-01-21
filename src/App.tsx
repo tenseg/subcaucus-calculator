@@ -23,6 +23,7 @@ interface State {
     dateCreated: Date
     changingName: boolean
     changingDelegates: boolean
+    removingEmpties: boolean
     showingAbout: boolean
     showingBy: boolean
     showInstructions: boolean
@@ -36,28 +37,48 @@ export class App extends React.Component<Props, State> {
 
     constructor(props: Props) {
         super(props)
-        this.addSubcaucus(false)
-        this.addSubcaucus(false)
-        this.addSubcaucus(false)
         this.state = {
-            name: 'Debugging', // make '' for release
-            allowed: 10, // make 0 for release
+            name: '', // '' for release
+            allowed: 0, // 0 for release
             dateCreated: new Date(),
             changingName: false,
             changingDelegates: false,
+            removingEmpties: false, // false for release
             showingAbout: false,
             showingBy: false,
-            showInstructions: false, // make true for release
+            showInstructions: false, // true for release
             sortName: SortOrder.None,
             sortCount: SortOrder.None,
+        }
+        if (_u.isDebugging()) {
+            this.addSubcaucus(false, "A", 10, 0)
+            this.addSubcaucus(false, "B", 1, 0)
+            this.addSubcaucus(false, "C", 100, 5)
+            this.state = {
+                name: 'Debugging', // '' for release
+                allowed: 10, // 0 for release
+                dateCreated: new Date(),
+                changingName: false,
+                changingDelegates: false,
+                removingEmpties: true, // false for release
+                showingAbout: false,
+                showingBy: false,
+                showInstructions: false, // true for release
+                sortName: SortOrder.None,
+                sortCount: SortOrder.None,
+            }
+        } else {
+            this.addSubcaucus(false)
+            this.addSubcaucus(false)
+            this.addSubcaucus(false)
         }
     }
 
     private _currentSubcaucusID = 1
     nextSubcaucusID = () => this._currentSubcaucusID++
 
-    addSubcaucus = (forceUpdate = true) => {
-        const newSubcaucus = new Subcaucus(this.nextSubcaucusID())
+    addSubcaucus = (forceUpdate = true, name = '', count = 0, delegates = 0) => {
+        const newSubcaucus = new Subcaucus(this.nextSubcaucusID(), name, count, delegates)
         this.subcaucuses.set(newSubcaucus.id, newSubcaucus)
         if (forceUpdate) this.forceUpdate()
     }
@@ -111,6 +132,20 @@ export class App extends React.Component<Props, State> {
                 this.forceUpdate()
                 return
         }
+    }
+
+    removeEmpties = (subset = 'all') => {
+        if (subset == 'all') {
+            this.subcaucuses.filter((subcaucus, key) => {
+                return subcaucus.count > 0
+            })
+        }
+        if (subset == 'unnamed') {
+            this.subcaucuses.filter((subcaucus, key) => {
+                return subcaucus.count > 0 || subcaucus.name != ''
+            })
+        }
+        this.setState({ removingEmpties: false })
     }
 
     sortOrderIcon = (order: SortOrder): string => {
@@ -171,6 +206,38 @@ export class App extends React.Component<Props, State> {
                 >
                     <p>We love the walking subcaucus process and it makes us a bit sad that the squirrelly math required to calculate who gets how many delegate discourages meetings and caucuses from using the process. We hope this calculator makes it easier for you to get to know your neighbors as you work together to change the world!</p>
                     <p>Please check us out at <a href="https://tenseg.net">tenseg.net</a> if you need help building a website or making appropriate use of technology.</p>
+                </ValueCard>
+            )
+        }
+
+        if (this.state.removingEmpties) {
+            card = (
+                <ValueCard id="remove-empties-card"
+                    title="Remove Empty Subcaucuses"
+                    footer={
+                        <>
+                            <Button id="remove-all-empties-button"
+                                label="Remove All Empties"
+                                icon="pi pi-check"
+                                onClick={() => this.removeEmpties()}
+                            />
+                            <Button id="remove-some-empties-button"
+                                label="Remove Only Unnamed"
+                                icon="pi pi-check"
+                                className="p-button-warning"
+                                onClick={() => this.removeEmpties('unnamed')}
+                            />
+                            <Button id="cancel-remove-button"
+                                label="Cancel"
+                                icon="pi pi-times"
+                                className="p-button-secondary"
+                                onClick={() => this.setState({ removingEmpties: false })}
+                            />
+                        </>
+                    }
+                >
+                    <p>An "empty" subcaucus is one with no participants &mdash; a zero count.</p>
+                    <p>You can choose to remove all empty subcaucuses, or only those which also have no names.</p>
                 </ValueCard>
             )
         }
@@ -338,7 +405,7 @@ export class App extends React.Component<Props, State> {
                             <Button id="remove-empty-subcaucuses-button"
                                 label="Remove Empties"
                                 icon="pi pi-times"
-                                onClick={() => this.addSubcaucus()}
+                                onClick={() => this.setState({ removingEmpties: true })}
                             />
                         </div>
                     </div>

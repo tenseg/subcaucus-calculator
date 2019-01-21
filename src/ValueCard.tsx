@@ -11,6 +11,7 @@ interface Props {
     description?: string
     image?: string
     alt?: string
+    footer?: jsxReact
     type?: 'text' | 'positive integer'
     value?: string
     defaultValue?: string
@@ -137,11 +138,9 @@ export class ValueCard extends React.Component<Props, State> {
                 onClick={this.save(null)}
             />
 
-        const cardFooter = (
-            <span>
-                {saveButton}{cancelButton}
-            </span>
-        )
+        const cardFooter = this.props.footer == undefined
+            ? <>{saveButton}{cancelButton}</>
+            : this.props.footer
 
         return (
             <div className="valuecard-wrapper">

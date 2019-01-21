@@ -9,6 +9,8 @@ $header-color: #0005a8;
 $body-color: #8f1731;
 $card-color: #f9edcb;
 $summary-color: #cccccc;
+$success-color: rgb(58, 148, 58);
+
 
 body {
     background-color: $body-color;
@@ -147,6 +149,7 @@ body {
                 
                 textarea,
                 input[type='text'] {
+                    background-color: transparent;
                     border: none;
                 }
                 
@@ -202,10 +205,17 @@ body {
                     color: $body-color;
                     text-align: center;
                     font-size: 20px;
-                    font-weight: 900;
+                    font-weight: 700;
                     
                     &.has-delegates {
-                        background-color: green;
+                    }
+                }
+                
+                &.has-delegates {
+                    background-color: lighten($success-color, 50%);
+                    
+                    .subcaucus-delegates-button {
+                        background-color: $success-color;
                         color: white;
                     }
                 }
@@ -265,12 +275,15 @@ body {
             }
         }
         .p-card-content {
+            margin-bottom: 0 - $form-margin;
+            
             input {
                 width: 100%;
             }
         }
 
         .p-button {
+            margin-top: $form-margin;
             margin-right: $form-margin;
         }
     
