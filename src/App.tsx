@@ -715,6 +715,16 @@ export class App extends React.Component<Props, State> {
                 </div>
                 {_u.isDebugging()
                     ? <div className="debugging">
+                        <p>This is debugging info for "
+                            <a href="https://grand.clst.org:3000/tenseg/subcalc-pr/issues" target="_repository">subcalc-pr</a>
+                            " (with "
+                            <a href="https://reactjs.org/" target="_react">ReactJS</a>
+                            " "
+                            <a href="https://www.primefaces.org/primereact/" target="_primereact">PrimeReact</a>
+                            " "
+                            <a href="https://www.primefaces.org/primeng/#/icons" target="_primeicons">PrimeIcons</a>
+                            ").
+                        </p>
                         <pre>{"rendered App " + (new Date()).toLocaleTimeString()}</pre>
                         <pre>{"this.state is " + JSON.stringify(this.state, null, 2)}</pre>
                         <pre>{"this.subcaucuses is " + JSON.stringify(this.subcaucuses, null, 2)}</pre>
