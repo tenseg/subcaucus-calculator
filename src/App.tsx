@@ -245,28 +245,33 @@ export class App extends React.Component<Props, State> {
                 ]
             },
             {
-                label: "Save",
-                icon: "pi pi-fw pi-folder",
+                label: "Meetings",
+                icon: "pi pi-fw pi-calendar",
                 items: [
                     {
                         label: "Save revision",
                         icon: "pi pi-fw pi-clock",
+                        command: () => alert("TODO: create save revision function.")
                     },
                     {
                         label: "New meeting",
-                        icon: "pi pi-fw pi-power-off",
+                        icon: "pi pi-fw pi-calendar-plus",
+                        command: () => alert("TODO: create new meeting function.")
                     },
                     {
                         label: "Duplicate meeting",
                         icon: "pi pi-fw pi-clone",
+                        command: () => alert("TODO: create duplicate meeting function.")
                     },
                     {
                         label: "Load meeting",
-                        icon: "pi pi-fw pi-calendar",
+                        icon: "pi pi-fw pi-folder-open",
+                        command: () => alert("TODO: create load meeting function.")
                     },
                     {
                         label: "Flip the coin",
                         icon: "pi pi-fw pi-refresh",
+                        command: () => alert("TODO: create coin flip function.")
                     },
                 ]
             },
@@ -277,18 +282,22 @@ export class App extends React.Component<Props, State> {
                     {
                         label: "Email report",
                         icon: "pi pi-fw pi-envelope",
+                        command: () => alert("TODO: create email function.")
                     },
                     {
                         label: "Download text",
                         icon: "pi pi-fw pi-align-left",
+                        command: () => alert("TODO: create download text function.")
                     },
                     {
                         label: "Download CSV",
                         icon: "pi pi-fw pi-table",
+                        command: () => alert("TODO: create download csv function.")
                     },
                     {
                         label: "Download code",
                         icon: "pi pi-fw pi-save",
+                        command: () => alert("TODO: create download code function.")
                     },
                 ]
             },
@@ -321,14 +330,18 @@ export class App extends React.Component<Props, State> {
     renderInstructions = (): JSX.Element => {
         return (
             <ValueCard key="instructions-card" id="instructions-card"
-                title="Fill in the Subcaucuses"
+                title="Fill in the subcaucuses"
                 image="walking.jpg"
                 onSave={() => this.removeCardState(CardFor.ShowingInstructions)}
             >
-                <p>Now it is time to fill in the subcaucus information. Just add each subcaucus name and the count of participants. Usually a convention or cacucus will solicit the names of subcaucuses first, feel free to enter them right away without a count. Then people will be encouraged to walk around the room and congregate with the subcaucus that most closely represents their views. Then, when each subcacus reports how many people they include, you can enter that as the count for that subcaucus.</p>
-                <p>As soon as you start entering subcaucus counts, the calculator will go to work determining how many delegates each subcaucus will be assigned. You can ignore those numbers until you have finished entering and confirming all the subcaucus counts. At that point, the delegate numbers can be reported to the chair of your convention or caucus.</p>
-                <p>Since most conventions or caucuses will go through more than one round of "walking", you can just keep reusing your subcaucus list for each round. However, you might want to consider emailing a report for each round to yourself and/or the chair of the meeting just so that everyone has a clear record of the process.</p>
-                <p>Have fun!</p>
+                <p>Now it is time to fill in the subcaucus information. Just add each subcaucus name and the count of participants. Usually a convention or cacucus will solicit the names of subcaucuses first, feel free to enter them right away without a count. Then people will be encouraged to walk around the room and congregate with the subcaucus that most closely represents their views. When each subcacus reports how many people they attracted, you can enter that as the count for that subcaucus.</p>
+                <p>As soon as you start entering subcaucus counts, the calculator will go to work determining how many delegates each subcaucus will be assigned. You can ignore those numbers until you have finished entering and confirming all the subcaucus counts. When you are done, the delegate numbers can be reported to the chair of your convention or caucus.</p>
+                <p>Since most conventions or caucuses will go through more than one round of "walking", you can just keep reusing your subcaucus list for each round. However, you might want to consider these steps at the end of each round:</p>
+                <ul>
+                    <li>Use the "Meetings" menu at the top to save a revision after each round of caucusing. This will give you a good record of the whole process.</li>
+                    <li>Use the "Share" menu to email a report about each round to the chair of the meeting just so they also have a clear record of the process.</li>
+                </ul>
+                <p>You can always get these instructions back under the "About" menu at the top. Have fun!</p>
             </ValueCard>
         )
     }
@@ -379,9 +392,9 @@ export class App extends React.Component<Props, State> {
                 extraButtons={this.state.name
                     ? <Button id="new-meeting-button"
                         label="New meeting"
-                        icon="pi pi-power-off"
+                        icon="pi pi-calendar-plus"
                         className="p-button-secondary"
-                        onClick={() => { /* TODO: start a new meeting */ }}
+                        onClick={() => alert("TODO: create new meeting function.")}
                     />
                     : <></>
                 }
@@ -411,9 +424,9 @@ export class App extends React.Component<Props, State> {
                 extraButtons={this.state.allowed
                     ? <Button id="new-meeting-button"
                         label="New meeting"
-                        icon="pi pi-power-off"
+                        icon="pi pi-calendar-plus"
                         className="p-button-secondary"
-                        onClick={() => { /* TODO: start a new meeting */ }}
+                        onClick={() => alert("TODO: create new meeting function.")}
                     />
                     : <></>
                 }
@@ -441,7 +454,7 @@ export class App extends React.Component<Props, State> {
     renderRemovingEmpties = (): JSX.Element => {
         return (
             <ValueCard key="remove-empties-card" id="remove-empties-card"
-                title="Remove Empty Subcaucuses"
+                title="Remove empty subcaucuses"
                 footer={
                     <>
                         <Button id="remove-all-empties-button"
@@ -575,7 +588,7 @@ export class App extends React.Component<Props, State> {
                 </div>
                 {summary.nonViableCount
                     ? <div className="summary-row clickable"
-                        onClick={() => alert("todo")}
+                        onClick={() => alert("TODO: explain viability in more detail.")}
                     >
                         <div className="summary-label">
                             Recalculated viability number ({summary.nonViableCount.singularPlural("person", "people")} in non-viable subcaucuses)
