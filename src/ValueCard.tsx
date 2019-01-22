@@ -14,6 +14,7 @@ interface Props {
     description?: string
     image?: string
     alt?: string
+    extraButtons?: JSX.Element
     footer?: JSX.Element
     type?: KindOfValue
     value?: string
@@ -114,18 +115,24 @@ export class ValueCard extends React.Component<Props, State> {
             const illegallyEmpty = (this.isEmpty(value) && this.isEmpty(this.defaultValue()) && this.props.allowEmpty === false)
             const originalIllegallyEmpty = (this.isEmpty(this.originalValue()) && this.props.allowEmpty === false)
 
-            const saveButton = (this.props.value != undefined)
-                ? <Button id={this.idPlus("save-button")}
-                    label="Save"
-                    icon="pi pi-check"
-                    disabled={illegallyEmpty}
-                    onClick={this.save(_u.unwrapString(value, this.defaultValue()))}
-                />
-                : <Button id={this.idPlus("close-button")}
-                    label="Close"
-                    icon="pi pi-times"
-                    onClick={this.save()}
-                />
+            // don't show a save button at all if there is no save function
+            // and if there is no value property, then call the save button "close" instead
+            const saveButton = (this.props.onSave
+                ? ((this.props.value != undefined)
+                    ? <Button id={this.idPlus("save-button")}
+                        label="Save"
+                        icon="pi pi-check"
+                        disabled={illegallyEmpty}
+                        onClick={this.save(_u.unwrapString(value, this.defaultValue()))}
+                    />
+                    : <Button id={this.idPlus("close-button")}
+                        label="Close"
+                        icon="pi pi-times"
+                        onClick={this.save()}
+                    />
+                )
+                : <></>
+            )
 
             const cancelButton = originalIllegallyEmpty || this.props.value === undefined
                 ? ''
@@ -136,7 +143,7 @@ export class ValueCard extends React.Component<Props, State> {
                     onClick={this.save()}
                 />
 
-            cardFooter = <>{saveButton}{cancelButton}</>
+            cardFooter = <>{saveButton}{this.props.extraButtons}{cancelButton}</>
         } else {
             cardFooter = this.props.footer
         }

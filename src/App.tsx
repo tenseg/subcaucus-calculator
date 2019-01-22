@@ -126,20 +126,32 @@ export class App extends React.Component<Props, State> {
         return `${this.state.allowed} delegates to be elected`
     }
 
-    addCard = (cardFor: CardFor): Array<CardFor> => {
-        return [...this.state.cards, cardFor]
+    addCard = (cardFor: CardFor, to?: Array<CardFor>): Array<CardFor> => {
+        if (to === undefined) {
+            to = this.state.cards
+        }
+        return [...to, cardFor]
     }
 
     addCardState = (cardFor: CardFor) => {
         this.setState({ cards: this.addCard(cardFor) })
     }
 
-    removeCard = (seekingCardFor: CardFor): Array<CardFor> => {
-        return this.state.cards.filter(foundCardFor => foundCardFor != seekingCardFor)
+    removeCard = (seekingCardFor: CardFor, from?: Array<CardFor>): Array<CardFor> => {
+        if (from === undefined) {
+            from = this.state.cards
+        }
+        return from.filter(foundCardFor => foundCardFor != seekingCardFor)
     }
 
     removeCardState = (cardFor: CardFor) => {
         this.setState({ cards: this.removeCard(cardFor) })
+    }
+
+    switchCardState = (fromCardFor: CardFor, toCardFor: CardFor) => {
+        let newCards = this.removeCard(fromCardFor)
+        newCards = this.addCard(toCardFor, newCards)
+        this.setState({ cards: newCards })
     }
 
     showingCard = (cardFor: CardFor): boolean => {
@@ -230,10 +242,6 @@ export class App extends React.Component<Props, State> {
                         label: "Instructions",
                         command: () => this.addCardState(CardFor.ShowingInstructions),
                     },
-                    {
-                        label: "Credits",
-                        command: () => this.addCardState(CardFor.ShowingBy),
-                    },
                 ]
             },
             {
@@ -288,6 +296,28 @@ export class App extends React.Component<Props, State> {
         return <Menubar model={items} id="app-main-menu" />
     }
 
+    renderAbout = (): JSX.Element => {
+        return (
+            <ValueCard key="about-card" id="about-card"
+                title="Minnesota DFL Subcaucus Calculator"
+                image="dfl.jpg"
+                onSave={() => this.removeCardState(CardFor.ShowingAbout)}
+                extraButtons={
+                    <Button id="show-credits-button"
+                        label="Credits"
+                        icon="pi pi-user"
+                        className="p-button-secondary"
+                        onClick={() => this.switchCardState(CardFor.ShowingAbout, CardFor.ShowingBy)}
+                    />
+                }
+            >
+                <p>Originally written for <a href="http://sd64dfl.org">SD64 DFL</a>, this app assists convenors of precinct caucuses and conventions in Minnesota. The Minnesota Democratic Farmer Labor (DFL) party uses a wonderful, but bit arcane, “walking subcaucus” process that is simple enough to do, but rather difficult to tabulate.</p>
+                <p>Given the number of delegates your meeting or caucus is allowed to send forward and the number of people in each subcaucus, this calculator determines how many of those delegates each subcaucus will elect. The rules it follows appeared on page 4 of the <a href="http://www.sd64dfl.org/more/caucus2014printing/2014-Official-Call.pdf">DFL 2014 Official Call</a>, including the proper treatment of remainders. It makes the math involved in a walking subcaucus disappear.</p>
+                <p>The app could be used to facilitate a “walking subcaucus” or “<a href="https://en.wikipedia.org/wiki/Proportional_representation">proportional representation</a>” system for any group.</p>
+            </ValueCard>
+        )
+    }
+
     renderInstructions = (): JSX.Element => {
         return (
             <ValueCard key="instructions-card" id="instructions-card"
@@ -303,20 +333,6 @@ export class App extends React.Component<Props, State> {
         )
     }
 
-    renderAbout = (): JSX.Element => {
-        return (
-            <ValueCard key="about-card" id="about-card"
-                title="Minnesota DFL Subcaucus Calculator"
-                image="dfl.jpg"
-                onSave={() => this.removeCardState(CardFor.ShowingAbout)}
-            >
-                <p>Originally written for <a href="http://sd64dfl.org">SD64 DFL</a>, this app assists convenors of precinct caucuses and conventions in Minnesota. The Minnesota Democratic Farmer Labor (DFL) party uses a wonderful, but bit arcane, “walking subcaucus” process that is simple enough to do, but rather difficult to tabulate.</p>
-                <p>Given the number of delegates your meeting or caucus is allowed to send forward and the number of people in each subcaucus, this calculator determines how many of those delegates each subcaucus will elect. The rules it follows appeared on page 4 of the <a href="http://www.sd64dfl.org/more/caucus2014printing/2014-Official-Call.pdf">DFL 2014 Official Call</a>, including the proper treatment of remainders. It makes the math involved in a walking subcaucus disappear.</p>
-                <p>The app could be used to facilitate a “walking subcaucus” or “<a href="https://en.wikipedia.org/wiki/Proportional_representation">proportional representation</a>” system for any group.</p>
-            </ValueCard>
-        )
-    }
-
     renderBy = (): JSX.Element => {
         return (
             <ValueCard key="by-card" id="by-card"
@@ -327,28 +343,6 @@ export class App extends React.Component<Props, State> {
                 <p>We love the walking subcaucus process and it makes us a bit sad that the squirrelly math required to calculate who gets how many delegate discourages meetings and caucuses from using the process. We hope this calculator makes it easier for you to get to know your neighbors as you work together to change the world!</p>
                 <p>Please check us out at <a href="https://tenseg.net">tenseg.net</a> if you need help building a website or making appropriate use of technology.</p>
             </ValueCard>
-        )
-    }
-
-    renderChangingName = (): JSX.Element => {
-        return (
-            <ValueCard key="name-value" id="name-value"
-                title="What is the name of your meeting?"
-                description='Welcome the Minnesota DFL Subcaucus Calculator. Please start by specifying the name of your meeting here. Most meetings have a name, like the "Ward 4 Precinct 7 Caucus" or the "Saint Paul City Convention".'
-                value={this.state.name}
-                defaultValue={this.defaultName()}
-                allowEmpty={false}
-                onSave={(value?: string) => {
-                    if (value == undefined) {
-                        this.removeCardState(CardFor.ChangingName)
-                    } else {
-                        this.setState({
-                            name: value,
-                            cards: this.removeCard(CardFor.ChangingName),
-                        })
-                    }
-                }}
-            />
         )
     }
 
@@ -375,14 +369,54 @@ export class App extends React.Component<Props, State> {
         )
     }
 
+    renderChangingName = (): JSX.Element => {
+        return (
+            <ValueCard key="name-value" id="name-value"
+                title="Meeting name?"
+                value={this.state.name}
+                defaultValue={this.defaultName()}
+                allowEmpty={false}
+                extraButtons={this.state.name
+                    ? <Button id="new-meeting-button"
+                        label="New meeting"
+                        icon="pi pi-power-off"
+                        className="p-button-secondary"
+                        onClick={() => { /* TODO: start a new meeting */ }}
+                    />
+                    : <></>
+                }
+                onSave={(value?: string) => {
+                    if (value == undefined) {
+                        this.removeCardState(CardFor.ChangingName)
+                    } else {
+                        this.setState({
+                            name: value,
+                            cards: this.removeCard(CardFor.ChangingName),
+                        })
+                    }
+                }}
+            >
+                <p>You can save a new name for this meeting or, if this is really a new event, you may want to start a new meeting altogether.</p>
+            </ValueCard>
+        )
+    }
+
     renderChangingDelegates = (): JSX.Element => {
         return (
             <ValueCard key="delegate-value" id="delegate-value"
                 title="Number of delegates allowed?"
-                description="Specify the number of delegates that your meeting or caucus is allowed to send on to the next level. This is the number of delegates to be elected by your meeting."
                 type="positive integer"
                 value={this.state.allowed.toString()}
                 allowEmpty={false}
+                extraButtons={this.state.allowed
+                    ? <Button id="new-meeting-button"
+                        label="New meeting"
+                        icon="pi pi-power-off"
+                        className="p-button-secondary"
+                        onClick={() => { /* TODO: start a new meeting */ }}
+                    />
+                    : <></>
+                }
                 onSave={(value?: string) => {
                     if (value == undefined) {
                         this.removeCardState(CardFor.ChangingDelegates)
@@ -393,7 +427,14 @@ export class App extends React.Component<Props, State> {
                         })
                     }
                 }}
-            />
+            >
+                <p>Specify the number of delegates that your meeting or caucus is allowed to send on to the next level. This is the number of delegates to be elected by your meeting.
+                {this.state.allowed
+                        ? <span> If this is actually a new event, you may want to start a new meeting instead</span>
+                        : <></>
+                    }
+                </p>
+            </ValueCard>
         )
     }
 

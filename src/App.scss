@@ -345,7 +345,7 @@ body {
         }
     }
     
-    .p-card {
+    .p-card.valuecard {
         position: absolute;
         top: ( 5 * $form-margin );
         left: $form-margin;
@@ -380,11 +380,15 @@ body {
             }
         }
 
-        .p-button {
-            margin-top: $form-margin;
-            margin-right: $form-margin;
+        .p-card-footer {
+            text-align: left;
+            
+            .p-button {
+                margin-top: $form-margin;
+                margin-right: $form-margin;
+            }
         }
-    
+        
     }
     
     .success-color {
