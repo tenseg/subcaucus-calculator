@@ -1,8 +1,9 @@
 import * as React from 'react'
-// import * as ReactDOM from 'react-dom'
+// see https://www.primefaces.org/primereact
 import { Button } from 'primereact/button'
 import { Card } from 'primereact/card'
 import { InputText } from 'primereact/inputtext'
+// local to this app
 import * as _u from './Utilities'
 
 type KindOfValue = 'text' | 'positive integer'

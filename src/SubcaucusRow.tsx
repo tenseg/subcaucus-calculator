@@ -1,7 +1,9 @@
 import * as React from 'react'
+// see https://www.primefaces.org/primereact
 import { Button } from 'primereact/button'
 import { InputText } from 'primereact/inputtext'
 import { InputTextarea } from 'primereact/inputtextarea'
+// local to this app
 import * as _u from './Utilities'
 import { Subcaucus } from './Subcaucus'
 

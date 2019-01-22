@@ -1,14 +1,18 @@
 import * as React from 'react'
+// see https://github.com/ClickSimply/typescript-map
 import { TSMap } from 'typescript-map'
+// see https://www.primefaces.org/primereact
 import { Button } from 'primereact/button'
-import { ValueCard } from './ValueCard'
+import { Menubar } from 'primereact/menubar';
 import 'primereact/resources/primereact.min.css'
 import 'primereact/resources/themes/nova-light/theme.css'
 import 'primeicons/primeicons.css'
+// local to this app
 import './App.scss'
 import * as _u from './Utilities'
 import { Subcaucus } from './Subcaucus'
 import { SubcaucusRow, SubcaucusRowAction } from './SubcaucusRow'
+import { ValueCard } from './ValueCard'
 
 enum SortOrder {
     None = 0,
@@ -209,6 +213,21 @@ export class App extends React.Component<Props, State> {
             nextOrder += 3 // needed to cycle backwards
         }
         return nextOrder
+    }
+
+    renderMenu = (): JSX.Element => {
+        const menuItems = [
+            {
+                label: "Minnesota DFL Subcaucus Calculator",
+                icon: "pi pi-fw pi-info-circle",
+                command: () => this.addCardState(CardFor.ShowingAbout),
+            },
+            {
+                label: "Save",
+                icon: "pi pi-fw pi-folder",
+            },
+        ]
+        return <Menubar model={menuItems} />
     }
 
     renderInstructions = (): JSX.Element => {
@@ -459,17 +478,17 @@ export class App extends React.Component<Props, State> {
 
         _u.debug("rendering", this.subcaucuses)
 
-        const card = this.renderNextCard()
-
+        const menu = this.renderMenu()
         const subcaucusRows = this.renderSubcaucusRows()
-
         const summary = this.renderSummary()
+        const card = this.renderNextCard()
 
         const { name, sortName, sortCount } = this.state
 
         return (
             <div id="app">
                 <div id="app-content">
+                    {menu}
                     <div id="app-header">
                         <Button id="app-about-button"
                             label="Minnesota DFL Subcaucus Calculator"
