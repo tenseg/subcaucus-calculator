@@ -216,18 +216,75 @@ export class App extends React.Component<Props, State> {
     }
 
     renderMenu = (): JSX.Element => {
-        const menuItems = [
+        const items = [
             {
-                label: "Minnesota DFL Subcaucus Calculator",
+                label: "About",
                 icon: "pi pi-fw pi-info-circle",
-                command: () => this.addCardState(CardFor.ShowingAbout),
+                items: [
+                    {
+                        label: "Minnesota DFL Subcaucus Calculator",
+                        command: () => this.addCardState(CardFor.ShowingAbout),
+                    },
+                    {
+                        label: "Instructions",
+                        command: () => this.addCardState(CardFor.ShowingInstructions),
+                    },
+                    {
+                        label: "Credits",
+                        command: () => this.addCardState(CardFor.ShowingBy),
+                    },
+                ]
             },
             {
                 label: "Save",
                 icon: "pi pi-fw pi-folder",
+                items: [
+                    {
+                        label: "Save revision",
+                        icon: "pi pi-fw pi-clock",
+                    },
+                    {
+                        label: "New meeting",
+                        icon: "pi pi-fw pi-power-off",
+                    },
+                    {
+                        label: "Duplicate meeting",
+                        icon: "pi pi-fw pi-clone",
+                    },
+                    {
+                        label: "Load meeting",
+                        icon: "pi pi-fw pi-calendar",
+                    },
+                    {
+                        label: "Flip the coin",
+                        icon: "pi pi-fw pi-refresh",
+                    },
+                ]
+            },
+            {
+                label: "Share",
+                icon: "pi pi-fw pi-share-alt",
+                items: [
+                    {
+                        label: "Email report",
+                        icon: "pi pi-fw pi-envelope",
+                    },
+                    {
+                        label: "Download text",
+                        icon: "pi pi-fw pi-align-left",
+                    },
+                    {
+                        label: "Download CSV",
+                        icon: "pi pi-fw pi-table",
+                    },
+                    {
+                        label: "Download code",
+                        icon: "pi pi-fw pi-save",
+                    },
+                ]
             },
         ]
-        return <Menubar model={menuItems} />
+        return <Menubar model={items} id="app-main-menu" />
     }
 
     renderInstructions = (): JSX.Element => {
@@ -276,7 +333,7 @@ export class App extends React.Component<Props, State> {
         return (
             <ValueCard key="name-value" id="name-value"
                 title="What is the name of your meeting?"
-                description='Most meetings have a name, like the "Ward 4 Precinct 7 Caucus" or the "Saint Paul City Convention". Specify the name of your meeting here.'
+                description='Welcome the Minnesota DFL Subcaucus Calculator. Please start by specifying the name of your meeting here. Most meetings have a name, like the "Ward 4 Precinct 7 Caucus" or the "Saint Paul City Convention".'
                 value={this.state.name}
                 defaultValue={this.defaultName()}
                 allowEmpty={false}
@@ -489,17 +546,6 @@ export class App extends React.Component<Props, State> {
             <div id="app">
                 <div id="app-content">
                     {menu}
-                    <div id="app-header">
-                        <Button id="app-about-button"
-                            label="Minnesota DFL Subcaucus Calculator"
-                            iconPos="right"
-                            onClick={() => this.addCardState(CardFor.ShowingAbout)}
-                        />
-                        <Button id="app-instruction-button"
-                            icon="pi pi-info-circle"
-                            onClick={() => this.addCardState(CardFor.ShowingInstructions)}
-                        />
-                    </div>
                     <div id="meeting-info">
                         <Button id="meeting-name"
                             label={name ? name : this.defaultName()}

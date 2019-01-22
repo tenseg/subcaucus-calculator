@@ -65,6 +65,60 @@ body {
         }
     }
     
+    #app-main-menu {
+        border: none;
+        border-radius: 0;
+        background-color: $header-color;
+        
+        & > .p-menubar-root-list {
+            
+            & > .p-menuitem {
+                
+                &.p-menuitem-active {
+                    & > .p-menuitem-link {
+                        background-color: lighten($header-color, 25%);
+                        
+                        
+                        &:hover {
+                            background-color: lighten($header-color, 25%);
+                        }
+                    }
+                    
+                    & > .p-submenu-list {
+                        margin-top: -2px;
+                        border-color: lighten($header-color, 25%);
+                        
+                        .p-menuitem.p-menuitem-active > .p-menuitem-link {
+                            background-color: lighten($header-color, 55%);
+                            
+                            &:hover {
+                                background-color: lighten($header-color, 55%);
+                            }
+                        }
+                    }
+                }
+                
+                & > .p-menuitem-link {
+                    padding-bottom: $form-margin;
+                    
+                    &:hover {
+                        background-color: lighten($header-color, 25%);
+                    }
+                    
+                    & > .p-menuitem-icon,
+                    & > .p-menuitem-text {
+                        color: white;
+                    }
+                    
+                    & > .p-submenu-icon{
+                        display: none;
+                    }
+                    
+                }
+            }
+        }
+    }
+    
     #app-content {
         position: relative;
         margin: auto;
