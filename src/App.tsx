@@ -23,6 +23,7 @@ enum SortOrder {
 enum CardFor {
     // these cards should be defined in priority order
     // if stacked, the ones toward the top will be shown first
+    WelcomeAndSetName,
     ChangingName,
     ChangingDelegates,
     RemovingEmpties,
@@ -59,7 +60,7 @@ export class App extends React.Component<Props, State> {
     subcaucuses = new TSMap<number, Subcaucus>()
 
     initialCardState: Array<CardFor> = [
-        CardFor.ChangingName,
+        CardFor.WelcomeAndSetName,
         CardFor.ChangingDelegates,
         CardFor.ShowingInstructions
     ]
@@ -351,6 +352,29 @@ export class App extends React.Component<Props, State> {
         )
     }
 
+    renderWelcomeAndSetName = (): JSX.Element => {
+        return (
+            <ValueCard key="name-value" id="name-value"
+                title="Welcome to the Minnesota DFL Subcacus Calculator"
+                image="dfl.jpg"
+                description='Please start by specifying the name of your meeting here. Most meetings have a name, like the "Ward 4 Precinct 7 Caucus" or the "Saint Paul City Convention".'
+                value={this.state.name}
+                defaultValue={this.defaultName()}
+                allowEmpty={false}
+                onSave={(value?: string) => {
+                    if (value == undefined) {
+                        this.removeCardState(CardFor.WelcomeAndSetName)
+                    } else {
+                        this.setState({
+                            name: value,
+                            cards: this.removeCard(CardFor.WelcomeAndSetName),
+                        })
+                    }
+                }}
+            />
+        )
+    }
+
     renderChangingDelegates = (): JSX.Element => {
         return (
             <ValueCard key="delegate-value" id="delegate-value"
@@ -409,6 +433,7 @@ export class App extends React.Component<Props, State> {
         return this.state.cards.sort((a, b) => b - a).reduce((accumulator: JSX.Element, cardFor: CardFor): JSX.Element => {
             _u.debug("filtering cards", accumulator, cardFor)
             switch (cardFor) {
+                case CardFor.WelcomeAndSetName: return this.renderWelcomeAndSetName()
                 case CardFor.ShowingInstructions: return this.renderInstructions()
                 case CardFor.ShowingAbout: return this.renderAbout()
                 case CardFor.ShowingBy: return this.renderBy()
