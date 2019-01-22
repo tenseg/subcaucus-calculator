@@ -210,7 +210,6 @@ body {
                 }
                 
                 &.has-delegates {
-                    background-color: lighten($success-color, 50%);
                     
                     .subcaucus-delegates-button {
                         background-color: $success-color;
@@ -220,6 +219,10 @@ body {
                             background-color: lighten($success-color, 25%);
                         }
                     }
+                }
+                
+                &.no-delegates {
+                    background-color: lighten($body-color, 63%);
                 }
             }
             

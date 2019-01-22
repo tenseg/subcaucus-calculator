@@ -73,9 +73,9 @@ export class App extends React.Component<Props, State> {
             sortCount: SortOrder.None,
         }
         if (_u.isDebugging()) {
-            this.addSubcaucus(false, "A", 10, 0)
-            this.addSubcaucus(false, "B", 0, 0)
-            this.addSubcaucus(false, "C", 100, 5)
+            this.addSubcaucus(false, "C", 10, 0)
+            this.addSubcaucus(false, "A", 0, 0)
+            this.addSubcaucus(false, "B", 100, 5)
             this.addSubcaucus(false, "D", 1, 0)
             this.addSubcaucus(false)
             this.state = {
@@ -355,8 +355,8 @@ export class App extends React.Component<Props, State> {
                 const direction = this.state.sortName == SortOrder.Ascending ? 1 : -1
                 // fall back to order of entry
                 let comparison = a.id - b.id
-                const nameA = a.name.toUpperCase();
-                const nameB = b.name.toUpperCase();
+                const nameA = a.name ? a.name.toUpperCase() : `SUBCAUCUS ${a.id}`;
+                const nameB = b.name ? b.name.toUpperCase() : `SUBCAUCUS ${b.id}`;
                 if (nameA < nameB) {
                     comparison = -1;
                 }
@@ -372,8 +372,8 @@ export class App extends React.Component<Props, State> {
                 const direction = this.state.sortCount == SortOrder.Ascending ? 1 : -1
                 // fall back to order of entry or names
                 let comparison = a.id - b.id
-                const nameA = a.name.toUpperCase();
-                const nameB = b.name.toUpperCase();
+                const nameA = a.name ? a.name.toUpperCase() : `SUBCAUCUS ${a.id}`;
+                const nameB = b.name ? b.name.toUpperCase() : `SUBCAUCUS ${b.id}`;
                 if (nameA < nameB) {
                     comparison = -1;
                 }
@@ -386,7 +386,7 @@ export class App extends React.Component<Props, State> {
                     countComparison = a.count - b.count
                 }
                 if (countComparison == 0) {
-                    countComparison = comparison
+                    return comparison
                 }
                 return countComparison * direction
             }
