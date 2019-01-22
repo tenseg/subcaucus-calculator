@@ -22,7 +22,6 @@ declare global {
 		singularPlural(singular: string, plural: string): string
 	}
 
-	type jsxReact = string | number | true | {} | React.ReactElement<any> | React.ReactNodeArray | React.ReactPortal
 }
 // see http://blog.stevenlevithan.com/archives/faster-trim-javascript
 String.prototype.trim = function (): string {

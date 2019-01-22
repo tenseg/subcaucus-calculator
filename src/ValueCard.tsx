@@ -5,14 +5,16 @@ import { Card } from 'primereact/card'
 import { InputText } from 'primereact/inputtext'
 import * as _u from './Utilities'
 
+type KindOfValue = 'text' | 'positive integer'
+
 interface Props {
     id?: string
     title: string
     description?: string
     image?: string
     alt?: string
-    footer?: jsxReact
-    type?: 'text' | 'positive integer'
+    footer?: JSX.Element
+    type?: KindOfValue
     value?: string
     defaultValue?: string
     allowEmpty?: boolean
@@ -24,34 +26,38 @@ interface State {
 
 export class ValueCard extends React.Component<Props, State> {
 
-    type: 'text' | 'positive integer' = 'text'
-    isPositiveInt = false
-    originalValue = ''
-    defaultValue = ''
+    isPositiveInteger = false
 
     constructor(props: Props) {
         super(props)
-        this.type = (this.props.type == undefined ? 'text' : this.props.type)
-        this.isPositiveInt = (this.type == 'positive integer')
-        this.originalValue = _u.unwrapString(this.props.value)
-        this.defaultValue = _u.unwrapString(this.props.defaultValue)
+        this.isPositiveInteger = this.props.type === 'positive integer'
+        let initialValue = _u.unwrapString(this.props.value)
+        if (!this.props.allowEmpty && this.isEmpty(initialValue)) {
+            initialValue = _u.unwrapString(this.props.defaultValue)
+        }
         this.state = {
-            value: this.originalValue,
+            value: initialValue,
         }
     }
 
+    originalValue = (): string => {
+        return _u.unwrapString(this.props.value)
+    }
+
+    defaultValue = (): string => {
+        return _u.unwrapString(this.props.defaultValue)
+    }
+
     handleChange = () => (event: React.FormEvent<HTMLInputElement>) => {
-        switch (this.type) {
-            case 'positive integer':
-                var num = Number(event.currentTarget.value)
-                if (num < 0) {
-                    num = 0
-                }
-                this.setState({ value: String(num) })
-                break
-            case 'text':
-                this.setState({ value: event.currentTarget.value })
-                break
+        _u.debug("change", event.currentTarget.value)
+        if (this.isPositiveInteger) {
+            var num = Number(event.currentTarget.value)
+            if (num < 0) {
+                num = 0
+            }
+            this.setState({ value: String(num) })
+        } else {
+            this.setState({ value: event.currentTarget.value })
         }
     }
 
@@ -70,18 +76,22 @@ export class ValueCard extends React.Component<Props, State> {
         setTimeout(() => target.setSelectionRange(0, 9999), 0)
     }
 
-    isEmpty = (value: string): boolean => {
-        var empty = (value == '')
-        if (this.props.type == 'positive integer') {
-            empty = (empty || value == '0')
+    isEmpty = (value?: string): boolean => {
+        var empty = (value === '') || (value === undefined)
+        if (this.isPositiveInteger) {
+            empty = (empty || value === '0')
         }
         return empty
     }
 
-    save = (value: string | null) => (event: React.MouseEvent<HTMLButtonElement>) => {
+    save = (value?: string) => (event: React.MouseEvent<HTMLButtonElement>) => {
         if (this.props.onSave) {
-            if (value == null) {
+            if (value === undefined) {
                 this.props.onSave()
+            } else if (this.isEmpty(value) && !this.props.allowEmpty) {
+                if (!this.isEmpty(this.props.defaultValue)) {
+                    this.props.onSave(this.props.defaultValue)
+                }
             } else {
                 this.props.onSave(value.trim())
             }
@@ -94,33 +104,41 @@ export class ValueCard extends React.Component<Props, State> {
 
     render() {
 
-        const illegallyEmpty = (this.isEmpty(this.state.value) && this.isEmpty(this.defaultValue) && !this.props.allowEmpty)
+        const { value } = this.state
+        const isPositiveInteger = this.isPositiveInteger
 
-        const saveButton = (this.props.value != undefined)
-            ? <Button id={this.idPlus("save-button")}
-                label="Save"
-                icon="pi pi-check"
-                disabled={illegallyEmpty}
-                onClick={this.save(_u.unwrapString(this.state.value, this.defaultValue))}
-            />
-            : <Button id={this.idPlus("close-button")}
-                label="Close"
-                icon="pi pi-times"
-                onClick={this.save(null)}
-            />
+        let cardFooter = <></>
 
-        const cancelButton = this.isEmpty(this.originalValue) || (!this.props.value)
-            ? ''
-            : <Button id={this.idPlus("cancel-button")}
-                label="Cancel"
-                icon="pi pi-times"
-                className="p-button-secondary"
-                onClick={this.save(null)}
-            />
+        if (this.props.footer == undefined) {
+            const illegallyEmpty = (this.isEmpty(value) && this.isEmpty(this.defaultValue()) && this.props.allowEmpty === false)
+            const originalIllegallyEmpty = (this.isEmpty(this.originalValue()) && this.props.allowEmpty === false)
 
-        const cardFooter = this.props.footer == undefined
-            ? <>{saveButton}{cancelButton}</>
-            : this.props.footer
+            const saveButton = (this.props.value != undefined)
+                ? <Button id={this.idPlus("save-button")}
+                    label="Save"
+                    icon="pi pi-check"
+                    disabled={illegallyEmpty}
+                    onClick={this.save(_u.unwrapString(value, this.defaultValue()))}
+                />
+                : <Button id={this.idPlus("close-button")}
+                    label="Close"
+                    icon="pi pi-times"
+                    onClick={this.save()}
+                />
+
+            const cancelButton = originalIllegallyEmpty || this.props.value === undefined
+                ? ''
+                : <Button id={this.idPlus("cancel-button")}
+                    label="Cancel"
+                    icon="pi pi-times"
+                    className="p-button-secondary"
+                    onClick={this.save()}
+                />
+
+            cardFooter = <>{saveButton}{cancelButton}</>
+        } else {
+            cardFooter = this.props.footer
+        }
 
         return (
             <div className="valuecard-wrapper">
@@ -140,7 +158,7 @@ export class ValueCard extends React.Component<Props, State> {
                             <Button
                                 id={this.idPlus("picture-close-button")}
                                 icon="pi pi-times"
-                                onClick={this.save(null)}
+                                onClick={this.save()}
                             />
                         </div>
                         : undefined
@@ -159,12 +177,12 @@ export class ValueCard extends React.Component<Props, State> {
                         : ''}
                     {this.props.value != undefined
                         ? <InputText id={this.idPlus("card-field")}
-                            className={this.isPositiveInt ? "number" : "text"}
-                            keyfilter={this.isPositiveInt ? "pint" : ""}
+                            className={isPositiveInteger ? "number" : "text"}
+                            keyfilter={isPositiveInteger ? "pint" : ""}
                             type="text"
-                            pattern={this.isPositiveInt ? "\\d*" : undefined}
-                            value={this.isPositiveInt ? (this.state.value ? this.state.value : '') : this.state.value} // show 0 as blank for positiveInt
-                            placeholder={this.defaultValue}
+                            pattern={isPositiveInteger ? "\\d*" : undefined}
+                            value={isPositiveInteger ? (value === '0' ? '' : value) : value} // show 0 as blank for positive integers
+                            placeholder={this.props.defaultValue}
                             onChange={this.handleChange()}
                             // onFocus={this.isPositiveInt ? this.focusOnWholeText() : undefined}
                             onKeyUp={this.handleKey()}

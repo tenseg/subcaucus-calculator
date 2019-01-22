@@ -104,8 +104,8 @@ export class SubcaucusRow extends React.Component<Props, State> {
 					// PrimeReact has a bug with the InputTextarea placeholder
 					// for now, it will not update this placeholder
 					// see: https://github.com/primefaces/primereact/issues/747
-					// placeholder={`Subcaucus ${this.props.id}`}
-					placeholder={`Subcaucus name`}
+					placeholder={`Subcaucus ${this.props.id}`}
+					// placeholder={`Subcaucus name`}
 					onChange={this.handleName()}
 					onKeyUp={this.handleKey()}
 				/>

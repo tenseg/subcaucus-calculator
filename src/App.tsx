@@ -16,33 +16,49 @@ enum SortOrder {
     Descending,
 }
 
+enum CardFor {
+    // these cards should be defined in priority order
+    // if stacked, the ones toward the top will be shown first
+    ChangingName,
+    ChangingDelegates,
+    RemovingEmpties,
+    ShowingAbout,
+    ShowingBy,
+    ShowingInstructions,
+}
+
+interface SummaryInfo {
+    count: number
+    delegates: number
+    viability: number
+    revisedViability: number
+    minimumCountForViability: number
+    nonViableCount: number
+}
+
 interface Props { }
 interface State {
     dateCreated: Date
     name: string
     allowed: number
     // card status
-    changingName: boolean
-    changingDelegates: boolean
-    removingEmpties: boolean
-    showingAbout: boolean
-    showingBy: boolean
-    showInstructions: boolean
+    cards: Array<CardFor>
     // sorting info
     sortName: SortOrder
     sortCount: SortOrder
     // summary info
-    totalParticipants: number
-    totalDelegates: number
-    viabilityNumber: number
-    peopleNeededForViability: number
-    delegateValue: number
-    peopleInNonViableSubcaucuses: number
+    summary?: SummaryInfo
 }
 
 export class App extends React.Component<Props, State> {
 
     subcaucuses = new TSMap<number, Subcaucus>()
+
+    initialCardState: Array<CardFor> = [
+        CardFor.ChangingName,
+        CardFor.ChangingDelegates,
+        CardFor.ShowingInstructions
+    ]
 
     constructor(props: Props) {
         super(props)
@@ -51,22 +67,10 @@ export class App extends React.Component<Props, State> {
             name: '',
             allowed: 0,
             // card status
-            changingName: false,
-            changingDelegates: false,
-            removingEmpties: false,
-            showingAbout: false,
-            showingBy: false,
-            showInstructions: false,
+            cards: this.initialCardState,
             // sorting info
             sortName: SortOrder.None,
             sortCount: SortOrder.None,
-            // summary info
-            totalParticipants: 0,
-            totalDelegates: 0,
-            viabilityNumber: 0,
-            delegateValue: 0,
-            peopleNeededForViability: 0,
-            peopleInNonViableSubcaucuses: 0,
         }
         if (_u.isDebugging()) {
             this.addSubcaucus(false, "A", 10, 0)
@@ -79,22 +83,19 @@ export class App extends React.Component<Props, State> {
                 name: 'Debugging', // '' for release
                 allowed: 10, // 0 for release
                 // card status
-                changingName: false,
-                changingDelegates: false,
-                removingEmpties: false, // false for release
-                showingAbout: false,
-                showingBy: false,
-                showInstructions: false, // true for release
+                cards: [],
                 // sorting info
                 sortName: SortOrder.None,
                 sortCount: SortOrder.None,
                 // summary info
-                totalParticipants: 1234,
-                totalDelegates: 256,
-                viabilityNumber: 2.124132,
-                delegateValue: 1.92123,
-                peopleNeededForViability: 3,
-                peopleInNonViableSubcaucuses: 3,
+                summary: {
+                    count: 1234,
+                    delegates: 256,
+                    viability: 2.124132,
+                    revisedViability: 1.92123,
+                    minimumCountForViability: 3,
+                    nonViableCount: 3,
+                }
             }
         } else {
             this.addSubcaucus(false)
@@ -118,6 +119,26 @@ export class App extends React.Component<Props, State> {
 
     allowedString = (): string => {
         return `${this.state.allowed} delegates to be elected`
+    }
+
+    addCard = (cardFor: CardFor): Array<CardFor> => {
+        return [...this.state.cards, cardFor]
+    }
+
+    addCardState = (cardFor: CardFor) => {
+        this.setState({ cards: this.addCard(cardFor) })
+    }
+
+    removeCard = (seekingCardFor: CardFor): Array<CardFor> => {
+        return this.state.cards.filter(foundCardFor => foundCardFor != seekingCardFor)
+    }
+
+    removeCardState = (cardFor: CardFor) => {
+        this.setState({ cards: this.removeCard(cardFor) })
+    }
+
+    showingCard = (cardFor: CardFor): boolean => {
+        return this.state.cards.indexOf(cardFor) > -1
     }
 
     handleChange = (name: string) => (event: React.FormEvent<HTMLInputElement>) => {
@@ -175,7 +196,7 @@ export class App extends React.Component<Props, State> {
                 return subcaucus.count > 0 || subcaucus.name != ''
             })
         }
-        this.setState({ removingEmpties: false })
+        this.removeCardState(CardFor.RemovingEmpties)
     }
 
     sortOrderIcon = (order: SortOrder): string => {
@@ -190,145 +211,148 @@ export class App extends React.Component<Props, State> {
         return nextOrder
     }
 
-    render() {
+    renderInstructions = (): JSX.Element => {
+        return (
+            <ValueCard key="instructions-card" id="instructions-card"
+                title="Fill in the Subcaucuses"
+                image="walking.jpg"
+                onSave={() => this.removeCardState(CardFor.ShowingInstructions)}
+            >
+                <p>Now it is time to fill in the subcaucus information. Just add each subcaucus name and the count of participants. Usually a convention or cacucus will solicit the names of subcaucuses first, feel free to enter them right away without a count. Then people will be encouraged to walk around the room and congregate with the subcaucus that most closely represents their views. Then, when each subcacus reports how many people they include, you can enter that as the count for that subcaucus.</p>
+                <p>As soon as you start entering subcaucus counts, the calculator will go to work determining how many delegates each subcaucus will be assigned. You can ignore those numbers until you have finished entering and confirming all the subcaucus counts. At that point, the delegate numbers can be reported to the chair of your convention or caucus.</p>
+                <p>Since most conventions or caucuses will go through more than one round of "walking", you can just keep reusing your subcaucus list for each round. However, you might want to consider emailing a report for each round to yourself and/or the chair of the meeting just so that everyone has a clear record of the process.</p>
+                <p>Have fun!</p>
+            </ValueCard>
+        )
+    }
 
-        _u.debug("rendering", this.subcaucuses)
-        const s = this.state
+    renderAbout = (): JSX.Element => {
+        return (
+            <ValueCard key="about-card" id="about-card"
+                title="Minnesota DFL Subcaucus Calculator"
+                image="dfl.jpg"
+                onSave={() => this.removeCardState(CardFor.ShowingAbout)}
+            >
+                <p>Originally written for <a href="http://sd64dfl.org">SD64 DFL</a>, this app assists convenors of precinct caucuses and conventions in Minnesota. The Minnesota Democratic Farmer Labor (DFL) party uses a wonderful, but bit arcane, “walking subcaucus” process that is simple enough to do, but rather difficult to tabulate.</p>
+                <p>Given the number of delegates your meeting or caucus is allowed to send forward and the number of people in each subcaucus, this calculator determines how many of those delegates each subcaucus will elect. The rules it follows appeared on page 4 of the <a href="http://www.sd64dfl.org/more/caucus2014printing/2014-Official-Call.pdf">DFL 2014 Official Call</a>, including the proper treatment of remainders. It makes the math involved in a walking subcaucus disappear.</p>
+                <p>The app could be used to facilitate a “walking subcaucus” or “<a href="https://en.wikipedia.org/wiki/Proportional_representation">proportional representation</a>” system for any group.</p>
+            </ValueCard>
+        )
+    }
 
-        // we start with an empty card, then change the value of card as circumstances warrent
-        // note that the last card set "wins" in the case where multiple cards are possible
-        var card = <></>
+    renderBy = (): JSX.Element => {
+        return (
+            <ValueCard key="by-card" id="by-card"
+                title="Brought to you by Tenseg LLC"
+                image="tenseg.jpg"
+                onSave={() => this.removeCardState(CardFor.ShowingBy)}
+            >
+                <p>We love the walking subcaucus process and it makes us a bit sad that the squirrelly math required to calculate who gets how many delegate discourages meetings and caucuses from using the process. We hope this calculator makes it easier for you to get to know your neighbors as you work together to change the world!</p>
+                <p>Please check us out at <a href="https://tenseg.net">tenseg.net</a> if you need help building a website or making appropriate use of technology.</p>
+            </ValueCard>
+        )
+    }
 
-        if (s.showInstructions) {
-            card = (
-                <ValueCard id="instructions-card"
-                    title="Fill in the Subcaucuses"
-                    image="walking.jpg"
-                    onSave={() => this.setState({ showInstructions: false })}
-                >
-                    <p>Now it is time to fill in the subcaucus information. Just add each subcaucus name and the count of participants. Usually a convention or cacucus will solicit the names of subcaucuses first, feel free to enter them right away without a count. Then people will be encouraged to walk around the room and congregate with the subcaucus that most closely represents their views. Then, when each subcacus reports how many people they include, you can enter that as the count for that subcaucus.</p>
-                    <p>As soon as you start entering subcaucus counts, the calculator will go to work determining how many delegates each subcaucus will be assigned. You can ignore those numbers until you have finished entering and confirming all the subcaucus counts. At that point, the delegate numbers can be reported to the chair of your convention or caucus.</p>
-                    <p>Since most conventions or caucuses will go through more than one round of "walking", you can just keep reusing your subcaucus list for each round. However, you might want to consider emailing a report for each round to yourself and/or the chair of the meeting just so that everyone has a clear record of the process.</p>
-                    <p>Have fun!</p>
-                </ValueCard>
-            )
-        }
-
-        if (s.showingAbout) {
-            card = (
-                <ValueCard id="about-card"
-                    title="Minnesota DFL Subcaucus Calculator"
-                    image="dfl.jpg"
-                    onSave={() => this.setState({ showingAbout: false })}
-                >
-                    <p>Originally written for <a href="http://sd64dfl.org">SD64 DFL</a>, this app assists convenors of precinct caucuses and conventions in Minnesota. The Minnesota Democratic Farmer Labor (DFL) party uses a wonderful, but bit arcane, “walking subcaucus” process that is simple enough to do, but rather difficult to tabulate.</p>
-                    <p>Given the number of delegates your meeting or caucus is allowed to send forward and the number of people in each subcaucus, this calculator determines how many of those delegates each subcaucus will elect. The rules it follows appeared on page 4 of the <a href="http://www.sd64dfl.org/more/caucus2014printing/2014-Official-Call.pdf">DFL 2014 Official Call</a>, including the proper treatment of remainders. It makes the math involved in a walking subcaucus disappear.</p>
-                    <p>The app could be used to facilitate a “walking subcaucus” or “<a href="https://en.wikipedia.org/wiki/Proportional_representation">proportional representation</a>” system for any group.</p>
-                </ValueCard>
-            )
-        }
-
-        if (s.showingBy) {
-            card = (
-                <ValueCard id="by-card"
-                    title="Brought to you by Tenseg LLC"
-                    image="tenseg.jpg"
-                    onSave={() => this.setState({ showingBy: false })}
-                >
-                    <p>We love the walking subcaucus process and it makes us a bit sad that the squirrelly math required to calculate who gets how many delegate discourages meetings and caucuses from using the process. We hope this calculator makes it easier for you to get to know your neighbors as you work together to change the world!</p>
-                    <p>Please check us out at <a href="https://tenseg.net">tenseg.net</a> if you need help building a website or making appropriate use of technology.</p>
-                </ValueCard>
-            )
-        }
-
-        if (s.removingEmpties) {
-            card = (
-                <ValueCard id="remove-empties-card"
-                    title="Remove Empty Subcaucuses"
-                    footer={
-                        <>
-                            <Button id="remove-all-empties-button"
-                                label="Remove All Empties"
-                                icon="pi pi-trash"
-                                onClick={() => this.removeEmpties()}
-                            />
-                            <Button id="remove-some-empties-button"
-                                label="Remove Only Unnamed"
-                                icon="pi pi-trash"
-                                className="p-button-warning"
-                                onClick={() => this.removeEmpties('unnamed')}
-                            />
-                            <Button id="cancel-remove-button"
-                                label="Cancel"
-                                icon="pi pi-times"
-                                className="p-button-secondary"
-                                onClick={() => this.setState({ removingEmpties: false })}
-                            />
-                        </>
+    renderChangingName = (): JSX.Element => {
+        return (
+            <ValueCard key="name-value" id="name-value"
+                title="What is the name of your meeting?"
+                description='Most meetings have a name, like the "Ward 4 Precinct 7 Caucus" or the "Saint Paul City Convention". Specify the name of your meeting here.'
+                value={this.state.name}
+                defaultValue={this.defaultName()}
+                allowEmpty={false}
+                onSave={(value?: string) => {
+                    if (value == undefined) {
+                        this.removeCardState(CardFor.ChangingName)
+                    } else {
+                        this.setState({
+                            name: value,
+                            cards: this.removeCard(CardFor.ChangingName),
+                        })
                     }
-                >
-                    <p>An "empty" subcaucus is one with no participants &mdash; a zero count.</p>
-                    <p>You can choose to remove all empty subcaucuses, or only those which also have no names.</p>
-                </ValueCard>
-            )
-        }
+                }}
+            />
+        )
+    }
 
-        // show a delegates allowed card there are none allowed or we are trying to change the number
-        if (!s.allowed || s.changingDelegates) {
-            card = (
-                <ValueCard id="delegate-value"
-                    title="Number of delegates allowed?"
-                    description="Specify the number of delegates that your meeting or caucus is allowed to send on to the next level. This is the number of delegates to be elected by your meeting."
-                    type="positive integer"
-                    value={s.allowed.toString()}
-                    onSave={(value?: string) => {
-                        if (value == undefined) {
-                            this.setState({
-                                changingDelegates: false,
-                            })
-                        } else {
-                            this.setState({
-                                allowed: Number(value),
-                                changingDelegates: false,
-                            })
-                        }
-                    }}
-                />
-            )
-        }
+    renderChangingDelegates = (): JSX.Element => {
+        return (
+            <ValueCard key="delegate-value" id="delegate-value"
+                title="Number of delegates allowed?"
+                description="Specify the number of delegates that your meeting or caucus is allowed to send on to the next level. This is the number of delegates to be elected by your meeting."
+                type="positive integer"
+                value={this.state.allowed.toString()}
+                allowEmpty={false}
+                onSave={(value?: string) => {
+                    if (value == undefined) {
+                        this.removeCardState(CardFor.ChangingDelegates)
+                    } else {
+                        this.setState({
+                            allowed: Number(value),
+                            cards: this.removeCard(CardFor.ChangingDelegates),
+                        })
+                    }
+                }}
+            />
+        )
+    }
 
-        // show a name card if the meeting name is empty or we are trying to change the name
-        if ((s.name == '') || s.changingName) {
-            card = (
-                <ValueCard id="name-value"
-                    title="What is the name of your meeting?"
-                    description='Most meetings have a name, like the "Ward 4 Precinct 7 Caucus" or the "Saint Paul City Convention". Specify the name of your meeting here.'
-                    value={s.name ? s.name : this.defaultName()}
-                    defaultValue={this.defaultName()}
-                    onSave={(value?: string) => {
-                        if (value == undefined) {
-                            this.setState({
-                                changingName: false,
-                            })
-                        } else {
-                            this.setState({
-                                name: value,
-                                changingName: false,
-                            })
-                        }
-                    }}
-                />
-            )
-        }
+    renderRemovingEmpties = (): JSX.Element => {
+        return (
+            <ValueCard key="remove-empties-card" id="remove-empties-card"
+                title="Remove Empty Subcaucuses"
+                footer={
+                    <>
+                        <Button id="remove-all-empties-button"
+                            label="Remove All Empties"
+                            icon="pi pi-trash"
+                            onClick={() => this.removeEmpties()}
+                        />
+                        <Button id="remove-some-empties-button"
+                            label="Remove Only Unnamed"
+                            icon="pi pi-trash"
+                            className="p-button-warning"
+                            onClick={() => this.removeEmpties('unnamed')}
+                        />
+                        <Button id="cancel-remove-button"
+                            label="Cancel"
+                            icon="pi pi-times"
+                            className="p-button-secondary"
+                            onClick={() => this.removeCardState(CardFor.RemovingEmpties)}
+                        />
+                    </>
+                }
+            >
+                <p>An "empty" subcaucus is one with no participants &mdash; a zero count.</p>
+                <p>You can choose to remove all empty subcaucuses, or only those which also have no names.</p>
+            </ValueCard>
+        )
+    }
 
+    renderNextCard = (): JSX.Element => {
+        return this.state.cards.sort((a, b) => b - a).reduce((accumulator: JSX.Element, cardFor: CardFor): JSX.Element => {
+            _u.debug("filtering cards", accumulator, cardFor)
+            switch (cardFor) {
+                case CardFor.ShowingInstructions: return this.renderInstructions()
+                case CardFor.ShowingAbout: return this.renderAbout()
+                case CardFor.ShowingBy: return this.renderBy()
+                case CardFor.ChangingName: return this.renderChangingName()
+                case CardFor.ChangingDelegates: return this.renderChangingDelegates()
+                case CardFor.RemovingEmpties: return this.renderRemovingEmpties()
+            }
+            return accumulator
+        }, <></>)
+    }
+
+    renderSubcaucusRows = (): JSX.Element[] => {
         // determine how the subcaucus rows should be sorted
         let sort = (a: Subcaucus, b: Subcaucus) => {
             return a.id - b.id
         }
 
-        if (s.sortName != SortOrder.None) {
+        if (this.state.sortName != SortOrder.None) {
             sort = (a: Subcaucus, b: Subcaucus) => {
-                const direction = s.sortName == SortOrder.Ascending ? 1 : -1
+                const direction = this.state.sortName == SortOrder.Ascending ? 1 : -1
                 // fall back to order of entry
                 let comparison = a.id - b.id
                 const nameA = a.name.toUpperCase();
@@ -343,9 +367,9 @@ export class App extends React.Component<Props, State> {
             }
         }
 
-        if (s.sortCount != SortOrder.None) {
+        if (this.state.sortCount != SortOrder.None) {
             sort = (a: Subcaucus, b: Subcaucus) => {
-                const direction = s.sortCount == SortOrder.Ascending ? 1 : -1
+                const direction = this.state.sortCount == SortOrder.Ascending ? 1 : -1
                 // fall back to order of entry or names
                 let comparison = a.id - b.id
                 const nameA = a.name.toUpperCase();
@@ -368,7 +392,7 @@ export class App extends React.Component<Props, State> {
             }
         }
 
-        const subcaucusRows = this.subcaucuses.values().sort(sort).map((subcaucus) => {
+        return this.subcaucuses.values().sort(sort).map((subcaucus): JSX.Element => {
             return (
                 <SubcaucusRow key={subcaucus.id}
                     id={subcaucus.id}
@@ -376,23 +400,27 @@ export class App extends React.Component<Props, State> {
                 />
             )
         })
+    }
 
-        const summary = ((s.totalParticipants)
+    renderSummary = (): JSX.Element => {
+        const { summary } = this.state
+
+        return ((summary)
             ? <div id="summary-container">
                 <div className="summary-row">
                     <div className="summary-label">
                         Total participants and delegates elected
                     </div>
                     <div className="summary-count">
-                        {s.totalParticipants.toCommaString()}
+                        {summary.count.toCommaString()}
                     </div>
                     <div className="summary-delegates">
-                        {s.totalDelegates.toCommaString()}
+                        {summary.delegates.toCommaString()}
                     </div>
                 </div>
                 <div className="summary-row">
                     <div className="summary-label">
-                        Minimum of <strong>{s.peopleNeededForViability.singularPlural("person", "people")}</strong> needed to make a subcaucus viable
+                        Minimum of <strong>{summary.minimumCountForViability.singularPlural("person", "people")}</strong> needed to make a subcaucus viable
                     </div>
                 </div>
                 <div className="summary-row">
@@ -400,18 +428,18 @@ export class App extends React.Component<Props, State> {
                         Viability number
                     </div>
                     <div className="summary-count">
-                        {Math.round(s.viabilityNumber * 1000) / 1000}
+                        {Math.round(summary.viability * 1000) / 1000}
                     </div>
                 </div>
-                {s.peopleInNonViableSubcaucuses
+                {summary.nonViableCount
                     ? <div className="summary-row clickable"
                         onClick={() => alert("todo")}
                     >
                         <div className="summary-label">
-                            Recalculated viability number ({s.peopleInNonViableSubcaucuses.singularPlural("person", "people")} in non-viable subcaucuses)
+                            Recalculated viability number ({summary.nonViableCount.singularPlural("person", "people")} in non-viable subcaucuses)
                         </div>
                         <div className="summary-count">
-                            {Math.round(s.delegateValue * 1000) / 1000}
+                            {Math.round(summary.revisedViability * 1000) / 1000}
                         </div>
                     </div>
                     : ''
@@ -425,6 +453,19 @@ export class App extends React.Component<Props, State> {
                 </div>
             </div>
         )
+    }
+
+    render() {
+
+        _u.debug("rendering", this.subcaucuses)
+
+        const card = this.renderNextCard()
+
+        const subcaucusRows = this.renderSubcaucusRows()
+
+        const summary = this.renderSummary()
+
+        const { name, sortName, sortCount } = this.state
 
         return (
             <div id="app">
@@ -433,40 +474,40 @@ export class App extends React.Component<Props, State> {
                         <Button id="app-about-button"
                             label="Minnesota DFL Subcaucus Calculator"
                             iconPos="right"
-                            onClick={() => this.setState({ showingAbout: true })}
+                            onClick={() => this.addCardState(CardFor.ShowingAbout)}
                         />
                         <Button id="app-instruction-button"
                             icon="pi pi-info-circle"
-                            onClick={() => this.setState({ showInstructions: true })}
+                            onClick={() => this.addCardState(CardFor.ShowingInstructions)}
                         />
                     </div>
                     <div id="meeting-info">
                         <Button id="meeting-name"
-                            label={s.name ? s.name : this.defaultName()}
-                            onClick={() => this.setState({ changingName: true })}
+                            label={name ? name : this.defaultName()}
+                            onClick={() => this.addCardState(CardFor.ChangingName)}
                         />
                         <Button id="delegates-allowed"
                             label={this.allowedString()}
-                            onClick={() => this.setState({ changingDelegates: true })}
+                            onClick={() => this.addCardState(CardFor.ChangingDelegates)}
                         />
                     </div>
                     <div id="subcaucus-container">
                         <div id="subcaucus-header">
                             <Button id="subcaucus-name-head"
                                 label="Subcaucus"
-                                icon={this.sortOrderIcon(s.sortName)}
+                                icon={this.sortOrderIcon(sortName)}
                                 onClick={() => this.setState({
-                                    sortName: this.nextSortOrder(s.sortName),
+                                    sortName: this.nextSortOrder(sortName),
                                     sortCount: SortOrder.None
                                 })}
                             />
                             <Button id="subcaucus-count-head"
                                 label="Count"
                                 iconPos="right"
-                                icon={this.sortOrderIcon(s.sortCount)}
+                                icon={this.sortOrderIcon(sortCount)}
                                 onClick={() => this.setState({
                                     sortName: SortOrder.None,
-                                    sortCount: this.nextSortOrder(s.sortCount, -1)
+                                    sortCount: this.nextSortOrder(sortCount, -1)
                                 })}
                             />
                             <Button id="subcaucus-delegate-head"
@@ -485,7 +526,7 @@ export class App extends React.Component<Props, State> {
                             <Button id="remove-empty-subcaucuses-button"
                                 label="Remove Empties"
                                 icon="pi pi-trash"
-                                onClick={() => this.setState({ removingEmpties: true })}
+                                onClick={() => this.addCardState(CardFor.RemovingEmpties)}
                             />
                         </div>
                     </div>
@@ -493,7 +534,7 @@ export class App extends React.Component<Props, State> {
                     <Button id="app-byline"
                         label="Brought to you by Tenseg LLC"
                         href="https://tenseg.net"
-                        onClick={() => this.setState({ showingBy: true })}
+                        onClick={() => this.addCardState(CardFor.ShowingBy)}
                     />
                     {card}
                 </div>
