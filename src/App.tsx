@@ -30,6 +30,7 @@ enum CardFor {
     ShowingAbout,
     ShowingBy,
     ShowingInstructions,
+    ShowingSecurity,
 }
 
 interface SummaryInfo {
@@ -242,6 +243,10 @@ export class App extends React.Component<Props, State> {
                         label: "Instructions",
                         command: () => this.addCardState(CardFor.ShowingInstructions),
                     },
+                    {
+                        label: "Data Security",
+                        command: () => this.addCardState(CardFor.ShowingSecurity),
+                    },
                 ]
             },
             {
@@ -346,6 +351,30 @@ export class App extends React.Component<Props, State> {
         )
     }
 
+    renderSecurity = (): JSX.Element => {
+        return (
+            <ValueCard key="security-card" id="security-card"
+                title="Data security"
+                image="security.jpg"
+                extraButtons={
+                    <Button id="clear-data -button"
+                        label="Clear All Data"
+                        icon="pi pi-exclamation-triangle"
+                        className="p-button-danger"
+                        onClick={() => alert("TODO: create clear data function.")}
+                    />
+                }
+                onSave={() => this.removeCardState(CardFor.ShowingSecurity)}
+            >
+                <p>The subcaucus calculator stores all of the data you enter on your own device. It uses a feature of web browsers called "local storage" to save all your meeting information within your web browser. None of your data gets off your device unless you choose to share it.</p>
+                <p>One thing to be aware of is that anyone using this same browser on this same device will be able to see your meeting information, including saved revisions and past meetings, when they come to this web site. If this is a public device and you want to clear out all the data the calculator has stored, click the "Clear All Data" button.</p>
+                <p>Since the data is stored with your browser on this device, also be aware that you will not be able to see your meeting information from any other browser. This means that even you won't be able to get at this data unless you use the sharing features.</p> {/* TODO: create a transfer data feature */}
+                <p>You can use the "Share" menu to get data off your device when you need to do so. Once you share your meeting information this calculator is no longer in control of that data. Make good choices about sharing.</p>
+                <p>The good news is that there really isn't any private information in the calculator in the first place. Most meetings that use the walking subcacus process are public meetings and the data you store in this calculator is not sensitive. Still, we thought you'd like to know we treat it as <em>your</em> data and do not share it unless you ask us to.</p>
+            </ValueCard>
+        )
+    }
+
     renderBy = (): JSX.Element => {
         return (
             <ValueCard key="by-card" id="by-card"
@@ -361,7 +390,7 @@ export class App extends React.Component<Props, State> {
 
     renderWelcomeAndSetName = (): JSX.Element => {
         return (
-            <ValueCard key="name-value" id="name-value"
+            <ValueCard key="welcome-card" id="welcome-card"
                 title="Welcome to the Minnesota DFL Subcacus Calculator"
                 image="dfl.jpg"
                 description='Please start by specifying the name of your meeting here. Most meetings have a name, like the "Ward 4 Precinct 7 Caucus" or the "Saint Paul City Convention".'
@@ -494,6 +523,7 @@ export class App extends React.Component<Props, State> {
                 case CardFor.ChangingName: return this.renderChangingName()
                 case CardFor.ChangingDelegates: return this.renderChangingDelegates()
                 case CardFor.RemovingEmpties: return this.renderRemovingEmpties()
+                case CardFor.ShowingSecurity: return this.renderSecurity()
             }
             return accumulator
         }, <></>)
