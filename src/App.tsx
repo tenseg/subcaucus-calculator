@@ -44,7 +44,8 @@ interface SummaryInfo {
 
 interface Props { }
 interface State {
-    dateCreated: Date
+    created: string
+    revised: string
     name: string
     allowed: number
     // card status
@@ -68,8 +69,10 @@ export class App extends React.Component<Props, State> {
 
     constructor(props: Props) {
         super(props)
+        const timestamp = (new Date()).toJSON()
         this.state = {
-            dateCreated: new Date(),
+            created: timestamp,
+            revised: timestamp,
             name: '',
             allowed: 0,
             // card status
@@ -85,7 +88,8 @@ export class App extends React.Component<Props, State> {
             this.addSubcaucus(false, "D", 1, 0)
             this.addSubcaucus(false)
             this.state = {
-                dateCreated: new Date(),
+                created: timestamp,
+                revised: timestamp,
                 name: 'Debugging', // '' for release
                 allowed: 10, // 0 for release
                 // card status
@@ -120,7 +124,7 @@ export class App extends React.Component<Props, State> {
     }
 
     defaultName = (): string => {
-        return "Meeting on " + this.state.dateCreated.toLocaleDateString("en-US")
+        return "Meeting on " + this.state.created.toDate().toLocaleDateString("en-US")
     }
 
     allowedString = (): string => {
@@ -598,7 +602,9 @@ export class App extends React.Component<Props, State> {
                         Total participants and delegates elected
                     </div>
                     <div className="summary-count">
-                        {summary.count.toCommaString()}
+                        <strong>
+                            {summary.count.toCommaString()}
+                        </strong>
                     </div>
                     <div className="summary-delegates">
                         {summary.delegates.toCommaString()}
@@ -614,7 +620,9 @@ export class App extends React.Component<Props, State> {
                         Viability number
                     </div>
                     <div className="summary-count">
-                        {Math.round(summary.viability * 1000) / 1000}
+                        <strong>
+                            {Math.round(summary.viability * 1000) / 1000}
+                        </strong>
                     </div>
                 </div>
                 {summary.nonViableCount
@@ -657,14 +665,20 @@ export class App extends React.Component<Props, State> {
                 <div id="app-content">
                     {menu}
                     <div id="meeting-info">
-                        <Button id="meeting-name"
-                            label={name ? name : this.defaultName()}
+                        <div id="meeting-name" className="button"
                             onClick={() => this.addCardState(CardFor.ChangingName)}
-                        />
-                        <Button id="delegates-allowed"
-                            label={this.allowedString()}
+                        >
+                            {name ? name : this.defaultName()}
+                            {true // TODO: test for revision
+                                ? <span className="revision">
+                                    Revision
+                                </span>
+                                : ''
+                            }
+                        </div>
+                        <div id="delegates-allowed" className="button"
                             onClick={() => this.addCardState(CardFor.ChangingDelegates)}
-                        />
+                        >{this.allowedString()}</div>
                     </div>
                     <div id="subcaucus-container">
                         <div id="subcaucus-header">
@@ -715,15 +729,7 @@ export class App extends React.Component<Props, State> {
                 </div>
                 {_u.isDebugging()
                     ? <div className="debugging">
-                        <p>This is debugging info for "
-                            <a href="https://grand.clst.org:3000/tenseg/subcalc-pr/issues" target="_repository">subcalc-pr</a>
-                            " (with "
-                            <a href="https://reactjs.org/" target="_react">ReactJS</a>
-                            " "
-                            <a href="https://www.primefaces.org/primereact/" target="_primereact">PrimeReact</a>
-                            " "
-                            <a href="https://www.primefaces.org/primeng/#/icons" target="_primeicons">PrimeIcons</a>
-                            ").
+                        <p>This is debugging info for <a href="https://grand.clst.org:3000/tenseg/subcalc-pr/issues" target="_repository">subcalc-pr</a> (with <a href="https://reactjs.org/docs/react-component.html" target="_react">ReactJS</a>, <a href="https://www.primefaces.org/primereact/" target="_primereact">PrimeReact</a>, <a href="https://www.primefaces.org/primeng/#/icons" target="_primeicons">PrimeIcons</a>) derrived from <a href="https://bitbucket.org/tenseg/subcalc-js/src" target="_bitbucket">subcalc-js</a>.
                         </p>
                         <pre>{"rendered App " + (new Date()).toLocaleTimeString()}</pre>
                         <pre>{"this.state is " + JSON.stringify(this.state, null, 2)}</pre>

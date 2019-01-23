@@ -5,3 +5,4 @@ dist
 build
 *.lock
 *-lock.*
+local-notes

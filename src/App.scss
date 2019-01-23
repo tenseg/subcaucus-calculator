@@ -127,6 +127,7 @@ body {
 
         #meeting-info {
     
+            div.button,
             button.p-button {
                 display: block;
                 width: 100%;
@@ -135,6 +136,7 @@ body {
                 border: none;
                 background-color: $meeting-info-color;
                 color: black;
+                cursor: pointer;
                 font-size: 18px;
                 font-weight: 900;
                 
@@ -152,8 +154,12 @@ body {
                 text-align: right;
             }
             
-            .p-button.p-button-text-only .p-button-text {
-                padding: 0;
+            .revision {
+                font-weight: 100;
+                
+                &::before {
+                    content: " — ";
+                }
             }
         
         }
@@ -314,7 +320,11 @@ body {
                 padding: $form-margin 0;
                 border-top: 1px solid $rule-color;
                 font-size: 18px;
-                
+
+                strong {
+                    font-weight: 900;
+                }
+
                 &.clickable {
                     cursor: pointer;
                     
@@ -325,14 +335,19 @@ body {
                 .summary-label {
                     flex: 1 0 5em;
                     margin-top: 0;
-                    margin-left: $form-margin;                    
+                    margin-left: $form-margin;
+                    font-weight: 100;
                 }
+                
+                // see https://stackoverflow.com/a/12646655/383737
+                // there may be a better alternative to the RTL trick
                 
                 .summary-count {
                     flex: 0 0 $count-width;
                     width: $count-width;
                     padding-right: $form-margin;
                     text-align: right;
+                    direction: rtl;
                 }
                 
                 .summary-delegates {
@@ -340,6 +355,7 @@ body {
                     width: $delegate-width;
                     padding-right: $form-margin;
                     text-align: right;
+                    direction: rtl;
                 }
             }
         }

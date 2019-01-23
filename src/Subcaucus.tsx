@@ -1,3 +1,7 @@
+// we will need a way to type validate the json we import
+// see https://github.com/mojotech/json-type-validation
+// or maybe just use a JSON.parse reviver to type the data
+
 export class Subcaucus {
 
 	readonly id: number

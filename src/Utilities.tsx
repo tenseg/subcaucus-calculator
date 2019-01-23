@@ -15,6 +15,7 @@ declare global {
 
 	interface String {
 		trim(): string
+		toDate(): Date
 	}
 
 	interface Number {
@@ -33,6 +34,10 @@ String.prototype.trim = function (): string {
 		}
 	}
 	return str
+}
+
+String.prototype.toDate = function (): Date {
+	return new Date(String(this))
 }
 
 // see: https://stackoverflow.com/a/2901298
