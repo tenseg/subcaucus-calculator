@@ -24,6 +24,10 @@ declare global {
 		singularPlural(singular: string, plural: string): string
 	}
 
+	interface Array<T> {
+		pushUnique(something: T): Array<T>
+	}
+
 	var isInApp: boolean
 
 }
@@ -57,13 +61,20 @@ String.prototype.toDate = function (): Date {
 }
 
 // see: https://stackoverflow.com/a/2901298
-//     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 Number.prototype.toCommaString = function (): string {
 	return this.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 Number.prototype.singularPlural = function (singular: string, plural: string): string {
 	return `${this} ${this == 1 ? singular : plural}`
+}
+
+// see: https://stackoverflow.com/a/12803141
+Array.prototype.pushUnique = function (something) {
+	if (this.indexOf(something) === -1) {
+		this.push(something)
+	}
+	return this
 }
 
 // _u functions

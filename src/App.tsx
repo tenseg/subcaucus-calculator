@@ -10,6 +10,7 @@ import 'primeicons/primeicons.css'
 // local to this app
 import './App.scss'
 import * as _u from './Utilities'
+import { SubCalcStorage } from './SubCalcStorage'
 import { Subcaucus } from './Subcaucus'
 import { SubcaucusRow, SubcaucusRowAction } from './SubcaucusRow'
 import { ValueCard } from './ValueCard'
@@ -60,7 +61,8 @@ interface State {
 
 export class App extends React.Component<Props, State> {
 
-    subcaucuses = new TSMap<number, Subcaucus>()
+    storage: SubCalcStorage
+    subcaucuses: TSMap<number, Subcaucus>
 
     initialCardState: Array<CardFor> = [
         CardFor.WelcomeAndSetName,
@@ -70,6 +72,10 @@ export class App extends React.Component<Props, State> {
 
     constructor(props: Props) {
         super(props)
+
+        this.storage = new SubCalcStorage()
+        this.subcaucuses = new TSMap<number, Subcaucus>()
+
         const timestamp = (new Date()).toJSON()
         this.state = {
             created: timestamp,
