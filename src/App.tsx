@@ -46,6 +46,7 @@ interface Props { }
 interface State {
     created: string
     revised: string
+    snapshot: string
     name: string
     allowed: number
     // card status
@@ -73,6 +74,7 @@ export class App extends React.Component<Props, State> {
         this.state = {
             created: timestamp,
             revised: timestamp,
+            snapshot: '',
             name: '',
             allowed: 0,
             // card status
@@ -90,8 +92,9 @@ export class App extends React.Component<Props, State> {
             this.state = {
                 created: timestamp,
                 revised: timestamp,
-                name: 'Debugging', // '' for release
-                allowed: 10, // 0 for release
+                snapshot: 'Revised',
+                name: 'Debugging',
+                allowed: 10,
                 // card status
                 cards: [],
                 // sorting info
@@ -258,9 +261,9 @@ export class App extends React.Component<Props, State> {
                 icon: "pi pi-fw pi-calendar",
                 items: [
                     {
-                        label: "Save revision",
+                        label: "Save snapshot",
                         icon: "pi pi-fw pi-clock",
-                        command: () => alert("TODO: create save revision function.")
+                        command: () => alert("TODO: create save snapshot function.")
                     },
                     {
                         label: "New meeting",
@@ -347,7 +350,7 @@ export class App extends React.Component<Props, State> {
                 <p>As soon as you start entering subcaucus counts, the calculator will go to work determining how many delegates each subcaucus will be assigned. You can ignore those numbers until you have finished entering and confirming all the subcaucus counts. When you are done, the delegate numbers can be reported to the chair of your convention or caucus.</p>
                 <p>Since most conventions or caucuses will go through more than one round of "walking", you can just keep reusing your subcaucus list for each round. However, you might want to consider these steps at the end of each round:</p>
                 <ul>
-                    <li>Use the "Meetings" menu at the top to save a revision after each round of caucusing. This will give you a good record of the whole process.</li>
+                    <li>Use the "Meetings" menu at the top to save a snapshot after each round of caucusing. This will give you a good record of the whole process.</li>
                     <li>Use the "Share" menu to email a report about each round to the chair of the meeting just so they also have a clear record of the process.</li>
                 </ul>
                 <p>You can always get these instructions back under the "About" menu at the top. Have fun!</p>
@@ -372,7 +375,7 @@ export class App extends React.Component<Props, State> {
             >
                 <p>The subcaucus calculator stores all of the data you enter on your own device. It uses a feature of web browsers called "local storage" to save all your meeting information within your web browser. None of your data gets off your device unless you choose to share it.</p>
                 <p>Do note that this app is running on a web server, though, and that server will keep all the logs typical of web servers. This includes logs of your IP address and the documents you retrieve from the server. None of these logs will include your specific meeting information.</p>
-                <p>One thing to be aware of is that anyone using this same browser on this same device will be able to see your meeting information, including saved revisions and past meetings, when they come to this web site. If this is a public device and you want to clear out all the data the calculator has stored, click the "Clear All Data" button.</p>
+                <p>One thing to be aware of is that anyone using this same browser on this same device will be able to see your meeting information, including saved snapshots and past meetings, when they come to this web site. If this is a public device and you want to clear out all the data the calculator has stored, click the "Clear All Data" button.</p>
                 <p>Since the data is stored with your browser on this device, also be aware that you will not be able to see your meeting information from any other browser. This means that even you won't be able to get at this data unless you use the sharing features.</p> {/* TODO: create a transfer data feature */}
                 <p>You can use the "Share" menu to get data off your device when you need to do so. Once you share your meeting information this calculator is no longer in control of that data. Make good choices about sharing.</p>
                 <p>The good news is that there really isn't any private information in the calculator in the first place. Most meetings that use the walking subcacus process are public meetings and the data you store in this calculator is not sensitive. Still, we thought you'd like to know we treat it as <em>your</em> data and do not share it unless you ask us to.</p>
@@ -658,7 +661,7 @@ export class App extends React.Component<Props, State> {
         const summary = this.renderSummary()
         const card = this.renderNextCard()
 
-        const { name, sortName, sortCount } = this.state
+        const { name, revised, snapshot, created, sortName, sortCount } = this.state
 
         return (
             <div id="app">
@@ -669,9 +672,9 @@ export class App extends React.Component<Props, State> {
                             onClick={() => this.addCardState(CardFor.ChangingName)}
                         >
                             {name ? name : this.defaultName()}
-                            {true // TODO: test for revision
-                                ? <span className="revision">
-                                    Revision
+                            {revised === created && snapshot != ''
+                                ? <span className="snapshot">
+                                    {snapshot}
                                 </span>
                                 : ''
                             }

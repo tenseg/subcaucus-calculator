@@ -1,5 +1,5 @@
 /**
- * SubCalcRNG.ts
+ * SubCalcPRNG.ts
  *
  * Manages the generation of random numbers.
  *
@@ -24,7 +24,7 @@
 /**
  * Manages the generation of random numbers.
  */
-export class SubCalcRNG {
+export class SubCalcPRNG {
 
 	mod1 = 4294967087
 	mul1 = 65539
