@@ -82,7 +82,7 @@ export function debug(message?: any, ...optionalParams: any[]) {
 }
 
 export function isDebugging(): boolean {
-	return !process.env.NODE_ENV || process.env.NODE_ENV === 'development' || getQueryVariable("debug") == "yes"
+	return !process.env.NODE_ENV || process.env.NODE_ENV === "development" || getQueryVariable("debug") === "yes"
 }
 
 export function getQueryVariable(variable: string) {
