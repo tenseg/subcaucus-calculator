@@ -96,6 +96,10 @@ export function isDebugging(): boolean {
 	return !process.env.NODE_ENV || process.env.NODE_ENV === "development" || getQueryVariable("debug") === "yes"
 }
 
+export function isApp(): boolean {
+	return getQueryVariable("app") === "yes"
+}
+
 export function getQueryVariable(variable: string) {
 	var query = window.location.search.substring(1);
 	var vars = query.split('&');
