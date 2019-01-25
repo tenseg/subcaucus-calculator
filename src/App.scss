@@ -266,6 +266,18 @@ body {
                     text-align: center;
                     font-size: 20px;
                     font-weight: 700;
+                    
+                    .p-button-text {
+                        $shift: 0.12em;
+                        padding-top: 0.429em + $shift;
+                        padding-bottom: 0.429em - $shift;
+                    }
+                    
+                    .pi {
+                        $shift: 6%;
+                        top: 50% + $shift;
+                    }
+                    
                 }
                 
                 &.has-delegates {
