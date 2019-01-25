@@ -281,14 +281,14 @@ body {
                 }
                 
                 &.no-delegates {
-                    background-color: lighten($body-color, 60%);
+                    background-color: lighten($body-color, 65%);
 
                     .subcaucus-delegates-button {
-                        background-color: lighten($body-color, 50%);
+                        background-color: lighten($body-color, 55%);
                         color: $body-color;
                         
                         &:hover {
-                            background-color: lighten($body-color, 55%);
+                            background-color: lighten($body-color, 60%);
                         }
                     }
                 }
