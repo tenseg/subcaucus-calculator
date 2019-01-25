@@ -24,6 +24,7 @@ declare global {
 	interface Number {
 		toCommaString(): string
 		singularPlural(singular: string, plural: string): string
+		comparisonValue(): -1 | 0 | 1
 	}
 
 	interface Array<T> {
@@ -77,6 +78,12 @@ Number.prototype.toCommaString = function (): string {
 
 Number.prototype.singularPlural = function (singular: string, plural: string): string {
 	return `${this} ${this == 1 ? singular : plural}`
+}
+
+Number.prototype.comparisonValue = function (): -1 | 0 | 1 {
+	if (this < 0) return -1
+	if (this > 0) return 1
+	return 0
 }
 
 // see: https://stackoverflow.com/a/12803141

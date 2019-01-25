@@ -604,52 +604,58 @@ export class App extends React.Component<Props, State> {
         }, <></>)
     }
 
+    sortBySubcaucusName = (a: Subcaucus, b: Subcaucus): number => {
+        const direction = this.state.sortName == SortOrder.Ascending ? 1 : -1
+        // fall back to order of entry
+        let comparison = a.id - b.id
+        const nameA = a.name ? a.name.toUpperCase() : `SUBCAUCUS ${a.id}`;
+        const nameB = b.name ? b.name.toUpperCase() : `SUBCAUCUS ${b.id}`;
+        if (nameA < nameB) {
+            comparison = -1;
+        }
+        if (nameA > nameB) {
+            comparison = 1;
+        }
+        return comparison * direction
+    }
+
+    sortBySubcaucusCounts = (a: Subcaucus, b: Subcaucus): number => {
+        const direction = this.state.sortCount == SortOrder.Ascending ? 1 : -1
+
+        // start with delegates, then check on count, then fall back if needed
+        const delegateComparison = (a.delegates - b.delegates).comparisonValue()
+
+        let ac = a.count ? a.count : direction * Infinity
+        let bc = b.count ? b.count : direction * Infinity
+        const countComparison = (ac - bc).comparisonValue()
+
+
+        const weightedComparison = (0.1 * delegateComparison) + countComparison
+
+        let comparison = weightedComparison
+
+        if (comparison == 0) {
+            // we want the names to always sort in descending order
+            // during count comparisons, so we undo the effect of direction
+            // (both 1 * 1 and -1 * -1 equal 1) and then force a -1 direction 
+            comparison = this.sortBySubcaucusName(a, b) * direction * -1
+        }
+
+        return comparison * direction
+    }
+
     renderSubcaucusRows = (): JSX.Element[] => {
-        // determine how the subcaucus rows should be sorted
+        // sort subcaucuses by id number by default
         let sort = (a: Subcaucus, b: Subcaucus) => {
             return a.id - b.id
         }
 
         if (this.state.sortName != SortOrder.None) {
-            sort = (a: Subcaucus, b: Subcaucus) => {
-                const direction = this.state.sortName == SortOrder.Ascending ? 1 : -1
-                // fall back to order of entry
-                let comparison = a.id - b.id
-                const nameA = a.name ? a.name.toUpperCase() : `SUBCAUCUS ${a.id}`;
-                const nameB = b.name ? b.name.toUpperCase() : `SUBCAUCUS ${b.id}`;
-                if (nameA < nameB) {
-                    comparison = -1;
-                }
-                if (nameA > nameB) {
-                    comparison = 1;
-                }
-                return comparison * direction
-            }
+            sort = this.sortBySubcaucusName
         }
 
         if (this.state.sortCount != SortOrder.None) {
-            sort = (a: Subcaucus, b: Subcaucus) => {
-                const direction = this.state.sortCount == SortOrder.Ascending ? 1 : -1
-                // fall back to order of entry or names
-                let comparison = a.id - b.id
-                const nameA = a.name ? a.name.toUpperCase() : `SUBCAUCUS ${a.id}`;
-                const nameB = b.name ? b.name.toUpperCase() : `SUBCAUCUS ${b.id}`;
-                if (nameA < nameB) {
-                    comparison = -1;
-                }
-                if (nameA > nameB) {
-                    comparison = 1;
-                }
-                // start with delegates, then check on count, then fall back if needed
-                let countComparison = a.delegates - b.delegates
-                if (countComparison == 0) {
-                    countComparison = a.count - b.count
-                }
-                if (countComparison == 0) {
-                    return comparison
-                }
-                return countComparison * direction
-            }
+            sort = this.sortBySubcaucusCounts
         }
 
         return this.subcaucuses.values().sort(sort).map((subcaucus): JSX.Element => {
