@@ -24,7 +24,7 @@ declare global {
 		allowed: number
 		seed: number
 		nextSubcaucusID: number
-		subcacucuses: TSMap<number, Subcaucus>
+		subcaucuses: TSMap<number, Subcaucus>
 	}
 
 	interface Meeting {
@@ -150,7 +150,7 @@ export class SubCalcStorage {
 			allowed: 0,
 			seed: _u.randomSeed(),
 			nextSubcaucusID: nextSubcaucusID,
-			subcacucuses: subcaucuses
+			subcaucuses: subcaucuses
 		}
 	}
 
@@ -336,14 +336,14 @@ export class SubCalcStorage {
 		}
 
 		let nextSubcaucusID = 0
-		let subcacucuses = new TSMap<number, Subcaucus>()
+		let subcaucuses = new TSMap<number, Subcaucus>()
 
 		Object.keys(jsonSubcaucuses).forEach((key: any) => {
 			key = Number(key)
 			const subcaucus = this.jsonToSubcaucus(key, jsonSubcaucuses[key])
 			if (subcaucus) {
 				nextSubcaucusID = Math.max(nextSubcaucusID, key)
-				subcacucuses.set(key, subcaucus)
+				subcaucuses.set(key, subcaucus)
 			}
 		})
 
@@ -355,7 +355,7 @@ export class SubCalcStorage {
 			allowed: allowed,
 			seed: seed,
 			nextSubcaucusID: nextSubcaucusID,
-			subcacucuses: subcacucuses
+			subcaucuses: subcaucuses
 		}
 	}
 
