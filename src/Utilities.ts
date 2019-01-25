@@ -40,7 +40,6 @@ declare global {
 	}
 
 	var isInApp: boolean
-
 }
 
 // see http://blog.stevenlevithan.com/archives/faster-trim-javascript
@@ -117,8 +116,18 @@ export function debug(message?: any, ...optionalParams: any[]) {
 	}
 }
 
+var alertFunction: ((message: string) => void)
+
+export function setAlertFunction(callback: ((message: string) => void)) {
+	alertFunction = callback
+}
+
 export function alertUser(error: Error, ...optionalParams: any[]) {
-	alert(error.message)
+	if (alertFunction) {
+		alertFunction(error.message)
+	} else {
+		alert(error.message)
+	}
 	debug(error, ...optionalParams)
 }
 

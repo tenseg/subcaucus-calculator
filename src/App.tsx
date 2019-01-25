@@ -3,7 +3,8 @@ import * as React from 'react'
 import { TSMap } from 'typescript-map'
 // see https://www.primefaces.org/primereact
 import { Button } from 'primereact/button'
-import { Menubar } from 'primereact/menubar';
+import { Menubar } from 'primereact/menubar'
+import { Growl } from 'primereact/growl'
 import 'primereact/resources/primereact.min.css'
 import 'primereact/resources/themes/nova-light/theme.css'
 import 'primeicons/primeicons.css'
@@ -60,6 +61,8 @@ interface State {
     summary?: SummaryInfo
 }
 
+var alertFunction: ((message: string) => void)
+
 export class App extends React.Component<Props, State> {
 
     storage: SubCalcStorage
@@ -71,6 +74,8 @@ export class App extends React.Component<Props, State> {
         CardFor.ShowingInstructions
     ]
 
+    growl: Growl | null = null
+
     constructor(props: Props) {
         super(props)
 
@@ -78,17 +83,45 @@ export class App extends React.Component<Props, State> {
 
         const meeting = this.storage.getMeetingFromLocalStorage()
 
-        if (meeting) {
+        if (_u.isDebugging()) {
+            this.subcaucuses = new TSMap<number, Subcaucus>()
+            const timestamp = (new Date()).toTimestampString()
+
+            this.addSubcaucus(false, "C", 10, 0)
+            this.addSubcaucus(false, "A", 0, 0)
+            this.addSubcaucus(false, "B", 100, 5)
+            this.addSubcaucus(false, "D", 1, 0)
+            this.addSubcaucus(false)
+            this.state = {
+                created: timestamp,
+                revised: timestamp,
+                snapshot: 'Revised',
+                // name: 'Debugging', allowed: 10, cards: [],
+                name: '', allowed: 0, cards: this.initialCardState,
+                seed: 42,
+                // sorting info
+                sortName: SortOrder.None,
+                sortCount: SortOrder.None,
+                // summary info
+                summary: {
+                    count: 1234,
+                    delegates: 256,
+                    viability: 2.124132,
+                    revisedViability: 1.92123,
+                    minimumCountForViability: 3,
+                    nonViableCount: 3,
+                }
+            }
+        } else if (meeting) {
             this.subcaucuses = meeting.current.subcaucuses
             this._currentSubcaucusID = meeting.current.currentSubcaucusID
-
             this.state = this.stateFromSnapshot(meeting.current)
         } else {
             _u.alertUser(new Error("Could not read or write local storage"))
 
             this.subcaucuses = new TSMap<number, Subcaucus>()
-
             const timestamp = (new Date()).toTimestampString()
+
             this.state = {
                 created: timestamp,
                 revised: timestamp,
@@ -102,6 +135,12 @@ export class App extends React.Component<Props, State> {
                 sortName: SortOrder.None,
                 sortCount: SortOrder.None,
             }
+        }
+    }
+
+    stateForDebugging = () => {
+        if (_u.isDebugging()) {
+
         }
     }
 
@@ -731,9 +770,20 @@ export class App extends React.Component<Props, State> {
         )
     }
 
+    growlAlert = (message: string) => {
+        if (this.growl) {
+            this.growl.show({ severity: 'error', summary: 'Error Message', detail: message });
+        } else {
+            alert(message)
+        }
+    }
+
     render() {
 
         _u.debug("rendering", this.subcaucuses)
+
+        console.log(alertFunction)
+        _u.setAlertFunction(this.growlAlert)
 
         const menu = this.renderMenu()
         const subcaucusRows = this.renderSubcaucusRows()
@@ -746,6 +796,7 @@ export class App extends React.Component<Props, State> {
             <div id="app">
                 <div id="app-content">
                     {menu}
+                    <Growl ref={(el) => this.growl = el} />
                     <div id="meeting-info">
                         <div id="meeting-name" className="button"
                             onClick={() => this.addCardState(CardFor.ChangingName)}
