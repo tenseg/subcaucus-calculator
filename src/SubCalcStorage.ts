@@ -23,7 +23,7 @@ declare global {
 		name: string
 		allowed: number
 		seed: number
-		nextSubcaucusID: number
+		currentSubcaucusID: number
 		subcaucuses: TSMap<number, Subcaucus>
 	}
 
@@ -136,11 +136,11 @@ export class SubCalcStorage {
 		}
 
 		// create a subcaucus ID and three subcaucuses
-		let nextSubcaucusID = 1
+		let currentSubcaucusID = 1
 		let subcaucuses = new TSMap<number, Subcaucus>()
-		subcaucuses.set(nextSubcaucusID, new Subcaucus(nextSubcaucusID++))
-		subcaucuses.set(nextSubcaucusID, new Subcaucus(nextSubcaucusID++))
-		subcaucuses.set(nextSubcaucusID, new Subcaucus(nextSubcaucusID++))
+		subcaucuses.set(currentSubcaucusID, new Subcaucus(currentSubcaucusID++))
+		subcaucuses.set(currentSubcaucusID, new Subcaucus(currentSubcaucusID++))
+		subcaucuses.set(currentSubcaucusID, new Subcaucus(currentSubcaucusID++))
 
 		return {
 			created: created,
@@ -149,7 +149,7 @@ export class SubCalcStorage {
 			name: '',
 			allowed: 0,
 			seed: _u.randomSeed(),
-			nextSubcaucusID: nextSubcaucusID,
+			currentSubcaucusID: currentSubcaucusID,
 			subcaucuses: subcaucuses
 		}
 	}
@@ -225,7 +225,7 @@ export class SubCalcStorage {
 	 * NOTE: This object is _not_ stringified yet.
 	 */
 	meetingSnapshotToJSON = (snapshot: MeetingSnapshot): Object => {
-		return { ...snapshot, created: undefined, nextSubcaucusID: undefined }
+		return { ...snapshot, created: undefined, currentSubcaucusID: undefined }
 	}
 
 	importSubCalc1Data = () => {
@@ -335,17 +335,20 @@ export class SubCalcStorage {
 			return undefined
 		}
 
-		let nextSubcaucusID = 0
+		let currentSubcaucusID = 0
 		let subcaucuses = new TSMap<number, Subcaucus>()
 
 		Object.keys(jsonSubcaucuses).forEach((key: any) => {
 			key = Number(key)
 			const subcaucus = this.jsonToSubcaucus(key, jsonSubcaucuses[key])
 			if (subcaucus) {
-				nextSubcaucusID = Math.max(nextSubcaucusID, key)
+				currentSubcaucusID = Math.max(currentSubcaucusID, key)
 				subcaucuses.set(key, subcaucus)
 			}
 		})
+
+		currentSubcaucusID++ // represents the next ID we should hand out
+		_u.debug("currentSubcaucusID", currentSubcaucusID)
 
 		return {
 			created: created,
@@ -354,7 +357,7 @@ export class SubCalcStorage {
 			name: name,
 			allowed: allowed,
 			seed: seed,
-			nextSubcaucusID: nextSubcaucusID,
+			currentSubcaucusID: currentSubcaucusID,
 			subcaucuses: subcaucuses
 		}
 	}
