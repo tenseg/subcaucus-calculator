@@ -50,6 +50,7 @@ interface State {
     snapshot: string
     name: string
     allowed: number
+    seed: number
     // card status
     cards: Array<CardFor>
     // sorting info
@@ -74,53 +75,121 @@ export class App extends React.Component<Props, State> {
         super(props)
 
         this.storage = new SubCalcStorage()
-        this.subcaucuses = new TSMap<number, Subcaucus>()
 
-        const timestamp = (new Date()).toTimestampString()
-        this.state = {
-            created: timestamp,
-            revised: timestamp,
-            snapshot: '',
-            name: '',
-            allowed: 0,
-            // card status
-            cards: this.initialCardState,
-            // sorting info
-            sortName: SortOrder.None,
-            sortCount: SortOrder.None,
-        }
-        if (_u.isDebugging()) {
-            this.addSubcaucus(false, "C", 10, 0)
-            this.addSubcaucus(false, "A", 0, 0)
-            this.addSubcaucus(false, "B", 100, 5)
-            this.addSubcaucus(false, "D", 1, 0)
-            this.addSubcaucus(false)
+        const meeting = this.storage.getMeetingFromLocalStorage()
+
+        if (meeting) {
+            this.subcaucuses = meeting.current.subcaucuses
+            this._currentSubcaucusID = meeting.current.currentSubcaucusID
+
+            this.state = this.stateFromSnapshot(meeting.current)
+        } else {
+            _u.alertUser(new Error("Could not read or write local storage"))
+
+            this.subcaucuses = new TSMap<number, Subcaucus>()
+
+            const timestamp = (new Date()).toTimestampString()
             this.state = {
                 created: timestamp,
                 revised: timestamp,
-                snapshot: 'Revised',
-                name: 'Debugging',
-                allowed: 10,
+                snapshot: '',
+                name: 'Could not read local storage!',
+                allowed: 0,
+                seed: 1,
                 // card status
                 cards: [],
                 // sorting info
                 sortName: SortOrder.None,
                 sortCount: SortOrder.None,
-                // summary info
-                summary: {
-                    count: 1234,
-                    delegates: 256,
-                    viability: 2.124132,
-                    revisedViability: 1.92123,
-                    minimumCountForViability: 3,
-                    nonViableCount: 3,
-                }
             }
-        } else {
-            this.addSubcaucus(false)
-            this.addSubcaucus(false)
-            this.addSubcaucus(false)
         }
+    }
+
+    stateFromSnapshot = (snapshot: MeetingSnapshot): State => {
+        const allowed = snapshot.allowed
+        return {
+            created: snapshot.created,
+            revised: snapshot.revised,
+            snapshot: snapshot.revision,
+            name: snapshot.name,
+            allowed: allowed,
+            seed: snapshot.seed,
+            // card status
+            cards: allowed ? [] : this.initialCardState,
+            // sorting info
+            sortName: SortOrder.None,
+            sortCount: SortOrder.None,
+        }
+    }
+
+    snapshotFromState = (): MeetingSnapshot => {
+        return {
+            created: this.state.created,
+            revised: this.state.revised,
+            revision: this.state.snapshot,
+            name: this.state.name,
+            allowed: this.state.allowed,
+            seed: this.state.seed,
+            currentSubcaucusID: this._currentSubcaucusID,
+            subcaucuses: this.subcaucuses,
+        }
+    }
+
+    // notconstructor(props: Props) {
+    //     super(props)
+
+    //     this.storage = new SubCalcStorage()
+    //     this.subcaucuses = new TSMap<number, Subcaucus>()
+
+    //     const timestamp = (new Date()).toTimestampString()
+    //     this.state = {
+    //         created: timestamp,
+    //         revised: timestamp,
+    //         snapshot: '',
+    //         name: '',
+    //         allowed: 0,
+    //         // card status
+    //         cards: this.initialCardState,
+    //         // sorting info
+    //         sortName: SortOrder.None,
+    //         sortCount: SortOrder.None,
+    //     }
+    //     if (_u.isDebugging()) {
+    //         this.addSubcaucus(false, "C", 10, 0)
+    //         this.addSubcaucus(false, "A", 0, 0)
+    //         this.addSubcaucus(false, "B", 100, 5)
+    //         this.addSubcaucus(false, "D", 1, 0)
+    //         this.addSubcaucus(false)
+    //         this.state = {
+    //             created: timestamp,
+    //             revised: timestamp,
+    //             snapshot: 'Revised',
+    //             name: 'Debugging',
+    //             allowed: 10,
+    //             // card status
+    //             cards: [],
+    //             // sorting info
+    //             sortName: SortOrder.None,
+    //             sortCount: SortOrder.None,
+    //             // summary info
+    //             summary: {
+    //                 count: 1234,
+    //                 delegates: 256,
+    //                 viability: 2.124132,
+    //                 revisedViability: 1.92123,
+    //                 minimumCountForViability: 3,
+    //                 nonViableCount: 3,
+    //             }
+    //         }
+    //     } else {
+    //         this.addSubcaucus(false)
+    //         this.addSubcaucus(false)
+    //         this.addSubcaucus(false)
+    //     }
+    // }
+
+    componentDidUpdate = (previousProps: Props) => {
+        this.storage.writeMeetingSnapshot(this.snapshotFromState())
     }
 
     private _currentSubcaucusID = 1

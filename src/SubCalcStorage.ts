@@ -156,8 +156,6 @@ export class SubCalcStorage {
 
 	/**
 	 * Writes the a meeting snapshot to local storage.
-	 * 
-	 * @param snapshot 
 	 */
 	writeMeetingSnapshot(snapshot: MeetingSnapshot) {
 		const meetingKey = this.meetingKey(snapshot.created)
@@ -232,6 +230,9 @@ export class SubCalcStorage {
 
 	}
 
+	/**
+	 * Try to populate this instance with subcalc2 data from local storage.
+	 */
 	importSubCalc2Data = () => {
 		const subcalc = JSON.parse(localStorage.getItem("subcalc2") || 'false')
 
@@ -262,8 +263,14 @@ export class SubCalcStorage {
 		}
 	}
 
-	getMeetingFromLocalStorage = (key: string): Meeting | undefined => {
+	/**
+	 * Given a meeting key, this functions looks for that meeting in
+	 * local storage and creates a meeting object to hold the information.
+	 */
+	getMeetingFromLocalStorage = (key?: string): Meeting | undefined => {
 		let jsonMeeting: Object
+
+		key = key || `${this.meetingPrefix} ${this.currentMeetingKey}`
 
 		try {
 			jsonMeeting = JSON.parse(localStorage.getItem(key) || 'false')
@@ -315,6 +322,10 @@ export class SubCalcStorage {
 		}
 	}
 
+	/**
+	 * Given the JSON object version of snapshot data and the meeting's
+	 * created timestamp, this function populates a meeting snapshot object.
+	 */
 	jsonToMeetingSnapshot = (jsonSnapshot: any, created: TimestampString): MeetingSnapshot | undefined => {
 
 		const revised = String(jsonSnapshot['revised'] || '')
@@ -340,7 +351,7 @@ export class SubCalcStorage {
 
 		Object.keys(jsonSubcaucuses).forEach((key: any) => {
 			key = Number(key)
-			const subcaucus = this.jsonToSubcaucus(key, jsonSubcaucuses[key])
+			const subcaucus = this.jsonToSubcaucus(jsonSubcaucuses[key], key)
 			if (subcaucus) {
 				currentSubcaucusID = Math.max(currentSubcaucusID, key)
 				subcaucuses.set(key, subcaucus)
@@ -362,7 +373,11 @@ export class SubCalcStorage {
 		}
 	}
 
-	jsonToSubcaucus = (key: number, jsonSubcaucus: any): Subcaucus | undefined => {
+	/**
+	 * Given the JSON object version of a subcacucus and its key, this function
+	 * creates the subcaucus object version.
+	 */
+	jsonToSubcaucus = (jsonSubcaucus: any, key: number): Subcaucus | undefined => {
 
 		if (typeof jsonSubcaucus != "object") {
 			_u.debug(new Error(`Non-object subcaucus ${key}`), jsonSubcaucus)
