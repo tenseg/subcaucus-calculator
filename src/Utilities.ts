@@ -14,6 +14,7 @@
 declare global {
 
 	type TimestampString = string
+	type ComparisonValue = -1 | 0 | 1
 
 	interface String {
 		trim(): string
@@ -24,7 +25,7 @@ declare global {
 	interface Number {
 		toCommaString(): string
 		singularPlural(singular: string, plural: string): string
-		comparisonValue(): -1 | 0 | 1
+		comparisonValue(): ComparisonValue
 	}
 
 	interface Array<T> {
@@ -40,7 +41,6 @@ declare global {
 		toTimestampString(): TimestampString
 	}
 
-	var isInApp: boolean
 }
 
 // see http://blog.stevenlevithan.com/archives/faster-trim-javascript
@@ -80,7 +80,7 @@ Number.prototype.singularPlural = function (singular: string, plural: string): s
 	return `${this} ${this == 1 ? singular : plural}`
 }
 
-Number.prototype.comparisonValue = function (): -1 | 0 | 1 {
+Number.prototype.comparisonValue = function (): ComparisonValue {
 	if (this < 0) return -1
 	if (this > 0) return 1
 	return 0

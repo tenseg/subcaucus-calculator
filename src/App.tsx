@@ -47,7 +47,6 @@ interface SummaryInfo {
 interface Props { }
 interface State {
     created: TimestampString
-    revised: TimestampString
     snapshot: string
     name: string
     allowed: number
@@ -65,8 +64,11 @@ var alertFunction: ((message: string) => void)
 
 export class App extends React.Component<Props, State> {
 
-    storage: SubCalcStorage
-    subcaucuses: TSMap<number, Subcaucus>
+    private storage: SubCalcStorage
+    private subcaucuses: TSMap<number, Subcaucus>
+    private subcaucusesChanged = false
+    private revised: TimestampString
+    private currentSubcaucusID = 1
 
     initialCardState: Array<CardFor> = [
         CardFor.WelcomeAndSetName,
@@ -94,9 +96,9 @@ export class App extends React.Component<Props, State> {
             this.addSubcaucus(false, "B", 100, 5)
             this.addSubcaucus(false, "D", 1, 0)
             this.addSubcaucus(false)
+            this.revised = timestamp
             this.state = {
                 created: timestamp,
-                revised: timestamp,
                 snapshot: 'Revised',
                 name: 'Debugging', allowed: 10, cards: [],
                 // name: '', allowed: 0, cards: this.initialCardState,
@@ -116,17 +118,18 @@ export class App extends React.Component<Props, State> {
             }
         } else if (meeting) {
             this.subcaucuses = meeting.current.subcaucuses
-            this._currentSubcaucusID = meeting.current.currentSubcaucusID
+            this.revised = meeting.current.revised
+            this.currentSubcaucusID = meeting.current.currentSubcaucusID
             this.state = this.stateFromSnapshot(meeting.current)
         } else {
             _u.alertUser(new Error("Could not read or write local storage"))
 
             this.subcaucuses = new TSMap<number, Subcaucus>()
             const timestamp = (new Date()).toTimestampString()
+            this.revised = timestamp
 
             this.state = {
                 created: timestamp,
-                revised: timestamp,
                 snapshot: '',
                 name: 'Could not read local storage!',
                 allowed: 0,
@@ -150,7 +153,6 @@ export class App extends React.Component<Props, State> {
         const allowed = snapshot.allowed
         return {
             created: snapshot.created,
-            revised: snapshot.revised,
             snapshot: snapshot.revision,
             name: snapshot.name,
             allowed: allowed,
@@ -166,22 +168,30 @@ export class App extends React.Component<Props, State> {
     snapshotFromState = (): MeetingSnapshot => {
         return {
             created: this.state.created,
-            revised: this.state.revised,
+            revised: this.revised,
             revision: this.state.snapshot,
             name: this.state.name,
             allowed: this.state.allowed,
             seed: this.state.seed,
-            currentSubcaucusID: this._currentSubcaucusID,
+            currentSubcaucusID: this.currentSubcaucusID,
             subcaucuses: this.subcaucuses,
         }
     }
 
-    componentDidUpdate = (previousProps: Props) => {
-        this.storage.writeMeetingSnapshot(this.snapshotFromState())
+    componentDidUpdate = (previousProps: Props, previousState: State) => {
+
+        if (this.subcaucusesChanged
+            || this.state.name != previousState.name
+            || this.state.allowed != previousState.allowed
+            || this.state.seed != previousState.seed
+        ) {
+            this.revised = (new Date()).toTimestampString()
+            this.subcaucusesChanged = false
+            this.storage.writeMeetingSnapshot(this.snapshotFromState())
+        }
     }
 
-    private _currentSubcaucusID = 1
-    nextSubcaucusID = () => this._currentSubcaucusID++
+    nextSubcaucusID = () => this.currentSubcaucusID++
 
     addSubcaucus = (forceUpdate = true, name = '', count = 0, delegates = 0) => {
         const newSubcaucus = new Subcaucus(this.nextSubcaucusID(), {
@@ -190,6 +200,7 @@ export class App extends React.Component<Props, State> {
             delegates: delegates
         })
         this.subcaucuses.set(newSubcaucus.id, newSubcaucus)
+        this.subcaucusesChanged = true
         if (forceUpdate) this.forceUpdate()
     }
 
@@ -260,6 +271,7 @@ export class App extends React.Component<Props, State> {
                 this.subcaucuses.filter((subcaucus, key) => {
                     return key != subcaucusID
                 })
+                this.subcaucusesChanged = true
                 this.forceUpdate()
                 return
             case 'enter':
@@ -269,9 +281,13 @@ export class App extends React.Component<Props, State> {
             default:
                 // this.subcaucuses[id] = changedSubcaucus
                 const subcaucus = this.subcaucuses.get(subcaucusID)
-                subcaucus.name = action.name
-                subcaucus.count = action.count
-                this.forceUpdate()
+                if (subcaucus.name != action.name || subcaucus.count != action.count) {
+                    subcaucus.name = action.name
+                    subcaucus.count = action.count
+                    this.subcaucusesChanged = true
+                    this.revised = (new Date()).toTimestampString()
+                    this.forceUpdate()
+                }
                 return
         }
     }
@@ -749,7 +765,7 @@ export class App extends React.Component<Props, State> {
         const summary = this.renderSummary()
         const card = this.renderNextCard()
 
-        const { name, revised, snapshot, created, sortName, sortCount } = this.state
+        const { name, snapshot, created, sortName, sortCount } = this.state
 
         return (
             <div id="app">
@@ -761,7 +777,7 @@ export class App extends React.Component<Props, State> {
                             onClick={() => this.addCardState(CardFor.ChangingName)}
                         >
                             {name ? name : this.defaultName()}
-                            {revised === created && snapshot != ''
+                            {this.revised === created && snapshot != ''
                                 ? <span className="snapshot">
                                     {snapshot}
                                 </span>
@@ -778,7 +794,7 @@ export class App extends React.Component<Props, State> {
                                 label="Subcaucus"
                                 icon={this.sortOrderIcon(sortName)}
                                 onClick={() => this.setState({
-                                    sortName: this.nextSortOrder(sortName),
+                                    sortName: this.state.sortName ? SortOrder.None : SortOrder.Ascending,
                                     sortCount: SortOrder.None
                                 })}
                             />
