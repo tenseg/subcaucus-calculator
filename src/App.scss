@@ -263,7 +263,6 @@ body {
                     margin-right: 0;
                     border: none;
                     border-radius: 0;
-                    color: $body-color;
                     text-align: center;
                     font-size: 20px;
                     font-weight: 700;
@@ -282,7 +281,16 @@ body {
                 }
                 
                 &.no-delegates {
-                    background-color: lighten($body-color, 63%);
+                    background-color: lighten($body-color, 60%);
+
+                    .subcaucus-delegates-button {
+                        background-color: lighten($body-color, 50%);
+                        color: $body-color;
+                        
+                        &:hover {
+                            background-color: lighten($body-color, 55%);
+                        }
+                    }
                 }
             }
             

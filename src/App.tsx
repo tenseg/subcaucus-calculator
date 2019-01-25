@@ -79,6 +79,8 @@ export class App extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props)
 
+        _u.setAlertFunction(this.growlAlert)
+
         this.storage = new SubCalcStorage()
 
         const meeting = this.storage.getMeetingFromLocalStorage()
@@ -96,8 +98,8 @@ export class App extends React.Component<Props, State> {
                 created: timestamp,
                 revised: timestamp,
                 snapshot: 'Revised',
-                // name: 'Debugging', allowed: 10, cards: [],
-                name: '', allowed: 0, cards: this.initialCardState,
+                name: 'Debugging', allowed: 10, cards: [],
+                // name: '', allowed: 0, cards: this.initialCardState,
                 seed: 42,
                 // sorting info
                 sortName: SortOrder.None,
@@ -173,59 +175,6 @@ export class App extends React.Component<Props, State> {
             subcaucuses: this.subcaucuses,
         }
     }
-
-    // notconstructor(props: Props) {
-    //     super(props)
-
-    //     this.storage = new SubCalcStorage()
-    //     this.subcaucuses = new TSMap<number, Subcaucus>()
-
-    //     const timestamp = (new Date()).toTimestampString()
-    //     this.state = {
-    //         created: timestamp,
-    //         revised: timestamp,
-    //         snapshot: '',
-    //         name: '',
-    //         allowed: 0,
-    //         // card status
-    //         cards: this.initialCardState,
-    //         // sorting info
-    //         sortName: SortOrder.None,
-    //         sortCount: SortOrder.None,
-    //     }
-    //     if (_u.isDebugging()) {
-    //         this.addSubcaucus(false, "C", 10, 0)
-    //         this.addSubcaucus(false, "A", 0, 0)
-    //         this.addSubcaucus(false, "B", 100, 5)
-    //         this.addSubcaucus(false, "D", 1, 0)
-    //         this.addSubcaucus(false)
-    //         this.state = {
-    //             created: timestamp,
-    //             revised: timestamp,
-    //             snapshot: 'Revised',
-    //             name: 'Debugging',
-    //             allowed: 10,
-    //             // card status
-    //             cards: [],
-    //             // sorting info
-    //             sortName: SortOrder.None,
-    //             sortCount: SortOrder.None,
-    //             // summary info
-    //             summary: {
-    //                 count: 1234,
-    //                 delegates: 256,
-    //                 viability: 2.124132,
-    //                 revisedViability: 1.92123,
-    //                 minimumCountForViability: 3,
-    //                 nonViableCount: 3,
-    //             }
-    //         }
-    //     } else {
-    //         this.addSubcaucus(false)
-    //         this.addSubcaucus(false)
-    //         this.addSubcaucus(false)
-    //     }
-    // }
 
     componentDidUpdate = (previousProps: Props) => {
         this.storage.writeMeetingSnapshot(this.snapshotFromState())
@@ -770,9 +719,14 @@ export class App extends React.Component<Props, State> {
         )
     }
 
-    growlAlert = (message: string) => {
+    growlAlert = (message: string, severity: 'error' | 'warn' | 'success' | 'info' = 'error', summary = '') => {
         if (this.growl) {
-            this.growl.show({ severity: 'error', summary: 'Error Message', detail: message });
+            this.growl.show({
+                severity: severity,
+                summary: summary,
+                closable: false,
+                detail: message
+            });
         } else {
             alert(message)
         }
@@ -783,7 +737,6 @@ export class App extends React.Component<Props, State> {
         _u.debug("rendering", this.subcaucuses)
 
         console.log(alertFunction)
-        _u.setAlertFunction(this.growlAlert)
 
         const menu = this.renderMenu()
         const subcaucusRows = this.renderSubcaucusRows()
