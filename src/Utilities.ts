@@ -13,6 +13,8 @@
 
 declare global {
 
+	type TimestampString = string
+
 	interface String {
 		trim(): string
 		hashCode(): number
@@ -26,6 +28,15 @@ declare global {
 
 	interface Array<T> {
 		pushUnique(something: T): Array<T>
+		max(): number
+	}
+
+	/**
+	 * Converts a date to our typical timestamp string,
+	 * which is really just JSON format with a type to be clearer.
+	 */
+	interface Date {
+		toTimestampString(): TimestampString
 	}
 
 	var isInApp: boolean
@@ -77,6 +88,20 @@ Array.prototype.pushUnique = function (something) {
 	return this
 }
 
+Array.prototype.max = function (): number {
+	return this.reduce((accumulator, current) => {
+		return Math.max(accumulator, current)
+	})
+}
+
+/**
+ * Converts a date to our typical timestamp string,
+ * which is really just JSON format with a type to be clearer.
+ */
+Date.prototype.toTimestampString = function (): TimestampString {
+	return this.toJSON()
+}
+
 // _u functions
 
 /**
@@ -90,6 +115,11 @@ export function debug(message?: any, ...optionalParams: any[]) {
 	if (isDebugging()) {
 		console.log(message, ...optionalParams)
 	}
+}
+
+export function alertUser(error: Error, ...optionalParams: any[]) {
+	alert(error.message)
+	debug(error, ...optionalParams)
 }
 
 export function isDebugging(): boolean {

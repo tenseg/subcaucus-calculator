@@ -45,8 +45,8 @@ interface SummaryInfo {
 
 interface Props { }
 interface State {
-    created: string
-    revised: string
+    created: TimestampString
+    revised: TimestampString
     snapshot: string
     name: string
     allowed: number
@@ -76,7 +76,7 @@ export class App extends React.Component<Props, State> {
         this.storage = new SubCalcStorage()
         this.subcaucuses = new TSMap<number, Subcaucus>()
 
-        const timestamp = (new Date()).toJSON()
+        const timestamp = (new Date()).toTimestampString()
         this.state = {
             created: timestamp,
             revised: timestamp,
@@ -127,7 +127,11 @@ export class App extends React.Component<Props, State> {
     nextSubcaucusID = () => this._currentSubcaucusID++
 
     addSubcaucus = (forceUpdate = true, name = '', count = 0, delegates = 0) => {
-        const newSubcaucus = new Subcaucus(this.nextSubcaucusID(), name, count, delegates)
+        const newSubcaucus = new Subcaucus(this.nextSubcaucusID(), {
+            name: name,
+            count: count,
+            delegates: delegates
+        })
         this.subcaucuses.set(newSubcaucus.id, newSubcaucus)
         if (forceUpdate) this.forceUpdate()
     }

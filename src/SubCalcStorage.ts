@@ -17,18 +17,21 @@ declare global {
 	 * A snapshot of an meeting in time.
 	 */
 	interface MeetingSnapshot {
-		created: string
-		revised: string
-		snapName: string
+		created: TimestampString
+		revised: TimestampString
+		revision: string
 		name: string
 		allowed: number
 		seed: number
-		subcacucuses: Array<Subcaucus>
+		nextSubcaucusID: number
+		subcacucuses: TSMap<number, Subcaucus>
 	}
 
 	interface Meeting {
-		created: string
-		current: MeetingSnapshot,
+		key: string
+		created: TimestampString
+		author: number
+		current: MeetingSnapshot
 		snapshots: TSMap<string, MeetingSnapshot>
 	}
 
@@ -52,9 +55,26 @@ export class SubCalcStorage {
 	 * author and meeting creation date won't collide.
 	 */
 	author = 0
+
+	/**
+	 * Used to find the current meeting.
+	 */
 	currentMeetingKey = ''
+
+	/**
+	 * A map of meeting keys to meeting records.
+	 */
 	meetings = new TSMap<string, Meeting>()
 
+	/**
+	 * A prefix to be used when creating local storage items
+	 * for each meeting.
+	 */
+	meetingPrefix = "sc-meeting"
+
+	/**
+	 * Create an instance of a storage object to manage local storage.
+	 */
 	constructor() {
 
 		// then we look for local data
@@ -70,7 +90,7 @@ export class SubCalcStorage {
 				// no prefix means that subcalc has never run in this browser
 				// so we gather together some basics about this instance
 
-				const created = (new Date()).toJSON()
+				const created = (new Date()).toTimestampString()
 				this.author = _u.randomSeed()
 				this.currentMeetingKey = this.meetingKey(created)
 
@@ -78,15 +98,17 @@ export class SubCalcStorage {
 				// current meeting, so we have to create that and write
 				// it out as well
 
-				const currentSnapshot = this.newMeetingSnapshot(created)
+				const currentSnapshot = this.emptyMeetingSnapshot(created)
 
 				this.meetings.set(this.currentMeetingKey, {
+					key: this.currentMeetingKey,
+					author: this.author,
 					created: created,
 					current: currentSnapshot,
 					snapshots: new TSMap<string, MeetingSnapshot>()
 				})
 
-				this.storeMeetingSnapshot(currentSnapshot)
+				this.writeMeetingSnapshot(currentSnapshot)
 			}
 		}
 
@@ -96,102 +118,114 @@ export class SubCalcStorage {
 
 	}
 
-	meetingKey = (created: string): string => {
-		return `${this.author}-${created}`
+	/**
+	 * Returns a string to be used as a key for looking up a meeting.
+	 */
+	meetingKey = (created: TimestampString, author?: number): string => {
+		// we include the author number in the key in case meetings are shared
+		author = author || this.author
+		return `${created} ${author}`
 	}
 
-	newMeetingSnapshot = (created?: string): MeetingSnapshot => {
+	/**
+	 * Create a new and empty snapshot of a meeting.
+	 */
+	emptyMeetingSnapshot = (created?: TimestampString): MeetingSnapshot => {
 		if (created === undefined) {
-			created = (new Date()).toJSON()
+			created = (new Date()).toTimestampString()
 		}
+
+		// create a subcaucus ID and three subcaucuses
+		let nextSubcaucusID = 1
+		let subcaucuses = new TSMap<number, Subcaucus>()
+		subcaucuses.set(nextSubcaucusID, new Subcaucus(nextSubcaucusID++))
+		subcaucuses.set(nextSubcaucusID, new Subcaucus(nextSubcaucusID++))
+		subcaucuses.set(nextSubcaucusID, new Subcaucus(nextSubcaucusID++))
+
 		return {
 			created: created,
 			revised: '',
-			snapName: '',
+			revision: '',
 			name: '',
 			allowed: 0,
 			seed: _u.randomSeed(),
-			subcacucuses: []
+			nextSubcaucusID: nextSubcaucusID,
+			subcacucuses: subcaucuses
 		}
 	}
 
-	storeMeetingSnapshot(snapshot: MeetingSnapshot) {
+	/**
+	 * Writes the a meeting snapshot to local storage.
+	 * 
+	 * @param snapshot 
+	 */
+	writeMeetingSnapshot(snapshot: MeetingSnapshot) {
 		const meetingKey = this.meetingKey(snapshot.created)
-		const isCurrent = (snapshot.snapName == '')
-
-		// add the snapshot to our instance data
-
-		if (isCurrent) {
-			this.meetings.get(meetingKey).current = snapshot
-		} else {
-			this.meetings.get(meetingKey).snapshots[snapshot.revised] = snapshot
-		}
-
-		// synchronize our instance data with local storage
-
-		this.writeLocalStorage(meetingKey)
-	}
-
-	writeLocalStorage = (meetingKey: string) => {
-
+		const isCurrent = (snapshot.revision == '')
 		const meeting = this.meetings.get(meetingKey)
 
-		if (meeting === undefined) {
+		if (meeting) {
+			// add the snapshot to our instance data
+			if (isCurrent) {
+				this.meetings.get(meetingKey).current = snapshot
+			} else {
+				this.meetings.get(meetingKey).snapshots[snapshot.revised] = snapshot
+			}
 
+			// synchronize our instance data with local storage
+			this.writeMeeting(meeting)
+		} else {
+			_u.alertUser(new Error(`Meeting not found for ${meetingKey}`))
 		}
+	}
 
+	/**
+	 * Writes a meeting to local storage.
+	 */
+	writeMeeting = (meeting: Meeting) => {
 		const jsonSubCalc = {
 			v: this.version,
 			author: this.author,
-			current: meetingKey,
-			meetings: this.meetings.keys
+			current: meeting.key
 		}
 
 		try {
 			const jsonSubCalcString = JSON.stringify(jsonSubCalc)
-			console.log("storing subcalc2", jsonSubCalcString)
+			_u.debug("storing subcalc2", jsonSubCalcString)
 			localStorage.setItem("subcalc2", jsonSubCalcString)
 		} catch (e) {
-			alert(`Error saving subcalc2 to local storage: ${e.message}`)
-			console.log(e)
+			_u.alertUser(new Error("Failed to save subcalc2 to local storage"), e)
 			return
 		}
 
 		const jsonMeeting = {
 			v: this.version,
-			author: this.author,
 			created: meeting.created,
-			current: this.jsonForMeetingSnapshot(meeting.current),
+			author: meeting.author,
+			current: this.meetingSnapshotToJSON(meeting.current),
 			snapshots: meeting.snapshots.map((snapshot) => {
-				return this.jsonForMeetingSnapshot(snapshot)
+				return this.meetingSnapshotToJSON(snapshot)
 			})
 		}
 
+		const localStorageKey = `${this.meetingPrefix} ${meeting.key}`
 		try {
 			const jsonMeetingString = JSON.stringify(jsonMeeting)
-			console.log(`storing sc-${meetingKey}`, jsonMeetingString)
-			localStorage.setItem(`sc-${meetingKey}`, jsonMeetingString)
+			_u.debug(`storing ${localStorageKey}`, jsonMeetingString)
+			localStorage.setItem(`${localStorageKey}`, jsonMeetingString)
 		} catch (e) {
-			alert(`Error saving sc-${meetingKey} to local storage: ${e.message}`)
-			console.log(e)
+			_u.alertUser(new Error(`Error saving ${localStorageKey} to local storage`), e)
 			return
 		}
 	}
 
-	jsonForMeetingSnapshot = (snapshot: MeetingSnapshot): Object => {
-		let o: Object = { ...snapshot }
-		let jsonSubcaucuses = {}
-
-		snapshot.subcacucuses.forEach((subcaucus) => {
-			jsonSubcaucuses[subcaucus.id] = {
-				name: subcaucus.name,
-				count: subcaucus.count
-			}
-		})
-
-		o["Subcaucuses"] = jsonSubcaucuses
-
-		return o
+	/**
+	 * Create a JSON object from a meeting snapshot.
+	 * 
+	 * NOTE: This object is _not_ stringified yet.
+	 */
+	meetingSnapshotToJSON = (snapshot: MeetingSnapshot): Object => {
+		return { ...snapshot, created: undefined, nextSubcaucusID: undefined }
 	}
 
 	importSubCalc1Data = () => {
@@ -199,7 +233,143 @@ export class SubCalcStorage {
 	}
 
 	importSubCalc2Data = () => {
+		const subcalc = JSON.parse(localStorage.getItem("subcalc2") || 'false')
 
+		if (!subcalc) return // we just don't have any subcalc2 data yet
+
+		this.author = Number(subcalc["author"]) || 0
+
+		if (!this.author) {
+			_u.debug(new Error("No author in subcalc2"), subcalc)
+			return // the subcalc2 data we have is malformed and will be overwritten
+		}
+
+		this.currentMeetingKey = String(subcalc["current"]) || ''
+
+		const length = localStorage.length
+
+		this.meetings = new TSMap<string, Meeting>()
+
+		for (let i = 0; i < length; i++) {
+			const key = localStorage.key(i)
+			if (!key) break
+			if (key.startsWith(this.meetingPrefix)) {
+				const meeting = this.getMeetingFromLocalStorage(key)
+				if (meeting) {
+					this.meetings.set(meeting.key, meeting)
+				}
+			}
+		}
+	}
+
+	getMeetingFromLocalStorage = (key: string): Meeting | undefined => {
+		let jsonMeeting: Object
+
+		try {
+			jsonMeeting = JSON.parse(localStorage.getItem(key) || 'false')
+		} catch (e) {
+			_u.debug(e)
+			return undefined
+		}
+
+		if (!jsonMeeting) {
+			_u.debug(new Error(`Could not retreive ${key}`))
+			return undefined
+		}
+
+		const author = Number(jsonMeeting["author"])
+		const created = String(jsonMeeting["created"])
+
+		if (!author || !created) {
+			_u.debug(new Error(`Missing author or created in ${key}`), jsonMeeting)
+			return undefined
+		}
+
+		const currentMeeting = this.jsonToMeetingSnapshot(jsonMeeting["current"], created)
+
+		if (!currentMeeting) {
+			_u.debug(new Error(`Could not find current snapshot in ${key}`), jsonMeeting)
+			return undefined
+		}
+
+		if (!Array.isArray(jsonMeeting["snapshots"])) {
+			_u.debug(new Error(`No "snapshots" array in ${key}`), jsonMeeting)
+			return undefined
+		}
+
+		let snapshots = new TSMap<string, MeetingSnapshot>()
+
+		jsonMeeting["snapshots"].forEach((jsonSnapshot: any) => {
+			const snapshot = this.jsonToMeetingSnapshot(jsonSnapshot, created)
+			if (snapshot) {
+				snapshots.set(snapshot.revised, snapshot)
+			}
+		})
+
+		return {
+			key: this.meetingKey(created, author),
+			author: author,
+			created: created,
+			current: currentMeeting,
+			snapshots: snapshots
+		}
+	}
+
+	jsonToMeetingSnapshot = (jsonSnapshot: any, created: TimestampString): MeetingSnapshot | undefined => {
+
+		const revised = String(jsonSnapshot['revised'] || '')
+		const revision = String(jsonSnapshot['revision'] || '')
+		const name = String(jsonSnapshot['name'] || '')
+		const allowed = Number(jsonSnapshot['allowed'] || 0)
+		const seed = Number(jsonSnapshot['seed'])
+
+		if (!seed) {
+			_u.debug(new Error("Seed missing in snapshot"), jsonSnapshot)
+			return undefined
+		}
+
+		const jsonSubcaucuses = jsonSnapshot['subcaucuses']
+
+		if (typeof jsonSubcaucuses != "object") {
+			_u.debug(new Error("Non-object subcaucuses"), jsonSnapshot)
+			return undefined
+		}
+
+		let nextSubcaucusID = 0
+		let subcacucuses = new TSMap<number, Subcaucus>()
+
+		Object.keys(jsonSubcaucuses).forEach((key: any) => {
+			key = Number(key)
+			const subcaucus = this.jsonToSubcaucus(key, jsonSubcaucuses[key])
+			if (subcaucus) {
+				nextSubcaucusID = Math.max(nextSubcaucusID, key)
+				subcacucuses.set(key, subcaucus)
+			}
+		})
+
+		return {
+			created: created,
+			revised: revised,
+			revision: revision,
+			name: name,
+			allowed: allowed,
+			seed: seed,
+			nextSubcaucusID: nextSubcaucusID,
+			subcacucuses: subcacucuses
+		}
+	}
+
+	jsonToSubcaucus = (key: number, jsonSubcaucus: any): Subcaucus | undefined => {
+
+		if (typeof jsonSubcaucus != "object") {
+			_u.debug(new Error(`Non-object subcaucus ${key}`), jsonSubcaucus)
+			return undefined
+		}
+
+		return new Subcaucus(key, {
+			name: jsonSubcaucus["name"],
+			count: jsonSubcaucus["count"]
+		})
 	}
 
 	/**
@@ -214,9 +384,7 @@ export class SubCalcStorage {
 
 		if (meetingKey === '') {
 			if (!currentMeetingKey) {
-				const message = "No current meeting data"
-				alert(message)
-				console.log(new Error(message))
+				_u.alertUser(new Error("No current meeting data"))
 				return undefined
 			}
 			meetingKey = currentMeetingKey
@@ -225,9 +393,7 @@ export class SubCalcStorage {
 		const meeting = meetings[meetingKey]
 
 		if (meeting === undefined) {
-			const message = `No data for meeting ${meetingKey}`
-			alert(message)
-			console.log(new Error(message))
+			_u.alertUser(new Error(`No data for meeting ${meetingKey}`))
 			return undefined
 		}
 
@@ -239,9 +405,7 @@ export class SubCalcStorage {
 		const snapshot = meeting.snapshots[timestamp]
 
 		if (snapshot === undefined) {
-			const message = `No data for meeting ${currentMeetingKey} snapshot ${timestamp}`
-			alert(message)
-			console.log(new Error(message))
+			_u.alertUser(new Error(`No data for meeting ${currentMeetingKey} snapshot ${timestamp}`))
 			return undefined
 		}
 
