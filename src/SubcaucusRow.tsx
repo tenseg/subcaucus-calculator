@@ -99,6 +99,7 @@ export class SubcaucusRow extends React.Component<Props, State> {
 				{_u.isDebugging ? <div className="subcaucus-id">{this.props.id}</div> : ''}
 				<InputTextarea id={this.idPlus("row-name")}
 					className="subcaucus-field subcaucus-name"
+					autoComplete="off"
 					type="text"
 					value={name}
 					rows={1}
@@ -113,6 +114,7 @@ export class SubcaucusRow extends React.Component<Props, State> {
 				/>
 				<InputText id={this.idPlus("row-count")}
 					className="subcaucus-field subcaucus-count"
+					autoComplete="off"
 					keyfilter="pint"
 					type="text"
 					pattern="\d*"

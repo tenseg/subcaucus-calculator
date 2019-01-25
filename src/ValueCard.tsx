@@ -189,6 +189,7 @@ export class ValueCard extends React.Component<Props, State> {
                     {this.props.value != undefined
                         ? <InputText id={this.idPlus("card-field")}
                             className={isPositiveInteger ? "number" : "text"}
+                            autoComplete="off"
                             keyfilter={isPositiveInteger ? "pint" : ""}
                             type="text"
                             pattern={isPositiveInteger ? "\\d*" : undefined}

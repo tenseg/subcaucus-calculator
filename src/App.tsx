@@ -60,13 +60,12 @@ interface State {
     summary?: SummaryInfo
 }
 
-var alertFunction: ((message: string) => void)
-
 export class App extends React.Component<Props, State> {
 
     private storage: SubCalcStorage
     private subcaucuses: TSMap<number, Subcaucus>
     private subcaucusesChanged = false
+    private snapshotRevised: TimestampString
     private revised: TimestampString
     private currentSubcaucusID = 1
 
@@ -91,11 +90,12 @@ export class App extends React.Component<Props, State> {
             this.subcaucuses = new TSMap<number, Subcaucus>()
             const timestamp = (new Date()).toTimestampString()
 
-            this.addSubcaucus(false, "C", 10, 0)
-            this.addSubcaucus(false, "A", 0, 0)
-            this.addSubcaucus(false, "B", 100, 5)
-            this.addSubcaucus(false, "D", 1, 0)
-            this.addSubcaucus(false)
+            this.addSubcaucus("C", 10, 0)
+            this.addSubcaucus("A", 0, 0)
+            this.addSubcaucus("B", 100, 5)
+            this.addSubcaucus("D", 1, 0)
+            this.addSubcaucus()
+            this.snapshotRevised = timestamp
             this.revised = timestamp
             this.state = {
                 created: timestamp,
@@ -118,6 +118,7 @@ export class App extends React.Component<Props, State> {
             }
         } else if (meeting) {
             this.subcaucuses = meeting.current.subcaucuses
+            this.snapshotRevised = meeting.current.revised
             this.revised = meeting.current.revised
             this.currentSubcaucusID = meeting.current.currentSubcaucusID
             this.state = this.stateFromSnapshot(meeting.current)
@@ -126,6 +127,7 @@ export class App extends React.Component<Props, State> {
 
             this.subcaucuses = new TSMap<number, Subcaucus>()
             const timestamp = (new Date()).toTimestampString()
+            this.snapshotRevised = timestamp
             this.revised = timestamp
 
             this.state = {
@@ -193,15 +195,22 @@ export class App extends React.Component<Props, State> {
 
     nextSubcaucusID = () => this.currentSubcaucusID++
 
-    addSubcaucus = (forceUpdate = true, name = '', count = 0, delegates = 0) => {
+    /**
+     * Add a subcaucus.
+     * 
+     */
+    addSubcaucus = (name = '', count = 0, delegates = 0) => {
         const newSubcaucus = new Subcaucus(this.nextSubcaucusID(), {
             name: name,
             count: count,
             delegates: delegates
         })
         this.subcaucuses.set(newSubcaucus.id, newSubcaucus)
-        this.subcaucusesChanged = true
-        if (forceUpdate) this.forceUpdate()
+
+        // we should only force an update if the state already exists
+        // this allows us to add subcaucuses in the constructor
+        // as long as we make sure to do it before we create the state
+        if (this.state) this.forceSubcaucusesUpdate()
     }
 
     defaultName = (): string => {
@@ -264,6 +273,12 @@ export class App extends React.Component<Props, State> {
         setTimeout(() => target.setSelectionRange(0, 9999), 0) // do this async to try to make Safari behave
     }
 
+    forceSubcaucusesUpdate = () => {
+        this.subcaucusesChanged = true
+        this.revised = (new Date()).toTimestampString()
+        this.forceUpdate()
+    }
+
     handleSubcaucusChange = (subcaucusID: number, action: SubcaucusRowAction) => {
         _u.debug("subcaucus changed", subcaucusID, action)
         switch (action) {
@@ -271,8 +286,7 @@ export class App extends React.Component<Props, State> {
                 this.subcaucuses.filter((subcaucus, key) => {
                     return key != subcaucusID
                 })
-                this.subcaucusesChanged = true
-                this.forceUpdate()
+                this.forceSubcaucusesUpdate()
                 return
             case 'enter':
                 return
@@ -284,9 +298,7 @@ export class App extends React.Component<Props, State> {
                 if (subcaucus.name != action.name || subcaucus.count != action.count) {
                     subcaucus.name = action.name
                     subcaucus.count = action.count
-                    this.subcaucusesChanged = true
-                    this.revised = (new Date()).toTimestampString()
-                    this.forceUpdate()
+                    this.forceSubcaucusesUpdate()
                 }
                 return
         }
@@ -758,14 +770,12 @@ export class App extends React.Component<Props, State> {
 
         _u.debug("rendering", this.subcaucuses)
 
-        console.log(alertFunction)
-
         const menu = this.renderMenu()
         const subcaucusRows = this.renderSubcaucusRows()
         const summary = this.renderSummary()
         const card = this.renderNextCard()
 
-        const { name, snapshot, created, sortName, sortCount } = this.state
+        const { name, snapshot, sortName, sortCount } = this.state
 
         return (
             <div id="app">
@@ -777,7 +787,7 @@ export class App extends React.Component<Props, State> {
                             onClick={() => this.addCardState(CardFor.ChangingName)}
                         >
                             {name ? name : this.defaultName()}
-                            {this.revised === created && snapshot != ''
+                            {this.revised === this.snapshotRevised && snapshot != ''
                                 ? <span className="snapshot">
                                     {snapshot}
                                 </span>
