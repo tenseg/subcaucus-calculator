@@ -16,15 +16,26 @@ import { Subcaucus } from './Subcaucus'
 import { SubcaucusRow, SubcaucusRowAction } from './SubcaucusRow'
 import { ValueCard } from './ValueCard'
 
+/**
+ * Facilitates sorting up or down (or not at all), as needed.
+ */
 enum SortOrder {
+    Descending = -1,
     None = 0,
-    Ascending,
-    Descending,
+    Ascending = 1,
 }
 
+/**
+ * Includes the modal cards we can display.
+ * When more than one card is waiting to be viewed,
+ * they will be presented in the order listed in
+ * this enumerator.
+ * 
+ * NOTE: If you add a value you must also add a case
+ * to the `renderNextCard()` method for the card to
+ * ever be seen.
+ */
 enum CardFor {
-    // these cards should be defined in priority order
-    // if stacked, the ones toward the top will be shown first
     WelcomeAndSetName,
     ChangingName,
     ChangingDelegates,
@@ -35,6 +46,10 @@ enum CardFor {
     ShowingSecurity,
 }
 
+/**
+ * Details that our calculations need to share out
+ * to the user.
+ */
 interface SummaryInfo {
     count: number
     delegates: number
@@ -45,6 +60,10 @@ interface SummaryInfo {
 }
 
 interface Props { }
+
+/**
+ * React state for the SubCalc App.
+ */
 interface State {
     created: TimestampString
     snapshot: string
@@ -62,27 +81,81 @@ interface State {
 
 export class App extends React.Component<Props, State> {
 
-    private storage: SubCalcStorage
-    private subcaucuses: TSMap<number, Subcaucus>
+    /**
+     * An instance of `SubCalcStorage` that we use to
+     * read and write data from and to local storage.
+     */
+    private storage = new SubCalcStorage()
+
+    /**
+     * An array of `Subcaucus` objects used to track
+     * our subcaucuses and do calculations.
+     */
+    private subcaucuses = new TSMap<number, Subcaucus>()
+
+    /**
+     * Tracks the dirty state of the subcaucuses array.
+     * This toggles to `true` whenever significant data
+     * in the subcaucuses change. It is toggled back to
+     * `false` whenever we write data out to storage.
+     */
     private subcaucusesChanged = false
-    private snapshotRevised: TimestampString
-    private revised: TimestampString
+
+    /**
+     * The time at which the snapshot we start with
+     * was last revised.
+     */
+    private snapshotRevised: TimestampString = ''
+
+    /**
+     * The time of the last revision to significant
+     * data in this meeting. When this differs from
+     * `snapshotRevised` then we know we have what
+     * may become a new snapshot (if saved).
+     */
+    private revised: TimestampString = ''
+
+    /**
+     * Ensures that new subcacucuses are created with
+     * unique IDs. Those IDs are used as part of
+     * the subcaucus row keys so that the components
+     * are only reused appropriately.
+     */
     private currentSubcaucusID = 1
 
+    /**
+     * To be included with component key whenever you want
+     * to be sure that component will _not_ be reused
+     * when the App refreshes with a new snapshot.
+     */
+    private keySuffix = String(Math.random())
+
+    /**
+     * This set of cards is to be presented whenever
+     * the user loads a new meeting. It forces them to
+     * create a meeting name and disclose the number of
+     * delegates to be allowed from this meeting.
+     */
     initialCardState: Array<CardFor> = [
         CardFor.WelcomeAndSetName,
         CardFor.ChangingDelegates,
         CardFor.ShowingInstructions
     ]
 
+    /**
+     * A reference to the  PrimeReact growl notifier 
+     * used to share alerts with the user. This reference
+     * is set during the `render()` stage.
+     */
     growl: Growl | null = null
 
+    /**
+     * Creates the new SubCalc App.
+     */
     constructor(props: Props) {
         super(props)
 
         _u.setAlertFunction(this.growlAlert)
-
-        this.storage = new SubCalcStorage()
 
         const meeting = this.storage.getMeetingFromLocalStorage()
 
@@ -117,13 +190,9 @@ export class App extends React.Component<Props, State> {
                 }
             }
         } else if (meeting) {
-            this.subcaucuses = meeting.current.subcaucuses
-            this.snapshotRevised = meeting.current.revised
-            this.revised = meeting.current.revised
-            this.currentSubcaucusID = meeting.current.currentSubcaucusID
-            this.state = this.stateFromSnapshot(meeting.current)
+            this.state = this.refreshAppFromSnapshot(meeting.current)
         } else {
-            _u.alertUser(new Error("Could not read or write local storage"))
+            _u.alertUser(new Error("Could not read or write local storage."))
 
             this.subcaucuses = new TSMap<number, Subcaucus>()
             const timestamp = (new Date()).toTimestampString()
@@ -134,7 +203,7 @@ export class App extends React.Component<Props, State> {
                 created: timestamp,
                 snapshot: '',
                 name: 'Could not read local storage!',
-                allowed: 0,
+                allowed: 1,
                 seed: 1,
                 // card status
                 cards: [],
@@ -145,12 +214,28 @@ export class App extends React.Component<Props, State> {
         }
     }
 
-    stateForDebugging = () => {
-        if (_u.isDebugging()) {
-
-        }
+    /**
+     * Synchronizes instance variables with a new snapshot
+     * and returns new state to be used to synchronize state
+     * with the new snapshot as well.
+     * 
+     * NOTE: This function does _not_ set the state. In most
+     * cases it should probably be wrapped in a `setState()` call:
+     * 
+     * `this.setState(this.refreshAppFromSnapshot(snapshot))`
+     */
+    refreshAppFromSnapshot = (snapshot: MeetingSnapshot): State => {
+        this.keySuffix = String(Math.random())
+        this.subcaucuses = snapshot.subcaucuses
+        this.snapshotRevised = snapshot.revised
+        this.revised = snapshot.revised
+        this.currentSubcaucusID = snapshot.currentSubcaucusID
+        return this.stateFromSnapshot(snapshot)
     }
 
+    /**
+     * Returns a `State` object which reflects the snapshot.
+     */
     stateFromSnapshot = (snapshot: MeetingSnapshot): State => {
         const allowed = snapshot.allowed
         return {
@@ -164,9 +249,14 @@ export class App extends React.Component<Props, State> {
             // sorting info
             sortName: SortOrder.None,
             sortCount: SortOrder.None,
+            summary: undefined
         }
     }
 
+    /**
+     * Returns a `MeetingSnapshot` object which reflects the current state
+     * and the values of various instance variables.
+     */
     snapshotFromState = (): MeetingSnapshot => {
         return {
             created: this.state.created,
@@ -180,6 +270,13 @@ export class App extends React.Component<Props, State> {
         }
     }
 
+    /**
+     * Invoked immediately after React updating occurs. 
+     * Not called for the initial render.
+     * 
+     * Used to make sure significant changes are written
+     * out to the storage manager.
+     */
     componentDidUpdate = (previousProps: Props, previousState: State) => {
 
         if (this.subcaucusesChanged
@@ -193,11 +290,22 @@ export class App extends React.Component<Props, State> {
         }
     }
 
+    /**
+     * Request a new meeting from the storage manager and
+     * set our state to reflect the new meeting.
+     */
+    newMeeting = () => {
+        const snapshot = this.storage.newMeeting()
+        this.setState(this.refreshAppFromSnapshot(snapshot))
+    }
+
+    /**
+     * Increment the `currentSubcaucusID` so that each subcaucus gets a unique id.
+     */
     nextSubcaucusID = () => this.currentSubcaucusID++
 
     /**
-     * Add a subcaucus.
-     * 
+     * Add a subcaucus (empty by default).
      */
     addSubcaucus = (name = '', count = 0, delegates = 0) => {
         const newSubcaucus = new Subcaucus(this.nextSubcaucusID(), {
@@ -213,14 +321,26 @@ export class App extends React.Component<Props, State> {
         if (this.state) this.forceSubcaucusesUpdate()
     }
 
+    /**
+     * Provide a default name for this meeting, including today's date.
+     */
     defaultName = (): string => {
         return "Meeting on " + this.state.created.toDate().toLocaleDateString("en-US")
     }
 
+    /**
+     * Provide a friendly string explaining the `allowed` number.
+     */
     allowedString = (): string => {
         return `${this.state.allowed} delegates to be elected`
     }
 
+    /**
+     * Add a card to an array of cards (or to the current state cards
+     * if no array is provided). Note that we do not need to deduplicate
+     * this array since our `removeCard()` method will remove all copies
+     * of the same card anyway.
+     */
     addCard = (cardFor: CardFor, to?: Array<CardFor>): Array<CardFor> => {
         if (to === undefined) {
             to = this.state.cards
@@ -228,10 +348,17 @@ export class App extends React.Component<Props, State> {
         return [...to, cardFor]
     }
 
+    /**
+     * Adds a card to the cards state.
+     */
     addCardState = (cardFor: CardFor) => {
         this.setState({ cards: this.addCard(cardFor) })
     }
 
+    /**
+     * Remove all copies of the given card from the array of cards
+     * (or from the current state cards if not array is provided).
+     */
     removeCard = (seekingCardFor: CardFor, from?: Array<CardFor>): Array<CardFor> => {
         if (from === undefined) {
             from = this.state.cards
@@ -239,20 +366,37 @@ export class App extends React.Component<Props, State> {
         return from.filter(foundCardFor => foundCardFor != seekingCardFor)
     }
 
+    /**
+     * Removes a card from the cards state.
+     */
     removeCardState = (cardFor: CardFor) => {
         this.setState({ cards: this.removeCard(cardFor) })
     }
 
+    /**
+     * Swaps a card in for another card in the cards state.
+     * This can be used to make one card invoke another card.
+     */
     switchCardState = (fromCardFor: CardFor, toCardFor: CardFor) => {
         let newCards = this.removeCard(fromCardFor)
         newCards = this.addCard(toCardFor, newCards)
         this.setState({ cards: newCards })
     }
 
+    /**
+     * Returns `true` if the given card is in the cards state.
+     * 
+     * NOTE: The card may be one of many waiting to be displayed,
+     * so this may return `true` even when the card is not visible.
+     */
     showingCard = (cardFor: CardFor): boolean => {
         return this.state.cards.indexOf(cardFor) > -1
     }
 
+    /**
+     * Handles changes to the `allowed` and `name` state, but 
+     * nothing else. Expects to be called from an input form element.
+     */
     handleChange = (name: string) => (event: React.FormEvent<HTMLInputElement>) => {
         switch (name) {
             case 'allowed':
@@ -268,17 +412,31 @@ export class App extends React.Component<Props, State> {
         }
     }
 
+    /**
+     * Intended to facilitate focussing on the full text, even on iOS.
+     * However, this was proving problematic and is not currently in use.
+     */
     focusOnWholeText = () => (event: React.FormEvent<HTMLInputElement>) => {
         const target = event.currentTarget // event properties must be copied to use async
         setTimeout(() => target.setSelectionRange(0, 9999), 0) // do this async to try to make Safari behave
     }
 
+    /**
+     * Since the subcaucuses are kept in an instance variable,
+     * we cannot use `setState()` to update the interface.
+     * This method changes the relevant instance variables
+     * and forces an fresh render of the SubCalc App.
+     */
     forceSubcaucusesUpdate = () => {
         this.subcaucusesChanged = true
         this.revised = (new Date()).toTimestampString()
         this.forceUpdate()
     }
 
+    /**
+     * Used by the `SubcaucusRow` via a callback to update the 
+     * subcaucus array here in the app. 
+     */
     handleSubcaucusChange = (subcaucusID: number, action: SubcaucusRowAction) => {
         _u.debug("subcaucus changed", subcaucusID, action)
         switch (action) {
@@ -304,7 +462,10 @@ export class App extends React.Component<Props, State> {
         }
     }
 
-    removeEmpties = (subset = 'all') => {
+    /**
+     * Removes all empty subcaucuses or just those that are not named.
+     */
+    removeEmpties = (subset: 'all' | 'unnamed' = 'all') => {
         if (subset == 'all') {
             this.subcaucuses.filter((subcaucus, key) => {
                 return subcaucus.count > 0
@@ -319,18 +480,29 @@ export class App extends React.Component<Props, State> {
         this.removeCardState(CardFor.RemovingEmpties)
     }
 
+    /**
+     * Returns an icon to represent the supplied `SortOrder`.
+     */
     sortOrderIcon = (order: SortOrder): string => {
-        return ["pi pi-circle-off", "pi pi-chevron-circle-up", "pi pi-chevron-circle-down"][order]
+        return ["pi pi-chevron-circle-down", "pi pi-circle-off", "pi pi-chevron-circle-up"][order + 1]
     }
 
+    /**
+     * Cycles through the sort orders and returns the next one.
+     */
     nextSortOrder = (currentOrder: SortOrder, direction = 1): SortOrder => {
-        let nextOrder = (currentOrder + direction) % 3
+        // shifting over with +1 to nudge values over to where modulo is happy
+        let nextOrder = ((currentOrder + direction + 1) % 3)
         if (nextOrder < 0) {
             nextOrder += 3 // needed to cycle backwards
         }
-        return nextOrder
+        // shift back over -1 to align with our sort orders again
+        return nextOrder - 1
     }
 
+    /**
+     * Returns JSX for the menubar.
+     */
     renderMenu = (): JSX.Element => {
         const items = [
             {
@@ -358,27 +530,27 @@ export class App extends React.Component<Props, State> {
                     {
                         label: "Save snapshot",
                         icon: "pi pi-fw pi-clock",
-                        command: () => alert("TODO: create save snapshot function.")
+                        command: () => this.growlAlert("Save snapshot.", 'warn', 'TODO')
                     },
                     {
                         label: "New meeting",
                         icon: "pi pi-fw pi-calendar-plus",
-                        command: () => alert("TODO: create new meeting function.")
+                        command: () => this.newMeeting()
                     },
                     {
                         label: "Duplicate meeting",
                         icon: "pi pi-fw pi-clone",
-                        command: () => alert("TODO: create duplicate meeting function.")
+                        command: () => this.growlAlert("Duplicate meeting.", 'warn', 'TODO')
                     },
                     {
                         label: "Load meeting",
                         icon: "pi pi-fw pi-folder-open",
-                        command: () => alert("TODO: create load meeting function.")
+                        command: () => this.growlAlert("Load meeting.", 'warn', 'TODO')
                     },
                     {
                         label: "Flip the coin",
                         icon: "pi pi-fw pi-refresh",
-                        command: () => alert("TODO: create coin flip function.")
+                        command: () => this.growlAlert("Coin flip.", 'warn', 'TODO')
                     },
                 ]
             },
@@ -389,22 +561,22 @@ export class App extends React.Component<Props, State> {
                     {
                         label: "Email report",
                         icon: "pi pi-fw pi-envelope",
-                        command: () => alert("TODO: create email function.")
+                        command: () => this.growlAlert("Email report.", 'warn', 'TODO')
                     },
                     {
                         label: "Download text",
                         icon: "pi pi-fw pi-align-left",
-                        command: () => alert("TODO: create download text function.")
+                        command: () => this.growlAlert("Download text.", 'warn', 'TODO')
                     },
                     {
                         label: "Download CSV",
                         icon: "pi pi-fw pi-table",
-                        command: () => alert("TODO: create download csv function.")
+                        command: () => this.growlAlert("Download csv.", 'warn', 'TODO')
                     },
                     {
                         label: "Download code",
                         icon: "pi pi-fw pi-save",
-                        command: () => alert("TODO: create download code function.")
+                        command: () => this.growlAlert("Download code.", 'warn', 'TODO')
                     },
                 ]
             },
@@ -412,6 +584,9 @@ export class App extends React.Component<Props, State> {
         return <Menubar model={items} id="app-main-menu" />
     }
 
+    /**
+     * Returns JSX for the about card.
+     */
     renderAbout = (): JSX.Element => {
         return (
             <ValueCard key="about-card" id="about-card"
@@ -434,6 +609,9 @@ export class App extends React.Component<Props, State> {
         )
     }
 
+    /**
+     * Returns JSX for the instructions card.
+     */
     renderInstructions = (): JSX.Element => {
         return (
             <ValueCard key="instructions-card" id="instructions-card"
@@ -453,6 +631,9 @@ export class App extends React.Component<Props, State> {
         )
     }
 
+    /**
+     * Returns JSX for the security card.
+     */
     renderSecurity = (): JSX.Element => {
         return (
             <ValueCard key="security-card" id="security-card"
@@ -463,7 +644,7 @@ export class App extends React.Component<Props, State> {
                         label="Clear All Data"
                         icon="pi pi-exclamation-triangle"
                         className="p-button-danger"
-                        onClick={() => alert("TODO: create clear data function.")}
+                        onClick={() => this.growlAlert("Clear data.", 'warn', 'TODO')}
                     />
                 }
                 onSave={() => this.removeCardState(CardFor.ShowingSecurity)}
@@ -478,6 +659,9 @@ export class App extends React.Component<Props, State> {
         )
     }
 
+    /**
+     * Returns JSX for the byline credit card.
+     */
     renderBy = (): JSX.Element => {
         return (
             <ValueCard key="by-card" id="by-card"
@@ -491,6 +675,10 @@ export class App extends React.Component<Props, State> {
         )
     }
 
+    /**
+     * Returns JSX for the welcome card, which is a special version
+     * of the card to enter a name for the meeting.
+     */
     renderWelcomeAndSetName = (): JSX.Element => {
         return (
             <ValueCard key="welcome-card" id="welcome-card"
@@ -514,6 +702,9 @@ export class App extends React.Component<Props, State> {
         )
     }
 
+    /**
+     * Returns JSX for the card to change a meeting's name.
+     */
     renderChangingName = (): JSX.Element => {
         return (
             <ValueCard key="name-value" id="name-value"
@@ -526,7 +717,7 @@ export class App extends React.Component<Props, State> {
                         label="New meeting"
                         icon="pi pi-calendar-plus"
                         className="p-button-secondary"
-                        onClick={() => alert("TODO: create new meeting function.")}
+                        onClick={() => this.growlAlert("New meeting.", 'warn', 'TODO')}
                     />
                     : <></>
                 }
@@ -546,6 +737,10 @@ export class App extends React.Component<Props, State> {
         )
     }
 
+    /**
+     * Returns JSX for the card to change the 
+     * number of delegates allowed from a meeting.
+     */
     renderChangingDelegates = (): JSX.Element => {
         return (
             <ValueCard key="delegate-value" id="delegate-value"
@@ -558,7 +753,7 @@ export class App extends React.Component<Props, State> {
                         label="New meeting"
                         icon="pi pi-calendar-plus"
                         className="p-button-secondary"
-                        onClick={() => alert("TODO: create new meeting function.")}
+                        onClick={() => this.growlAlert("New meeting.", 'warn', 'TODO')}
                     />
                     : <></>
                 }
@@ -583,6 +778,10 @@ export class App extends React.Component<Props, State> {
         )
     }
 
+    /**
+     * Returns JSX for the card that allows the user to
+     * back out of removing empty subcaucuses.
+     */
     renderRemovingEmpties = (): JSX.Element => {
         return (
             <ValueCard key="remove-empties-card" id="remove-empties-card"
@@ -615,6 +814,16 @@ export class App extends React.Component<Props, State> {
         )
     }
 
+    /**
+     * Returns JSX next card to be displayed from the cards state.
+     * Returns and empty JSX element if there are no cards waiting.
+     * 
+     * This function sorts the cards array so that highest priority
+     * cards are displayed first.
+     * 
+     * NOTE: Please be sure to add any new `CardFor` values as 
+     * cases in this function.
+     */
     renderNextCard = (): JSX.Element => {
         return this.state.cards.sort((a, b) => b - a).reduce((accumulator: JSX.Element, cardFor: CardFor): JSX.Element => {
             _u.debug("filtering cards", accumulator, cardFor)
@@ -632,8 +841,14 @@ export class App extends React.Component<Props, State> {
         }, <></>)
     }
 
+    /**
+     * A method to sort subcaucuses by name.
+     * 
+     * NOTE: This depends on the `sortName` state to determine
+     * whether the result will be ascending or descending.
+     */
     sortBySubcaucusName = (a: Subcaucus, b: Subcaucus): number => {
-        const direction = this.state.sortName == SortOrder.Ascending ? 1 : -1
+
         // fall back to order of entry
         let comparison = a.id - b.id
         const nameA = a.name ? a.name.toUpperCase() : `SUBCAUCUS ${a.id}`;
@@ -644,17 +859,27 @@ export class App extends React.Component<Props, State> {
         if (nameA > nameB) {
             comparison = 1;
         }
-        return comparison * direction
+        return comparison * this.state.sortName
     }
 
+    /**
+     * A method to sort subcaucuses by count.
+     * This method sorts first by count, then subsorts by
+     * the number of delegates, and then sorts by name
+     * (names will always be ascending). It also makes sure
+     * that subcaucuses without any members will sort to
+     * the bottom regardless of the chosen sort order.
+     * 
+     * NOTE: This depends on the `sortCount` state to determine
+     * whether the result will be ascending or descending.
+     */
     sortBySubcaucusCounts = (a: Subcaucus, b: Subcaucus): number => {
-        const direction = this.state.sortCount == SortOrder.Ascending ? 1 : -1
 
         // start with delegates, then check on count, then fall back if needed
         const delegateComparison = (a.delegates - b.delegates).comparisonValue()
 
-        let ac = a.count ? a.count : direction * Infinity
-        let bc = b.count ? b.count : direction * Infinity
+        let ac = a.count ? a.count : this.state.sortCount * Infinity
+        let bc = b.count ? b.count : this.state.sortCount * Infinity
         const countComparison = (ac - bc).comparisonValue()
 
 
@@ -666,12 +891,15 @@ export class App extends React.Component<Props, State> {
             // we want the names to always sort in descending order
             // during count comparisons, so we undo the effect of direction
             // (both 1 * 1 and -1 * -1 equal 1) and then force a -1 direction 
-            comparison = this.sortBySubcaucusName(a, b) * direction * -1
+            comparison = this.sortBySubcaucusName(a, b) * this.state.sortName * -1
         }
 
-        return comparison * direction
+        return comparison * this.state.sortCount
     }
 
+    /**
+     * Returns JSX for the subcaucus rows.
+     */
     renderSubcaucusRows = (): JSX.Element[] => {
         // sort subcaucuses by id number by default
         let sort = (a: Subcaucus, b: Subcaucus) => {
@@ -688,7 +916,7 @@ export class App extends React.Component<Props, State> {
 
         return this.subcaucuses.values().sort(sort).map((subcaucus): JSX.Element => {
             return (
-                <SubcaucusRow key={subcaucus.id}
+                <SubcaucusRow key={`${subcaucus.id} ${this.keySuffix}`}
                     id={subcaucus.id}
                     exchange={this.handleSubcaucusChange}
                 />
@@ -696,6 +924,9 @@ export class App extends React.Component<Props, State> {
         })
     }
 
+    /**
+     * Returns JSX for the summary section of the SubCalc App.
+     */
     renderSummary = (): JSX.Element => {
         const { summary } = this.state
 
@@ -731,7 +962,7 @@ export class App extends React.Component<Props, State> {
                 </div>
                 {summary.nonViableCount
                     ? <div className="summary-row clickable"
-                        onClick={() => alert("TODO: explain viability in more detail.")}
+                        onClick={() => this.growlAlert("Explain viability in more detail.", 'warn', 'TODO')}
                     >
                         <div className="summary-label">
                             Recalculated viability number ({summary.nonViableCount.singularPlural("person", "people")} in non-viable subcaucuses)
@@ -753,7 +984,15 @@ export class App extends React.Component<Props, State> {
         )
     }
 
+    /**
+     * Shows an alert using PrimeReact `Growl` if it is available,
+     * or simply as an alert if there is not growl instance yet.
+     */
     growlAlert = (message: string, severity: 'error' | 'warn' | 'success' | 'info' = 'error', summary = '') => {
+        if (!summary && message) {
+            summary = message
+            message = ''
+        }
         if (this.growl) {
             this.growl.show({
                 severity: severity,
@@ -766,6 +1005,9 @@ export class App extends React.Component<Props, State> {
         }
     }
 
+    /**
+     * Returns the JSX for the whole SubCalc App.
+     */
     render() {
 
         _u.debug("rendering", this.subcaucuses)

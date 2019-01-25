@@ -14,7 +14,7 @@ import { Subcaucus } from './Subcaucus'
 declare global {
 
 	/**
-	 * A snapshot of an meeting in time.
+	 * Elements of a snapshot of a meeting in time.
 	 */
 	interface MeetingSnapshot {
 		created: TimestampString
@@ -27,6 +27,9 @@ declare global {
 		subcaucuses: TSMap<number, Subcaucus>
 	}
 
+	/**
+	 * Elements of the whole meeting.
+	 */
 	interface Meeting {
 		key: string
 		created: TimestampString
@@ -87,28 +90,16 @@ export class SubCalcStorage {
 
 			if (!this.author) {
 
-				// no prefix means that subcalc has never run in this browser
+				// no author means that subcalc has never run in this browser
 				// so we gather together some basics about this instance
 
-				const created = (new Date()).toTimestampString()
 				this.author = _u.randomSeed()
-				this.currentMeetingKey = this.meetingKey(created)
 
 				// since there was no data at all, we also don't have a
 				// current meeting, so we have to create that and write
 				// it out as well
 
-				const currentSnapshot = this.emptyMeetingSnapshot(created)
-
-				this.meetings.set(this.currentMeetingKey, {
-					key: this.currentMeetingKey,
-					author: this.author,
-					created: created,
-					current: currentSnapshot,
-					snapshots: new TSMap<string, MeetingSnapshot>()
-				})
-
-				this.writeMeetingSnapshot(currentSnapshot)
+				this.newMeeting()
 			}
 		}
 
@@ -125,6 +116,29 @@ export class SubCalcStorage {
 		// we include the author number in the key in case meetings are shared
 		author = author || this.author
 		return `${created} ${author}`
+	}
+
+	/**
+	 * Creates a new meeting and returns the current snapshot
+	 * from that new meeting.
+	 */
+	newMeeting = (): MeetingSnapshot => {
+		const created = (new Date()).toTimestampString()
+		this.currentMeetingKey = this.meetingKey(created)
+
+		const currentSnapshot = this.emptyMeetingSnapshot(created)
+
+		this.meetings.set(this.currentMeetingKey, {
+			key: this.currentMeetingKey,
+			author: this.author,
+			created: created,
+			current: currentSnapshot,
+			snapshots: new TSMap<string, MeetingSnapshot>()
+		})
+
+		this.writeMeetingSnapshot(currentSnapshot)
+
+		return currentSnapshot
 	}
 
 	/**
