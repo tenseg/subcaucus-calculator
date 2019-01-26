@@ -504,6 +504,8 @@ export class App extends React.Component<Props, State> {
 
     /**
      * Returns JSX for the menubar.
+     * 
+     * NOTE: Do not `setState()` in this method.
      */
     renderMenu = (): JSX.Element => {
         const items = [
@@ -588,6 +590,8 @@ export class App extends React.Component<Props, State> {
 
     /**
      * Returns JSX for the about card.
+     * 
+     * NOTE: Do not `setState()` in this method.
      */
     renderAbout = (): JSX.Element => {
         return (
@@ -613,6 +617,8 @@ export class App extends React.Component<Props, State> {
 
     /**
      * Returns JSX for the instructions card.
+     * 
+     * NOTE: Do not `setState()` in this method.
      */
     renderInstructions = (): JSX.Element => {
         return (
@@ -635,6 +641,8 @@ export class App extends React.Component<Props, State> {
 
     /**
      * Returns JSX for the security card.
+     * 
+     * NOTE: Do not `setState()` in this method.
      */
     renderSecurity = (): JSX.Element => {
         return (
@@ -663,6 +671,8 @@ export class App extends React.Component<Props, State> {
 
     /**
      * Returns JSX for the byline credit card.
+     * 
+     * NOTE: Do not `setState()` in this method.
      */
     renderBy = (): JSX.Element => {
         return (
@@ -680,6 +690,8 @@ export class App extends React.Component<Props, State> {
     /**
      * Returns JSX for the welcome card, which is a special version
      * of the card to enter a name for the meeting.
+     * 
+     * NOTE: Do not `setState()` in this method.
      */
     renderWelcomeAndSetName = (): JSX.Element => {
         return (
@@ -706,6 +718,8 @@ export class App extends React.Component<Props, State> {
 
     /**
      * Returns JSX for the card to change a meeting's name.
+     * 
+     * NOTE: Do not `setState()` in this method.
      */
     renderChangingName = (): JSX.Element => {
         return (
@@ -742,6 +756,8 @@ export class App extends React.Component<Props, State> {
     /**
      * Returns JSX for the card to change the 
      * number of delegates allowed from a meeting.
+     * 
+     * NOTE: Do not `setState()` in this method.
      */
     renderChangingDelegates = (): JSX.Element => {
         return (
@@ -783,6 +799,8 @@ export class App extends React.Component<Props, State> {
     /**
      * Returns JSX for the card that allows the user to
      * back out of removing empty subcaucuses.
+     * 
+     * NOTE: Do not `setState()` in this method.
      */
     renderRemovingEmpties = (): JSX.Element => {
         return (
@@ -824,7 +842,7 @@ export class App extends React.Component<Props, State> {
      * cards are displayed first.
      * 
      * NOTE: Please be sure to add any new `CardFor` values as 
-     * cases in this function.
+     * cases in this function. Do not `setState()` in this method.
      */
     renderNextCard = (): JSX.Element => {
         return this.state.cards.sort((a, b) => b - a).reduce((accumulator: JSX.Element, cardFor: CardFor): JSX.Element => {
@@ -901,6 +919,8 @@ export class App extends React.Component<Props, State> {
 
     /**
      * Returns JSX for the subcaucus rows.
+     * 
+     * NOTE: Do not `setState()` in this method.
      */
     renderSubcaucusRows = (): JSX.Element[] => {
         // sort subcaucuses by id number by default
@@ -926,6 +946,73 @@ export class App extends React.Component<Props, State> {
         })
     }
 
+    /**
+     * Returns JSX for the summary section of the SubCalc App.
+     * 
+     * NOTE: Do not `setState()` in this method.
+     */
+    renderSummary = (): JSX.Element => {
+        const { summary } = this.state
+
+        return ((summary)
+            ? <div id="summary-container">
+                <div className="summary-row">
+                    <div className="summary-label">
+                        Total participants and delegates elected
+                    </div>
+                    <div className="summary-count">
+                        <strong>
+                            {summary.count.toCommaString()}
+                        </strong>
+                    </div>
+                    <div className="summary-delegates">
+                        {summary.delegates.toCommaString()}
+                    </div>
+                </div>
+                <div className="summary-row">
+                    <div className="summary-label">
+                        Minimum of <strong>{summary.minimumCountForViability.singularPlural("person", "people")}</strong> needed to make a subcaucus viable
+                    </div>
+                </div>
+                <div className="summary-row">
+                    <div className="summary-label">
+                        Viability number
+                    </div>
+                    <div className="summary-count">
+                        <strong>
+                            {Math.round(summary.viability * 1000) / 1000}
+                        </strong>
+                    </div>
+                </div>
+                {summary.nonViableCount
+                    ? <div className="summary-row clickable"
+                        onClick={() => this.growlAlert("Explain viability in more detail.", 'warn', 'TODO')}
+                    >
+                        <div className="summary-label">
+                            Recalculated viability number ({summary.nonViableCount.singularPlural("person", "people")} in non-viable subcaucuses)
+                        </div>
+                        <div className="summary-count">
+                            {Math.round(summary.revisedViability * 1000) / 1000}
+                        </div>
+                    </div>
+                    : ''
+                }
+            </div>
+            : <div id="summary-container">
+                <div className="summary-row">
+                    <div className="summary-label">
+                        To get a "viability number" just put the count of all the people in the room into a single subcaucus.
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
+    /**
+     * Returns JSX for the whole calculator.
+     * 
+     * NOTE: Do not `setState()` in this method.
+     */
     renderCalculator = (): JSX.Element => {
         const { name, snapshot, sortName, sortCount } = this.state
 
@@ -993,65 +1080,10 @@ export class App extends React.Component<Props, State> {
     }
 
     /**
-     * Returns JSX for the summary section of the SubCalc App.
+     * Returns the JSX for the footer elements of the app.
+     * 
+     * NOTE: Do not `setState()` in this method.
      */
-    renderSummary = (): JSX.Element => {
-        const { summary } = this.state
-
-        return ((summary)
-            ? <div id="summary-container">
-                <div className="summary-row">
-                    <div className="summary-label">
-                        Total participants and delegates elected
-                    </div>
-                    <div className="summary-count">
-                        <strong>
-                            {summary.count.toCommaString()}
-                        </strong>
-                    </div>
-                    <div className="summary-delegates">
-                        {summary.delegates.toCommaString()}
-                    </div>
-                </div>
-                <div className="summary-row">
-                    <div className="summary-label">
-                        Minimum of <strong>{summary.minimumCountForViability.singularPlural("person", "people")}</strong> needed to make a subcaucus viable
-                    </div>
-                </div>
-                <div className="summary-row">
-                    <div className="summary-label">
-                        Viability number
-                    </div>
-                    <div className="summary-count">
-                        <strong>
-                            {Math.round(summary.viability * 1000) / 1000}
-                        </strong>
-                    </div>
-                </div>
-                {summary.nonViableCount
-                    ? <div className="summary-row clickable"
-                        onClick={() => this.growlAlert("Explain viability in more detail.", 'warn', 'TODO')}
-                    >
-                        <div className="summary-label">
-                            Recalculated viability number ({summary.nonViableCount.singularPlural("person", "people")} in non-viable subcaucuses)
-                        </div>
-                        <div className="summary-count">
-                            {Math.round(summary.revisedViability * 1000) / 1000}
-                        </div>
-                    </div>
-                    : ''
-                }
-            </div>
-            : <div id="summary-container">
-                <div className="summary-row">
-                    <div className="summary-label">
-                        To get a "viability number" just put the count of all the people in the room into a single subcaucus.
-                    </div>
-                </div>
-            </div>
-        )
-    }
-
     renderByline = (): JSX.Element => {
         return (
             <Button id="app-byline"
@@ -1062,7 +1094,16 @@ export class App extends React.Component<Props, State> {
         )
     }
 
+    /**
+     * Returns the JSX for debugging elements. These should not be
+     * displayed when compiled for production.
+     * 
+     * NOTE: Do not `setState()` in this method.
+     */
     renderDebuggingInfo = (): JSX.Element => {
+
+        if (!_u.isDebugging) return <></>
+
         return (
             <div className="debugging">
                 <p>This is debugging info for <a href="https://grand.clst.org:3000/tenseg/subcalc-pr/issues" target="_repository">subcalc-pr</a> (with <a href="https://reactjs.org/docs/react-component.html" target="_react">ReactJS</a>, <a href="https://www.primefaces.org/primereact/" target="_primereact">PrimeReact</a>, <a href="https://www.primefaces.org/primeng/#/icons" target="_primeicons">PrimeIcons</a>) derrived from <a href="https://bitbucket.org/tenseg/subcalc-js/src" target="_bitbucket">subcalc-js</a>.
@@ -1114,7 +1155,7 @@ export class App extends React.Component<Props, State> {
                     {this.renderNextCard()}
                     <Growl ref={(el) => this.growl = el} />
                 </div>
-                {_u.isDebugging() ? this.renderDebuggingInfo() : ''}
+                {this.renderDebuggingInfo()}
             </div>
         )
     }
