@@ -926,6 +926,72 @@ export class App extends React.Component<Props, State> {
         })
     }
 
+    renderCalculator = (): JSX.Element => {
+        const { name, snapshot, sortName, sortCount } = this.state
+
+        return (
+            <div id="calculator">
+                {this.renderMenu()}
+                <div id="meeting-info">
+                    <div id="meeting-name" className="button"
+                        onClick={() => this.addCardState(CardFor.ChangingName)}
+                    >
+                        {name ? name : this.defaultName()}
+                        {this.revised === this.snapshotRevised && snapshot != ''
+                            ? <span className="snapshot">
+                                {snapshot}
+                            </span>
+                            : ''
+                        }
+                    </div>
+                    <div id="delegates-allowed" className="button"
+                        onClick={() => this.addCardState(CardFor.ChangingDelegates)}
+                    >{this.allowedString()}</div>
+                </div>
+                <div id="subcaucus-container">
+                    <div id="subcaucus-header">
+                        <Button id="subcaucus-name-head"
+                            label="Subcaucus"
+                            icon={this.sortOrderIcon(sortName)}
+                            onClick={() => this.setState({
+                                sortName: this.state.sortName ? SortOrder.None : SortOrder.Ascending,
+                                sortCount: SortOrder.None
+                            })}
+                        />
+                        <Button id="subcaucus-count-head"
+                            label="Count"
+                            iconPos="right"
+                            icon={this.sortOrderIcon(sortCount)}
+                            onClick={() => this.setState({
+                                sortName: SortOrder.None,
+                                sortCount: this.nextSortOrder(sortCount, -1)
+                            })}
+                        />
+                        <Button id="subcaucus-delegate-head"
+                            label="Dels"
+                        />
+                    </div>
+                    <div id="subcaucus-list">
+                        {this.renderSubcaucusRows()}
+                    </div>
+                    <div id="subcaucus-footer">
+                        <Button id="add-subcaucus-button"
+                            label="Add a Subcaucus"
+                            icon="pi pi-plus"
+                            onClick={() => this.addSubcaucus()}
+                        />
+                        <Button id="remove-empty-subcaucuses-button"
+                            label="Remove Empties"
+                            icon="pi pi-trash"
+                            onClick={() => this.addCardState(CardFor.RemovingEmpties)}
+                        />
+                    </div>
+                </div>
+                {this.renderSummary()}
+            </div>
+        )
+    }
+
     /**
      * Returns JSX for the summary section of the SubCalc App.
      */
@@ -986,6 +1052,32 @@ export class App extends React.Component<Props, State> {
         )
     }
 
+    renderByline = (): JSX.Element => {
+        return (
+            <Button id="app-byline"
+                label="Brought to you by Tenseg LLC"
+                href="https://tenseg.net"
+                onClick={() => this.addCardState(CardFor.ShowingBy)}
+            />
+        )
+    }
+
+    renderDebuggingInfo = (): JSX.Element => {
+        return (
+            <div className="debugging">
+                <p>This is debugging info for <a href="https://grand.clst.org:3000/tenseg/subcalc-pr/issues" target="_repository">subcalc-pr</a> (with <a href="https://reactjs.org/docs/react-component.html" target="_react">ReactJS</a>, <a href="https://www.primefaces.org/primereact/" target="_primereact">PrimeReact</a>, <a href="https://www.primefaces.org/primeng/#/icons" target="_primeicons">PrimeIcons</a>) derrived from <a href="https://bitbucket.org/tenseg/subcalc-js/src" target="_bitbucket">subcalc-js</a>.
+                        </p>
+                <div style={{ float: "right" }}>
+                    <ReactJson name="this.storage.meetings (TSMap)" src={this.storage.meetings} />
+                </div>
+                <pre>{"rendered App " + (new Date()).toLocaleTimeString()}</pre>
+                <ReactJson name="this.state" src={this.state} /><br />
+                <ReactJson name="this.subcaucuses (TSMap)" src={this.subcaucuses} />
+                <p style={{ clear: "both" }}>Done.</p>
+            </div>
+        )
+    }
+
     /**
      * Shows an alert using PrimeReact `Growl` if it is available,
      * or simply as an alert if there is not growl instance yet.
@@ -1014,95 +1106,15 @@ export class App extends React.Component<Props, State> {
 
         _u.debug("rendering", this.subcaucuses)
 
-        const menu = this.renderMenu()
-        const subcaucusRows = this.renderSubcaucusRows()
-        const summary = this.renderSummary()
-        const card = this.renderNextCard()
-
-        const { name, snapshot, sortName, sortCount } = this.state
-
         return (
             <div id="app">
                 <div id="app-content">
-                    {menu}
+                    {this.renderCalculator()}
+                    {this.renderByline()}
+                    {this.renderNextCard()}
                     <Growl ref={(el) => this.growl = el} />
-                    <div id="meeting-info">
-                        <div id="meeting-name" className="button"
-                            onClick={() => this.addCardState(CardFor.ChangingName)}
-                        >
-                            {name ? name : this.defaultName()}
-                            {this.revised === this.snapshotRevised && snapshot != ''
-                                ? <span className="snapshot">
-                                    {snapshot}
-                                </span>
-                                : ''
-                            }
-                        </div>
-                        <div id="delegates-allowed" className="button"
-                            onClick={() => this.addCardState(CardFor.ChangingDelegates)}
-                        >{this.allowedString()}</div>
-                    </div>
-                    <div id="subcaucus-container">
-                        <div id="subcaucus-header">
-                            <Button id="subcaucus-name-head"
-                                label="Subcaucus"
-                                icon={this.sortOrderIcon(sortName)}
-                                onClick={() => this.setState({
-                                    sortName: this.state.sortName ? SortOrder.None : SortOrder.Ascending,
-                                    sortCount: SortOrder.None
-                                })}
-                            />
-                            <Button id="subcaucus-count-head"
-                                label="Count"
-                                iconPos="right"
-                                icon={this.sortOrderIcon(sortCount)}
-                                onClick={() => this.setState({
-                                    sortName: SortOrder.None,
-                                    sortCount: this.nextSortOrder(sortCount, -1)
-                                })}
-                            />
-                            <Button id="subcaucus-delegate-head"
-                                label="Dels"
-                            />
-                        </div>
-                        <div id="subcaucus-list">
-                            {subcaucusRows}
-                        </div>
-                        <div id="subcaucus-footer">
-                            <Button id="add-subcaucus-button"
-                                label="Add a Subcaucus"
-                                icon="pi pi-plus"
-                                onClick={() => this.addSubcaucus()}
-                            />
-                            <Button id="remove-empty-subcaucuses-button"
-                                label="Remove Empties"
-                                icon="pi pi-trash"
-                                onClick={() => this.addCardState(CardFor.RemovingEmpties)}
-                            />
-                        </div>
-                    </div>
-                    {summary}
-                    <Button id="app-byline"
-                        label="Brought to you by Tenseg LLC"
-                        href="https://tenseg.net"
-                        onClick={() => this.addCardState(CardFor.ShowingBy)}
-                    />
-                    {card}
                 </div>
-                {_u.isDebugging()
-                    ? <div className="debugging">
-                        <p>This is debugging info for <a href="https://grand.clst.org:3000/tenseg/subcalc-pr/issues" target="_repository">subcalc-pr</a> (with <a href="https://reactjs.org/docs/react-component.html" target="_react">ReactJS</a>, <a href="https://www.primefaces.org/primereact/" target="_primereact">PrimeReact</a>, <a href="https://www.primefaces.org/primeng/#/icons" target="_primeicons">PrimeIcons</a>) derrived from <a href="https://bitbucket.org/tenseg/subcalc-js/src" target="_bitbucket">subcalc-js</a>.
-                        </p>
-                        <div style={{ float: "right" }}>
-                            <ReactJson name="this.storage.meetings (TSMap)" src={this.storage.meetings} />
-                        </div>
-                        <pre>{"rendered App " + (new Date()).toLocaleTimeString()}</pre>
-                        <ReactJson name="this.state" src={this.state} /><br />
-                        <ReactJson name="this.subcaucuses (TSMap)" src={this.subcaucuses} />
-                        <p style={{ clear: "both" }}>Done.</p>
-                    </div>
-                    : <></>
-                }
+                {_u.isDebugging() ? this.renderDebuggingInfo() : ''}
             </div>
         )
     }
