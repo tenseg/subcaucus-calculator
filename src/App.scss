@@ -127,6 +127,7 @@ body {
 
         #meeting-info {
     
+            div.not-button,
             div.button,
             button.p-button {
                 display: block;
@@ -136,10 +137,15 @@ body {
                 border: none;
                 background-color: $meeting-info-color;
                 color: black;
-                cursor: pointer;
+                cursor: default;
                 font-size: 18px;
                 font-weight: 900;
-                
+            }
+            
+            div.button,
+            button.p-button {
+                cursor: pointer;
+
                 &:hover {
                     background-color: darken($meeting-info-color, 10%)
                 }

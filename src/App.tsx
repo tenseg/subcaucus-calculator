@@ -17,6 +17,7 @@ import { SubCalcStorage } from './SubCalcStorage'
 import { Subcaucus } from './Subcaucus'
 import { SubcaucusRow, SubcaucusRowAction } from './SubcaucusRow'
 import { ValueCard } from './ValueCard'
+import { Loader } from './Loader'
 
 /**
  * Facilitates sorting up or down (or not at all), as needed.
@@ -48,6 +49,11 @@ enum CardFor {
     ShowingSecurity,
 }
 
+enum Presenting {
+    Calculator,
+    Loading,
+}
+
 /**
  * Details that our calculations need to share out
  * to the user.
@@ -72,8 +78,9 @@ interface State {
     name: string
     allowed: number
     seed: number
-    // card status
+    // modal interactions
     cards: Array<CardFor>
+    present: Presenting
     // sorting info
     sortName: SortOrder
     sortCount: SortOrder
@@ -177,6 +184,7 @@ export class App extends React.Component<Props, State> {
                 snapshot: 'Revised',
                 name: 'Debugging', allowed: 10, cards: [],
                 // name: '', allowed: 0, cards: this.initialCardState,
+                present: Presenting.Loading,
                 seed: 42,
                 // sorting info
                 sortName: SortOrder.None,
@@ -209,6 +217,7 @@ export class App extends React.Component<Props, State> {
                 seed: 1,
                 // card status
                 cards: [],
+                present: Presenting.Calculator,
                 // sorting info
                 sortName: SortOrder.None,
                 sortCount: SortOrder.None,
@@ -248,10 +257,23 @@ export class App extends React.Component<Props, State> {
             seed: snapshot.seed,
             // card status
             cards: allowed ? [] : this.initialCardState,
+            present: Presenting.Calculator,
             // sorting info
             sortName: SortOrder.None,
             sortCount: SortOrder.None,
             summary: undefined
+        }
+    }
+
+    /**
+     * Either load the snapshot or return to the calculator.
+     * This is used as a callback from the loading component.
+     */
+    loadSnapshot = (snapshot?: MeetingSnapshot) => {
+        if (snapshot) {
+            this.setState(this.refreshAppFromSnapshot(snapshot))
+        } else {
+            this.setState({ present: Presenting.Calculator })
         }
     }
 
@@ -549,7 +571,7 @@ export class App extends React.Component<Props, State> {
                     {
                         label: "Load meeting",
                         icon: "pi pi-fw pi-folder-open",
-                        command: () => this.growlAlert("Load meeting.", 'warn', 'TODO')
+                        command: () => this.setState({ present: Presenting.Loading })
                     },
                     {
                         label: "Flip the coin",
@@ -585,7 +607,7 @@ export class App extends React.Component<Props, State> {
                 ]
             },
         ]
-        return <Menubar model={items} id="app-main-menu" />
+        return <Menubar key="calculator-menu" model={items} id="app-main-menu" />
     }
 
     /**
@@ -1150,7 +1172,15 @@ export class App extends React.Component<Props, State> {
         return (
             <div id="app">
                 <div id="app-content">
-                    {this.renderCalculator()}
+                    {this.state.present == Presenting.Calculator
+                        ? this.renderCalculator()
+                        : ''}
+                    {this.state.present == Presenting.Loading
+                        ? <Loader
+                            storage={this.storage}
+                            onLoad={this.loadSnapshot}
+                        />
+                        : ''}
                     {this.renderByline()}
                     {this.renderNextCard()}
                     <Growl ref={(el) => this.growl = el} />

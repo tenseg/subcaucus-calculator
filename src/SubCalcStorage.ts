@@ -13,6 +13,9 @@ import { Subcaucus } from './Subcaucus'
 
 declare global {
 
+	type SnapshotMap = TSMap<string, MeetingSnapshot>
+	type SubcaucusMap = TSMap<number, Subcaucus>
+
 	/**
 	 * Elements of a snapshot of a meeting in time.
 	 */
@@ -24,7 +27,7 @@ declare global {
 		allowed: number
 		seed: number
 		currentSubcaucusID: number
-		subcaucuses: TSMap<number, Subcaucus>
+		subcaucuses: SubcaucusMap
 	}
 
 	/**
@@ -35,7 +38,7 @@ declare global {
 		created: TimestampString
 		author: number
 		current: MeetingSnapshot
-		snapshots: TSMap<string, MeetingSnapshot>
+		snapshots: SnapshotMap
 	}
 
 }
