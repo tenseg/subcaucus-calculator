@@ -170,9 +170,11 @@ body {
         
         }
         
+        #loader-container,
         #subcaucus-container {
             background: white;
             
+            #loader-header,
             #subcaucus-header {
                 display: flex;
                 
@@ -382,6 +384,89 @@ body {
                     padding-right: $form-margin;
                     text-align: right;
                     direction: rtl;
+                }
+            }
+        }
+        .loader {
+
+            #loader-name-head {
+                flex: 1 0 5em;
+            }
+            
+            #loader-timestamp-head {
+                flex: 0 0 15em;
+                width: 15em;
+                text-align: right !important;
+            }
+            
+            .loader-meetings {
+                
+                .p-accordion-tab {
+                    margin: 0;
+                
+                    .p-accordion-header {
+                        margin: 0;
+                        
+                        .p-accordion-header-text {
+                            width: calc(100% - 30px);
+                        }
+                    }
+                    
+                    .loader-meeting-accordion-header > a {
+                        border: none !important;
+                        border-radius: 0 !important;
+                    }
+                
+                    .p-accordion-content {
+                        padding: 0;
+                        border: none !important;
+                        border-radius: 0 !important;
+                    }
+                }
+                
+                .loader-meeting-header {
+                    display: flex;
+                    width: 100%;
+                    
+                    .loader-meeting-name {
+                        flex: 2 0 5em;
+                        width: 5em;
+                    }
+                    
+                    .loader-meeting-timestamp {
+                        flex: 1 0 5em;
+                        width: 5em;
+                        text-align: right;
+                    }
+                }
+                
+                .loader-snapshot {
+                    display: flex;
+                    padding: $form-margin/2 $form-margin;
+                    
+                    &:hover {
+                        background-color: yellow;
+                    }
+                    
+                    .loader-snapshot-button {
+                        flex: 1 0 5em;
+                        width: 5em;
+                        margin-right: $form-margin;
+                        padding-top: 7px;
+                        
+                        &:hover {
+                            cursor: pointer;
+                        }
+                        
+                        .loader-snapshot-revised {
+                            float: right;
+                        }
+                    }
+                    
+                    .loader-snapshot-actions {
+                        flex: 0 0 2em;
+                        width: 2em;
+                    }
                 }
             }
         }

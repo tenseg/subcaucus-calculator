@@ -57,22 +57,52 @@ export class Loader extends React.Component<Props, State> {
 
     renderSnapshot = (snapshot: MeetingSnapshot): JSX.Element => {
         const descriptor = snapshot.revision ? "snapshot" : "meeting"
+        const created = new Date(Date.parse(snapshot.created))
+        const createdDate = created.toLocaleString(undefined, {
+            year: 'numeric',
+            month: 'numeric',
+            day: 'numeric',
+        })
+        const revised = new Date(Date.parse(snapshot.revised))
+        const revisedDate = revised.toLocaleString(undefined, {
+            year: 'numeric',
+            month: 'numeric',
+            day: 'numeric',
+        })
+        const revisedString = createdDate === revisedDate
+            ? revised.toLocaleString(undefined, {
+                hour: 'numeric',
+                minute: '2-digit',
+                second: undefined,
+            })
+            : revised.toLocaleString(undefined, {
+                year: 'numeric',
+                month: 'numeric',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                second: undefined,
+            })
+
         return (
-            <div key={`loader-snapshot-${snapshot.seed}`} className={`loader-snapshot ${descriptor}`}>
-                <Button
-                    label="Load"
+            <div key={`loader-snapshot-${snapshot.revised}-${snapshot.author}`} className={`loader-snapshot ${descriptor}`}>
+                <div className="loader-snapshot-button button"
                     onClick={() => { this.props.onLoad(snapshot) }}
-                />&nbsp;
-                <span className="loader-snapshot-name">
-                    {snapshot.revision || "As it was last edited"}
-                </span>&nbsp;&nbsp;
-                <span className="loader-snapshot-revised">
-                    {snapshot.revised}
-                </span>&nbsp;&nbsp;
-                <Button
-                    icon="pi pi-trash"
-                    onClick={() => { _u.debug(`TODO Delete ${descriptor}`) }}
-                />
+                >
+                    <div className="loader-snapshot-revised">
+                        {revisedString}
+                    </div>
+                    <div className="loader-snapshot-name">
+                        <span className={"pi " + (snapshot.revision ? "pi-clock" : "pi-calendar")}>&nbsp;</span>
+                        {snapshot.revision || "As it was last edited"}
+                    </div>
+                </div>
+                <div className="loader-snapshot-actions">
+                    <Button
+                        icon="pi pi-trash"
+                        onClick={() => { _u.debug(`TODO Delete ${descriptor}`) }}
+                    />
+                </div>
             </div>
         )
     }
@@ -98,11 +128,24 @@ export class Loader extends React.Component<Props, State> {
             const meetingKey = `${meeting.created}-${meeting.author}`
             const hasSnapshots = meeting.snapshots.length > 0
 
-            return <AccordionTab key={`loader-meeting-current-${meetingKey}`}
+            const created = new Date(Date.parse(meeting.created))
+            const createdDate = created.toLocaleString(undefined, {
+                year: 'numeric',
+                month: 'numeric',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                second: undefined,
+            })
+
+            return <AccordionTab key={`loader-meeting-${meetingKey}`}
+                headerClassName="loader-meeting-accordion-header"
+                contentClassName="loader-meeting-accordion-content"
                 header={
-                    <span>
-                        <strong>{meeting.current.name}</strong> {meeting.current.created}
-                    </span>
+                    <div className="loader-meeting-header">
+                        <div className="loader-meeting-name">{meeting.current.name}</div>
+                        <div className="loader-meeting-timestamp">{createdDate}</div>
+                    </div>
                 }
             >
                 {this.renderSnapshot(meeting.current)}
@@ -111,7 +154,7 @@ export class Loader extends React.Component<Props, State> {
         })
 
         return (
-            <div key={`loader-meeting`} className="loader-meeting">
+            <div key={`loader-meetings`} className="loader-meetings">
                 <Accordion activeIndex={indexOfCurrent}>
                     {meetingRows}
                 </Accordion>
@@ -128,14 +171,15 @@ export class Loader extends React.Component<Props, State> {
                         Pick a meeting below to load it...
                     </div>
                 </div>
-                <div id="subcaucus-container">
-                    <div id="subcaucus-header">
-                        <Button id="subcaucus-name-head"
+                <div id="loader-container">
+                    <div id="loader-header">
+                        <Button id="loader-name-head"
                             label="Name"
                             icon={this.sortOrderIcon(0)}
                         />
-                        <Button id="subcaucus-name-head"
+                        <Button id="loader-timestamp-head"
                             label="Last Revised"
+                            iconPos="right"
                             icon={this.sortOrderIcon(0)}
                         />
                     </div>

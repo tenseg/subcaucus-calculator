@@ -186,7 +186,7 @@ export class SubCalcStorage {
 			if (isCurrent) {
 				this.meetings.get(meetingKey).current = snapshot
 			} else {
-				this.meetings.get(meetingKey).snapshots[snapshot.revised] = snapshot
+				this.meetings.get(meetingKey).snapshots.set(snapshot.revised, snapshot)
 			}
 
 			// synchronize our instance data with local storage
