@@ -21,6 +21,7 @@ declare global {
 	 */
 	interface MeetingSnapshot {
 		created: TimestampString
+		author: number
 		revised: TimestampString
 		revision: string
 		name: string
@@ -161,6 +162,7 @@ export class SubCalcStorage {
 
 		return {
 			created: created,
+			author: this.author,
 			revised: '',
 			revision: '',
 			name: '',
@@ -309,7 +311,7 @@ export class SubCalcStorage {
 			return undefined
 		}
 
-		const currentMeeting = this.jsonToMeetingSnapshot(jsonMeeting["current"], created)
+		const currentMeeting = this.jsonToMeetingSnapshot(jsonMeeting["current"], created, author)
 
 		if (!currentMeeting) {
 			_u.debug(new Error(`Could not find current snapshot in ${key}`), jsonMeeting)
@@ -324,7 +326,7 @@ export class SubCalcStorage {
 		let snapshots = new TSMap<string, MeetingSnapshot>()
 
 		jsonMeeting["snapshots"].forEach((jsonSnapshot: any) => {
-			const snapshot = this.jsonToMeetingSnapshot(jsonSnapshot, created)
+			const snapshot = this.jsonToMeetingSnapshot(jsonSnapshot, created, author)
 			if (snapshot) {
 				snapshots.set(snapshot.revised, snapshot)
 			}
@@ -343,7 +345,7 @@ export class SubCalcStorage {
 	 * Given the JSON object version of snapshot data and the meeting's
 	 * created timestamp, this function populates a meeting snapshot object.
 	 */
-	jsonToMeetingSnapshot = (jsonSnapshot: any, created: TimestampString): MeetingSnapshot | undefined => {
+	jsonToMeetingSnapshot = (jsonSnapshot: any, created: TimestampString, author: number): MeetingSnapshot | undefined => {
 
 		const revised = String(jsonSnapshot['revised'] || '')
 		const revision = String(jsonSnapshot['revision'] || '')
@@ -380,6 +382,7 @@ export class SubCalcStorage {
 
 		return {
 			created: created,
+			author: author,
 			revised: revised,
 			revision: revision,
 			name: name,

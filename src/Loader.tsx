@@ -18,6 +18,7 @@ enum SortOrder {
 
 interface Props {
     storage: SubCalcStorage
+    currentMeetingKey: string
     onLoad: ((snapshot?: MeetingSnapshot) => void)
 }
 interface State {
@@ -90,7 +91,7 @@ export class Loader extends React.Component<Props, State> {
         let indexOfCurrent = 0
         const meetingRows: Array<JSX.Element> = meetings.map((meeting, key, index) => {
 
-            if (this.props.storage.currentMeetingKey == key) {
+            if (this.props.currentMeetingKey == key) {
                 indexOfCurrent = index || 0
                 console.log("indexOfCurrent", indexOfCurrent, "index", index, "key", key)
             }

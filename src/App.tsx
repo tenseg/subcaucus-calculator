@@ -74,6 +74,7 @@ interface Props { }
  */
 interface State {
     created: TimestampString
+    author: number
     snapshot: string
     name: string
     allowed: number
@@ -95,6 +96,11 @@ export class App extends React.Component<Props, State> {
      * read and write data from and to local storage.
      */
     private storage = new SubCalcStorage()
+
+    /**
+     * Keeps track of the ID of the meeting in the calculator.
+     */
+    private currentMeetingKey = ""
 
     /**
      * An array of `Subcaucus` objects used to track
@@ -181,6 +187,7 @@ export class App extends React.Component<Props, State> {
             this.revised = timestamp
             this.state = {
                 created: timestamp,
+                author: this.storage.author,
                 snapshot: 'Revised',
                 name: 'Debugging', allowed: 10, cards: [],
                 // name: '', allowed: 0, cards: this.initialCardState,
@@ -211,6 +218,7 @@ export class App extends React.Component<Props, State> {
 
             this.state = {
                 created: timestamp,
+                author: this.storage.author,
                 snapshot: '',
                 name: 'Could not read local storage!',
                 allowed: 1,
@@ -241,6 +249,7 @@ export class App extends React.Component<Props, State> {
         this.snapshotRevised = snapshot.revised
         this.revised = snapshot.revised
         this.currentSubcaucusID = snapshot.currentSubcaucusID
+        this.currentMeetingKey = this.storage.meetingKey(snapshot.created, snapshot.author)
         return this.stateFromSnapshot(snapshot)
     }
 
@@ -251,6 +260,7 @@ export class App extends React.Component<Props, State> {
         const allowed = snapshot.allowed
         return {
             created: snapshot.created,
+            author: snapshot.author,
             snapshot: snapshot.revision,
             name: snapshot.name,
             allowed: allowed,
@@ -284,6 +294,7 @@ export class App extends React.Component<Props, State> {
     snapshotFromState = (): MeetingSnapshot => {
         return {
             created: this.state.created,
+            author: this.state.author,
             revised: this.revised,
             revision: this.state.snapshot,
             name: this.state.name,
@@ -1178,6 +1189,7 @@ export class App extends React.Component<Props, State> {
                     {this.state.present == Presenting.Loading
                         ? <Loader
                             storage={this.storage}
+                            currentMeetingKey={this.currentMeetingKey}
                             onLoad={this.loadSnapshot}
                         />
                         : ''}
