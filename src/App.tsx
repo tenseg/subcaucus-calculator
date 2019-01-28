@@ -291,14 +291,9 @@ export class App extends React.Component<Props, State> {
      * Either load the snapshot or return to the calculator.
      * This is used as a callback from the loading component.
      */
-    loadSnapshot = (meetingKey?: string, revised?: string) => {
-        if (meetingKey) {
-            const jsonString = this.storage.getSnapshot(meetingKey, revised)
-            if (jsonString) {
-                const json = JSON.parse(jsonString)
-                let subcaucuses: TSMap<number, Subcaucus>
-                this.setState(this.refreshAppFromSnapshot(snapshot))
-            }
+    loadSnapshot = (snapshot?: MeetingSnapshot) => {
+        if (snapshot) {
+            this.setState(this.refreshAppFromSnapshot(snapshot))
         } else {
             this.setState({ present: Presenting.Calculator })
         }

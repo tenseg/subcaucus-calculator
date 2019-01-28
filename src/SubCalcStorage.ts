@@ -417,7 +417,7 @@ export class SubCalcStorage {
 	 * NOTE: A side effect of this function is that the `currentMeetingKey`
 	 * of the Storage instance is reset when retrieval is successful.
 	 */
-	getSnapshot = (meetingKey = '', timestamp?: string): string | undefined => {
+	getSnapshot = (meetingKey = '', timestamp?: string): MeetingSnapshot | undefined => {
 		const { currentMeetingKey, meetings } = this
 
 		if (meetingKey === '') {
@@ -437,7 +437,7 @@ export class SubCalcStorage {
 
 		if (timestamp === undefined) {
 			this.currentMeetingKey = meetingKey
-			return JSON.stringify(meeting.current)
+			return meeting.current
 		}
 
 		const snapshot = meeting.snapshots[timestamp]
@@ -448,7 +448,7 @@ export class SubCalcStorage {
 		}
 
 		this.currentMeetingKey = meetingKey
-		return JSON.stringify(snapshot)
+		return snapshot
 	}
 
 
