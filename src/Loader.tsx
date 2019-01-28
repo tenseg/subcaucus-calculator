@@ -1,4 +1,6 @@
 import * as React from 'react'
+// see https://github.com/ClickSimply/typescript-map
+import { TSMap } from 'typescript-map'
 // see https://www.primefaces.org/primereact
 import { Button } from 'primereact/button'
 import { Menubar } from 'primereact/menubar'
@@ -107,7 +109,7 @@ export class Loader extends React.Component<Props, State> {
         )
     }
 
-    renderSnapshots = (snapshots: SnapshotMap): JSX.Element => {
+    renderSnapshots = (snapshots: TSMap<string, MeetingSnapshot>): JSX.Element => {
         return (
             <>
                 {snapshots.map(this.renderSnapshot)}

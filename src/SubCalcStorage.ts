@@ -13,9 +13,6 @@ import { Subcaucus } from './Subcaucus'
 
 declare global {
 
-	type SnapshotMap = TSMap<string, MeetingSnapshot>
-	type SubcaucusMap = TSMap<number, Subcaucus>
-
 	/**
 	 * Elements of a snapshot of a meeting in time.
 	 */
@@ -28,7 +25,7 @@ declare global {
 		allowed: number
 		seed: number
 		currentSubcaucusID: number
-		subcaucuses: SubcaucusMap
+		subcaucuses: TSMap<number, Subcaucus>
 	}
 
 	/**
@@ -39,7 +36,7 @@ declare global {
 		created: TimestampString
 		author: number
 		current: MeetingSnapshot
-		snapshots: SnapshotMap
+		snapshots: TSMap<string, MeetingSnapshot>
 	}
 
 }
@@ -180,13 +177,14 @@ export class SubCalcStorage {
 		const meetingKey = this.meetingKey(snapshot.created)
 		const isCurrent = (snapshot.revision == '')
 		const meeting = this.meetings.get(meetingKey)
+		const copyOfSnapshot = this.copySnapshot(snapshot)
 
 		if (meeting) {
 			// add the snapshot to our instance data
 			if (isCurrent) {
-				this.meetings.get(meetingKey).current = snapshot
+				this.meetings.get(meetingKey).current = copyOfSnapshot
 			} else {
-				this.meetings.get(meetingKey).snapshots.set(snapshot.revised, snapshot)
+				this.meetings.get(meetingKey).snapshots.set(snapshot.revised, copyOfSnapshot)
 			}
 
 			// synchronize our instance data with local storage
@@ -411,6 +409,17 @@ export class SubCalcStorage {
 	}
 
 	/**
+	 * Make a copy of the snapshot that has no lingering references to the original.
+	 */
+	copySnapshot = (snapshot: MeetingSnapshot): MeetingSnapshot => {
+		let newSnapshot = {
+			...snapshot,
+			subcacucuses: new TSMap<number, Subcaucus>().fromJSON(snapshot.subcaucuses.toJSON())
+		}
+		return newSnapshot
+	}
+
+	/**
 	 * Retrieve a snapshot (by default, the current meeting's current state),
 	 * from storage.
 	 * 
@@ -437,7 +446,7 @@ export class SubCalcStorage {
 
 		if (timestamp === undefined) {
 			this.currentMeetingKey = meetingKey
-			return meeting.current
+			return this.copySnapshot(meeting.current)
 		}
 
 		const snapshot = meeting.snapshots[timestamp]
@@ -448,7 +457,7 @@ export class SubCalcStorage {
 		}
 
 		this.currentMeetingKey = meetingKey
-		return snapshot
+		return this.copySnapshot(snapshot)
 	}
 
 
