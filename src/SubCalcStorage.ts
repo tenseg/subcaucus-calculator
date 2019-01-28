@@ -417,7 +417,7 @@ export class SubCalcStorage {
 	 * NOTE: A side effect of this function is that the `currentMeetingKey`
 	 * of the Storage instance is reset when retrieval is successful.
 	 */
-	getSnapshot = (meetingKey = '', timestamp?: string): MeetingSnapshot | undefined => {
+	getSnapshot = (meetingKey = '', timestamp?: string): string | undefined => {
 		const { currentMeetingKey, meetings } = this
 
 		if (meetingKey === '') {
@@ -428,7 +428,7 @@ export class SubCalcStorage {
 			meetingKey = currentMeetingKey
 		}
 
-		const meeting = meetings[meetingKey]
+		const meeting = meetings.get(meetingKey)
 
 		if (meeting === undefined) {
 			_u.alertUser(new Error(`No data for meeting ${meetingKey}`))
@@ -437,7 +437,7 @@ export class SubCalcStorage {
 
 		if (timestamp === undefined) {
 			this.currentMeetingKey = meetingKey
-			return meeting.current
+			return JSON.stringify(meeting.current)
 		}
 
 		const snapshot = meeting.snapshots[timestamp]
@@ -448,7 +448,7 @@ export class SubCalcStorage {
 		}
 
 		this.currentMeetingKey = meetingKey
-		return snapshot
+		return JSON.stringify(snapshot)
 	}
 
 
