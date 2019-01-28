@@ -414,6 +414,7 @@ body {
                     
                     .loader-meeting-accordion-header > a {
                         border: none !important;
+                        border-bottom: 1px solid $rule-color !important;
                         border-radius: 0 !important;
                     }
                 
@@ -444,6 +445,7 @@ body {
                 .loader-snapshot {
                     display: flex;
                     padding: $form-margin/2 $form-margin;
+                    border-bottom: 1px solid $rule-color;
                     
                     &:hover {
                         background-color: yellow;

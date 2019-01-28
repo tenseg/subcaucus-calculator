@@ -22,6 +22,7 @@ interface Props {
     storage: SubCalcStorage
     currentMeetingKey: string
     onLoad: ((snapshot?: MeetingSnapshot) => void)
+    onNew: (() => void)
 }
 interface State {
 }
@@ -40,13 +41,19 @@ export class Loader extends React.Component<Props, State> {
      * NOTE: Do not `setState()` in this method.
      */
     renderMenu = (): JSX.Element => {
-        const items = [
-            {
+        const items: any = []
+        if (this.props.storage.currentMeetingKey) {
+            items.push({
                 label: "Back to the calculator",
                 icon: "pi pi-fw pi-caret-left",
                 command: () => this.props.onLoad()
-            }
-        ]
+            })
+        } else {
+            items.push({
+                label: "Minnesota DFL Subcaucus Calculator",
+                disabled: true
+            })
+        }
         return <Menubar key="loader-menu" model={items} id="app-main-menu" />
     }
 
@@ -55,6 +62,11 @@ export class Loader extends React.Component<Props, State> {
      */
     sortOrderIcon = (order: SortOrder): string => {
         return ["pi pi-chevron-circle-down", "pi pi-circle-off", "pi pi-chevron-circle-up"][order + 1]
+    }
+
+    deleteSnapshot = (snapshot: MeetingSnapshot) => {
+        this.props.storage.deleteSnapshot(snapshot)
+        this.forceUpdate()
     }
 
     renderSnapshot = (snapshot: MeetingSnapshot): JSX.Element => {
@@ -102,7 +114,14 @@ export class Loader extends React.Component<Props, State> {
                 <div className="loader-snapshot-actions">
                     <Button
                         icon="pi pi-trash"
-                        onClick={() => { _u.debug(`TODO Delete ${descriptor}`) }}
+                        className={descriptor === 'meeting'
+                            ? 'p-button-danger'
+                            : 'p-button-warning'
+                        }
+                        onClick={descriptor === 'meeting'
+                            ? () => { _u.debug(`TODO Delete ${descriptor}`) }
+                            : () => { this.deleteSnapshot(snapshot) }
+                        }
                     />
                 </div>
             </div>
@@ -187,12 +206,20 @@ export class Loader extends React.Component<Props, State> {
                     </div>
                     {this.renderMeetings()}
                     <div id="subcaucus-footer">
-                        <Button id="cancel-loader-button"
-                            label="Cancel"
-                            icon="pi pi-times"
-                            className="p-button-secondary"
-                            onClick={() => this.props.onLoad()}
+                        <Button id="add-loader-button"
+                            label="Add new meeting"
+                            icon="pi pi-calendar-plus"
+                            onClick={() => this.props.onNew()}
                         />
+                        {this.props.storage.currentMeetingKey
+                            ? <Button id="cancel-loader-button"
+                                label="Cancel"
+                                icon="pi pi-times"
+                                className="p-button-secondary"
+                                onClick={() => this.props.onLoad()}
+                            />
+                            : <></>
+                        }
                     </div>
                 </div>
             </div>

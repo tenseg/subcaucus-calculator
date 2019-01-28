@@ -119,24 +119,42 @@ export class SubCalcStorage {
 		return `${created} ${author}`
 	}
 
+	setCurrentMeetingKey = (meetingKey: string) => {
+		this.currentMeetingKey = meetingKey
+		const jsonSubCalc = {
+			v: this.version,
+			author: this.author,
+			current: meetingKey
+		}
+		try {
+			const jsonSubCalcString = JSON.stringify(jsonSubCalc)
+			_u.debug("storing subcalc2", jsonSubCalcString)
+			localStorage.setItem("subcalc2", jsonSubCalcString)
+		} catch (e) {
+			_u.alertUser(new Error("Failed to save subcalc2 to local storage"), e)
+			return
+		}
+	}
+
 	/**
 	 * Creates a new meeting and returns the current snapshot
 	 * from that new meeting.
 	 */
 	newMeeting = (): MeetingSnapshot => {
 		const created = (new Date()).toTimestampString()
-		this.currentMeetingKey = this.meetingKey(created)
+		const newMeetingKey = this.meetingKey(created)
 
 		const currentSnapshot = this.emptyMeetingSnapshot(created)
 
-		this.meetings.set(this.currentMeetingKey, {
-			key: this.currentMeetingKey,
+		this.meetings.set(newMeetingKey, {
+			key: newMeetingKey,
 			author: this.author,
 			created: created,
 			current: currentSnapshot,
 			snapshots: new TSMap<string, MeetingSnapshot>()
 		})
 
+		this.setCurrentMeetingKey(newMeetingKey)
 		this.writeMeetingSnapshot(currentSnapshot)
 
 		return currentSnapshot
@@ -182,9 +200,9 @@ export class SubCalcStorage {
 		if (meeting) {
 			// add the snapshot to our instance data
 			if (isCurrent) {
-				this.meetings.get(meetingKey).current = copyOfSnapshot
+				meeting.current = copyOfSnapshot
 			} else {
-				this.meetings.get(meetingKey).snapshots.set(snapshot.revised, copyOfSnapshot)
+				meeting.snapshots.set(snapshot.revised, copyOfSnapshot)
 			}
 
 			// synchronize our instance data with local storage
@@ -195,23 +213,53 @@ export class SubCalcStorage {
 	}
 
 	/**
+	 * Remove a snapshot from local storage.
+	 * 
+	 * NOTE: This method will not remove the "current" snapshot.
+	 */
+	deleteMeeting = (meetingKey: string) => {
+		// if we are trying to delete the current meeting, 
+		// then we must also clear the currentMeetingKey
+		if (meetingKey == this.currentMeetingKey) {
+			this.setCurrentMeetingKey('')
+		}
+		try {
+			localStorage.removeItem(meetingKey)
+		} catch (e) {
+			_u.alertUser(new Error(`Failed to remove ${meetingKey} from local storage`), e)
+			return
+		}
+	}
+
+
+	/**
+	 * Remove a snapshot from local storage.
+	 * 
+	 * NOTE: This method will not remove the "current" snapshot.
+	 */
+	deleteSnapshot = (snapshot: MeetingSnapshot) => {
+		const meetingKey = this.meetingKey(snapshot.created)
+		const isCurrent = (snapshot.revision == '')
+
+		// we never delete the current snapshot
+		if (isCurrent) return
+
+		const meeting = this.meetings.get(meetingKey)
+
+		// can't do anything with a meeting that does not exist
+		if (!meeting) return
+
+		meeting.snapshots.delete(snapshot.revised)
+
+		this.writeMeeting(meeting)
+	}
+
+	/**
 	 * Writes a meeting to local storage.
 	 */
 	writeMeeting = (meeting: Meeting) => {
-		const jsonSubCalc = {
-			v: this.version,
-			author: this.author,
-			current: meeting.key
-		}
 
-		try {
-			const jsonSubCalcString = JSON.stringify(jsonSubCalc)
-			_u.debug("storing subcalc2", jsonSubCalcString)
-			localStorage.setItem("subcalc2", jsonSubCalcString)
-		} catch (e) {
-			_u.alertUser(new Error("Failed to save subcalc2 to local storage"), e)
-			return
-		}
+		this.setCurrentMeetingKey(meeting.key)
 
 		const jsonMeeting = {
 			v: this.version,
@@ -426,7 +474,7 @@ export class SubCalcStorage {
 	 * NOTE: A side effect of this function is that the `currentMeetingKey`
 	 * of the Storage instance is reset when retrieval is successful.
 	 */
-	getSnapshot = (meetingKey = '', timestamp?: string): MeetingSnapshot | undefined => {
+	getSnapshotCopy = (meetingKey = '', timestamp?: string): MeetingSnapshot | undefined => {
 		const { currentMeetingKey, meetings } = this
 
 		if (meetingKey === '') {

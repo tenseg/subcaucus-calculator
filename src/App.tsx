@@ -260,6 +260,7 @@ export class App extends React.Component<Props, State> {
         // this.originalRevised = snapshot.revised
         this.currentSubcaucusID = snapshot.currentSubcaucusID
         this.currentMeetingKey = this.storage.meetingKey(snapshot.created, snapshot.author)
+        this.storage.setCurrentMeetingKey(this.currentMeetingKey)
         return this.stateFromSnapshot(snapshot)
     }
 
@@ -1295,6 +1296,7 @@ export class App extends React.Component<Props, State> {
                             storage={this.storage}
                             currentMeetingKey={this.currentMeetingKey}
                             onLoad={this.loadSnapshot}
+                            onNew={this.newMeeting}
                         />
                         : ''}
                     {this.renderByline()}
