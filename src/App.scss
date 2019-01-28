@@ -431,6 +431,7 @@ body {
                     .loader-meeting-name {
                         flex: 2 0 5em;
                         width: 5em;
+                        font-weight: 900;
                     }
                     
                     .loader-meeting-timestamp {
@@ -590,6 +591,7 @@ body {
 }
 
 .debugging {
+    z-index: -100;
     margin: 40px 20px 0 20px;
     padding: 20px 20px;
     background-color: rgba(255, 255, 255, 0.65);

@@ -8,8 +8,6 @@ import { Growl } from 'primereact/growl'
 import 'primereact/resources/primereact.min.css'
 import 'primereact/resources/themes/nova-light/theme.css'
 import 'primeicons/primeicons.css'
-// see https://www.npmjs.com/package/react-json-view
-import ReactJson from 'react-json-view'
 // local to this app
 import './App.scss'
 import * as _u from './Utilities'
@@ -18,6 +16,7 @@ import { Subcaucus } from './Subcaucus'
 import { SubcaucusRow, SubcaucusRowAction } from './SubcaucusRow'
 import { ValueCard } from './ValueCard'
 import { Loader } from './Loader'
+import { ShowJSON } from './ShowJSON'
 
 /**
  * Facilitates sorting up or down (or not at all), as needed.
@@ -644,11 +643,11 @@ export class App extends React.Component<Props, State> {
                         icon: "pi pi-fw pi-calendar-plus",
                         command: () => this.newMeeting()
                     },
-                    {
-                        label: "Duplicate meeting",
-                        icon: "pi pi-fw pi-clone",
-                        command: () => this.growlAlert("Duplicate meeting.", 'warn', 'TODO')
-                    },
+                    // {
+                    //     label: "Duplicate meeting",
+                    //     icon: "pi pi-fw pi-clone",
+                    //     command: () => this.growlAlert("Duplicate meeting.", 'warn', 'TODO')
+                    // },
                     {
                         label: "Load meeting",
                         icon: "pi pi-fw pi-folder-open",
@@ -1247,11 +1246,11 @@ export class App extends React.Component<Props, State> {
                 <p>This is debugging info for <a href="https://grand.clst.org:3000/tenseg/subcalc-pr/issues" target="_repository">subcalc-pr</a> (with <a href="https://reactjs.org/docs/react-component.html" target="_react">ReactJS</a>, <a href="https://www.primefaces.org/primereact/" target="_primereact">PrimeReact</a>, <a href="https://www.primefaces.org/primeng/#/icons" target="_primeicons">PrimeIcons</a>) derrived from <a href="https://bitbucket.org/tenseg/subcalc-js/src" target="_bitbucket">subcalc-js</a>.
                         </p>
                 <div style={{ float: "right" }}>
-                    <ReactJson name="this.storage.meetings (TSMap)" src={this.storage.meetings} />
+                    <ShowJSON name="this.storage.meetings (TSMap)" data={this.storage.meetings} />
                 </div>
                 <pre>{"rendered App " + (new Date()).toLocaleTimeString()}</pre>
-                <ReactJson name="this.state" src={this.state} /><br />
-                <ReactJson name="this.subcaucuses (TSMap)" src={this.subcaucuses} />
+                <ShowJSON name="this.state" data={this.state} /><br />
+                <ShowJSON name="this.subcaucuses (TSMap)" data={this.subcaucuses} />
                 <p style={{ clear: "both" }}>Done.</p>
             </div>
         )
