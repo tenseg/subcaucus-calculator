@@ -76,7 +76,7 @@ interface State {
     created: TimestampString
     author: number
     revised: TimestampString
-    snapshot: string
+    revision: string
     name: string
     allowed: number
     seed: number
@@ -194,7 +194,7 @@ export class App extends React.Component<Props, State> {
                 created: timestamp,
                 author: this.storage.author,
                 revised: timestamp,
-                snapshot: '',
+                revision: '',
                 name: 'Debugging', allowed: 10, cards: [],
                 // name: '', allowed: 0, cards: this.initialCardState,
                 present: Presenting.Calculator,
@@ -223,7 +223,7 @@ export class App extends React.Component<Props, State> {
                 created: timestamp,
                 author: this.storage.author,
                 revised: timestamp,
-                snapshot: '',
+                revision: '',
                 name: 'Could not read local storage!',
                 allowed: 1,
                 seed: 1,
@@ -265,7 +265,7 @@ export class App extends React.Component<Props, State> {
             created: snapshot.created,
             author: snapshot.author,
             revised: snapshot.revised,
-            snapshot: snapshot.revision,
+            revision: snapshot.revision,
             name: snapshot.name,
             allowed: allowed,
             seed: snapshot.seed,
@@ -303,7 +303,7 @@ export class App extends React.Component<Props, State> {
             created: state.created,
             author: state.author,
             revised: state.revised,
-            revision: state.snapshot,
+            revision: state.revision,
             name: state.name,
             allowed: state.allowed,
             seed: state.seed,
@@ -328,7 +328,7 @@ export class App extends React.Component<Props, State> {
             || this.state.allowed != previousState.allowed
             || this.state.seed != previousState.seed
         )) {
-            _u.debug(`changing (snapshots ${this.snapshotChanged ? this.snapshotChanged : "no"}) revision date of ${this.state.name}, ${this.state.snapshot}`)
+            _u.debug(`changing (snapshots ${this.snapshotChanged ? this.snapshotChanged : "no"}) revision date of ${this.state.name}, ${this.state.revision}`)
             _u.debug(`snapshots ${this.snapshotChanged ? this.snapshotChanged : "no"}`)
             _u.debug(`name ${this.state.name != previousState.name ? `${this.state.name} vs ${previousState.name}` : "no"}`)
             _u.debug(`allowed ${this.state.allowed != previousState.allowed ? `${this.state.allowed} vs ${previousState.allowed}` : "no"}`)
@@ -339,7 +339,7 @@ export class App extends React.Component<Props, State> {
             this.snapshotChanged = ''
             this.storage.writeMeetingSnapshot(this.snapshotFromState())
             if (confirm) {
-                this.growlAlert(this.state.snapshot, 'success', 'Snapshot Saved')
+                this.growlAlert(this.state.revision, 'success', 'Snapshot Saved')
             }
         }
         this.loadingSnapshot = false
@@ -353,7 +353,7 @@ export class App extends React.Component<Props, State> {
         this.setState({
             name: name,
             revised: (new Date()).toTimestampString(),
-            snapshot: '',
+            revision: '',
         }, this.writeToStorage)
     }
 
@@ -361,7 +361,7 @@ export class App extends React.Component<Props, State> {
         this.setState({
             allowed: allowed,
             revised: (new Date()).toTimestampString(),
-            snapshot: '',
+            revision: '',
         }, this.writeToStorage)
     }
 
@@ -369,7 +369,7 @@ export class App extends React.Component<Props, State> {
         this.setState({
             seed: seed,
             revised: (new Date()).toTimestampString(),
-            snapshot: '',
+            revision: '',
         }, this.writeToStorage)
     }
 
@@ -382,7 +382,7 @@ export class App extends React.Component<Props, State> {
     setStateSubcaucuses = () => {
         this.setState({
             revised: (new Date()).toTimestampString(),
-            snapshot: '',
+            revision: '',
         }, this.writeToStorage)
     }
 
@@ -402,7 +402,7 @@ export class App extends React.Component<Props, State> {
     saveSnapshot = (revision: string) => {
         this.snapshotChanged = 'confirm'
         this.setState({
-            snapshot: revision,
+            revision: revision,
             cards: this.removeCard(CardFor.SavingSnapshot),
         }, this.writeToStorage)
         this.growlAlert(revision, 'success', 'Snapshot Saved')
@@ -856,7 +856,7 @@ export class App extends React.Component<Props, State> {
             <ValueCard key="snapshot-value" id="snapshot-value"
                 title="Name for the snapshot?"
                 value=""
-                defaultValue={`Revision of ${this.state.snapshot || this.state.name}`}
+                defaultValue={`Revision of ${this.state.revision || this.state.name}`}
                 allowEmpty={false}
                 extraButtons={
                     <Button id="cancel-save-snapshot-button"
@@ -1144,7 +1144,7 @@ export class App extends React.Component<Props, State> {
      * NOTE: Do not `setState()` in this method.
      */
     renderCalculator = (): JSX.Element => {
-        const { name, snapshot, sortName, sortCount } = this.state
+        const { name, revision: snapshot, sortName, sortCount } = this.state
 
         return (
             <div id="calculator">
