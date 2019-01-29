@@ -213,9 +213,7 @@ export class SubCalcStorage {
 	}
 
 	/**
-	 * Remove a snapshot from local storage.
-	 * 
-	 * NOTE: This method will not remove the "current" snapshot.
+	 * Remove a whole meeting from local storage.
 	 */
 	deleteMeeting = (meetingKey: string) => {
 		// if we are trying to delete the current meeting, 
@@ -224,7 +222,8 @@ export class SubCalcStorage {
 			this.setCurrentMeetingKey('')
 		}
 		try {
-			localStorage.removeItem(meetingKey)
+			this.meetings.delete(meetingKey)
+			localStorage.removeItem(`${this.meetingPrefix} ${meetingKey}`)
 		} catch (e) {
 			_u.alertUser(new Error(`Failed to remove ${meetingKey} from local storage`), e)
 			return

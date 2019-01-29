@@ -8,6 +8,7 @@ import { Accordion, AccordionTab } from 'primereact/accordion';
 // local to this app
 import * as _u from './Utilities'
 import { SubCalcStorage } from './SubCalcStorage'
+import { ValueCard } from './ValueCard'
 
 /**
  * Facilitates sorting up or down (or not at all), as needed.
@@ -20,11 +21,11 @@ enum SortOrder {
 
 interface Props {
     storage: SubCalcStorage
-    currentMeetingKey: string
     onLoad: ((snapshot?: MeetingSnapshot) => void)
     onNew: (() => void)
 }
 interface State {
+    deleteMeetingKey: string
 }
 
 export class Loader extends React.Component<Props, State> {
@@ -32,6 +33,7 @@ export class Loader extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props)
         this.state = {
+            deleteMeetingKey: ''
         }
     }
 
@@ -62,6 +64,11 @@ export class Loader extends React.Component<Props, State> {
      */
     sortOrderIcon = (order: SortOrder): string => {
         return ["pi pi-chevron-circle-down", "pi pi-circle-off", "pi pi-chevron-circle-up"][order + 1]
+    }
+
+    deleteMeeting = (meetingKey: string) => {
+        this.props.storage.deleteMeeting(meetingKey)
+        this.setState({ deleteMeetingKey: '' })
     }
 
     deleteSnapshot = (snapshot: MeetingSnapshot) => {
@@ -119,7 +126,7 @@ export class Loader extends React.Component<Props, State> {
                             : 'p-button-warning'
                         }
                         onClick={descriptor === 'meeting'
-                            ? () => { _u.debug(`TODO Delete ${descriptor}`) }
+                            ? () => { this.setState({ deleteMeetingKey: this.props.storage.meetingKey(snapshot.created, snapshot.author) }) }
                             : () => { this.deleteSnapshot(snapshot) }
                         }
                     />
@@ -142,7 +149,7 @@ export class Loader extends React.Component<Props, State> {
         let indexOfCurrent = 0
         const meetingRows: Array<JSX.Element> = meetings.map((meeting, key, index) => {
 
-            if (this.props.currentMeetingKey == key) {
+            if (this.props.storage.currentMeetingKey == key) {
                 indexOfCurrent = index || 0
                 console.log("indexOfCurrent", indexOfCurrent, "index", index, "key", key)
             }
@@ -222,6 +229,39 @@ export class Loader extends React.Component<Props, State> {
                         }
                     </div>
                 </div>
+                {this.state.deleteMeetingKey
+                    ? <ValueCard
+                        title="Delete whole meeting?"
+                        footer={
+                            <>
+                                <Button id="confirm-delete-meeting-button"
+                                    label="Delete whole meeting"
+                                    icon="pi pi-trash"
+                                    className="p-button-danger"
+                                    onClick={() => this.deleteMeeting(this.state.deleteMeetingKey)}
+                                />
+                                <Button id="cancel-delete-meeting-button"
+                                    label="Cancel"
+                                    icon="pi pi-times"
+                                    className="p-button-secondary"
+                                    onClick={() => this.setState({ deleteMeetingKey: '' })}
+                                />
+                            </>
+                        }
+                    >
+                        <p>If you proceed with this deletion it will delete the whole meeting, <em>including all of its snapshots</em>.</p>
+                        {this.state.deleteMeetingKey === this.props.storage.currentMeetingKey
+                            ? <p>
+                                The meeting you are deleting is also the current meeting
+                                in the calculator. If you delete it, you will have to pick
+                                another meeting to load or create a new meeting in order
+                                to get back to the calculator.
+                            </p>
+                            : <></>
+                        }
+                    </ValueCard>
+                    : <></>
+                }
             </div>
         )
     }

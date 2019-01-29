@@ -99,11 +99,6 @@ export class App extends React.Component<Props, State> {
     private storage = new SubCalcStorage()
 
     /**
-     * Keeps track of the ID of the meeting in the calculator.
-     */
-    private currentMeetingKey = ""
-
-    /**
      * An array of `Subcaucus` objects used to track
      * our subcaucuses and do calculations.
      */
@@ -220,8 +215,6 @@ export class App extends React.Component<Props, State> {
         } else if (meeting) {
             this.state = this.refreshAppFromSnapshot(meeting.current)
         } else {
-            _u.alertUser(new Error("Could not read or write local storage."))
-
             this.subcaucuses = new TSMap<number, Subcaucus>()
             const timestamp = (new Date()).toTimestampString()
             // this.originalRevised = timestamp
@@ -236,7 +229,7 @@ export class App extends React.Component<Props, State> {
                 seed: 1,
                 // card status
                 cards: [],
-                present: Presenting.Calculator,
+                present: Presenting.Loading,
                 // sorting info
                 sortName: SortOrder.None,
                 sortCount: SortOrder.None,
@@ -259,8 +252,7 @@ export class App extends React.Component<Props, State> {
         this.subcaucuses = snapshot.subcaucuses
         // this.originalRevised = snapshot.revised
         this.currentSubcaucusID = snapshot.currentSubcaucusID
-        this.currentMeetingKey = this.storage.meetingKey(snapshot.created, snapshot.author)
-        this.storage.setCurrentMeetingKey(this.currentMeetingKey)
+        this.storage.setCurrentMeetingKey(this.storage.meetingKey(snapshot.created, snapshot.author))
         return this.stateFromSnapshot(snapshot)
     }
 
@@ -1294,7 +1286,6 @@ export class App extends React.Component<Props, State> {
                     {this.state.present == Presenting.Loading
                         ? <Loader
                             storage={this.storage}
-                            currentMeetingKey={this.currentMeetingKey}
                             onLoad={this.loadSnapshot}
                             onNew={this.newMeeting}
                         />
