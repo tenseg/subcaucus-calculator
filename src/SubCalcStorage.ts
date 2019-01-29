@@ -10,23 +10,9 @@ import { TSMap } from 'typescript-map'
 // local to this app
 import * as _u from './Utilities'
 import { Subcaucus } from './Subcaucus'
+import { Snapshot } from './Snapshot'
 
 declare global {
-
-	/**
-	 * Elements of a snapshot of a meeting in time.
-	 */
-	interface MeetingSnapshot {
-		created: TimestampString
-		author: number
-		revised: TimestampString
-		revision: string
-		name: string
-		allowed: number
-		seed: number
-		currentSubcaucusID: number
-		subcaucuses: TSMap<number, Subcaucus>
-	}
 
 	/**
 	 * Elements of the whole meeting.
@@ -35,8 +21,8 @@ declare global {
 		key: string
 		created: TimestampString
 		author: number
-		current: MeetingSnapshot
-		snapshots: TSMap<string, MeetingSnapshot>
+		current: Snapshot
+		snapshots: TSMap<string, Snapshot>
 	}
 
 }
@@ -140,69 +126,41 @@ export class SubCalcStorage {
 	 * Creates a new meeting and returns the current snapshot
 	 * from that new meeting.
 	 */
-	newMeeting = (): MeetingSnapshot => {
+	newMeeting = (): Snapshot => {
 		const created = (new Date()).toTimestampString()
-		const newMeetingKey = this.meetingKey(created)
 
-		const currentSnapshot = this.emptyMeetingSnapshot(created)
+		const snapshot = new Snapshot(this.author, created)
+		const meetingKey = snapshot.meetingKey()
 
-		this.meetings.set(newMeetingKey, {
-			key: newMeetingKey,
+		this.meetings.set(meetingKey, {
+			key: meetingKey,
 			author: this.author,
 			created: created,
-			current: currentSnapshot,
-			snapshots: new TSMap<string, MeetingSnapshot>()
+			current: snapshot,
+			snapshots: new TSMap<string, Snapshot>()
 		})
 
-		this.setCurrentMeetingKey(newMeetingKey)
-		this.writeMeetingSnapshot(currentSnapshot)
+		this.setCurrentMeetingKey(meetingKey)
+		this.writeMeetingSnapshot(snapshot)
 
-		return currentSnapshot
-	}
-
-	/**
-	 * Create a new and empty snapshot of a meeting.
-	 */
-	emptyMeetingSnapshot = (created?: TimestampString): MeetingSnapshot => {
-		if (created === undefined) {
-			created = (new Date()).toTimestampString()
-		}
-
-		// create a subcaucus ID and three subcaucuses
-		let currentSubcaucusID = 1
-		let subcaucuses = new TSMap<number, Subcaucus>()
-		subcaucuses.set(currentSubcaucusID, new Subcaucus(currentSubcaucusID++))
-		subcaucuses.set(currentSubcaucusID, new Subcaucus(currentSubcaucusID++))
-		subcaucuses.set(currentSubcaucusID, new Subcaucus(currentSubcaucusID++))
-
-		return {
-			created: created,
-			author: this.author,
-			revised: '',
-			revision: '',
-			name: '',
-			allowed: 0,
-			seed: _u.randomSeed(),
-			currentSubcaucusID: currentSubcaucusID,
-			subcaucuses: subcaucuses
-		}
+		return snapshot
 	}
 
 	/**
 	 * Writes the a meeting snapshot to local storage.
 	 */
-	writeMeetingSnapshot(snapshot: MeetingSnapshot) {
-		const meetingKey = this.meetingKey(snapshot.created)
-		const isCurrent = (snapshot.revision == '')
+	writeMeetingSnapshot(snapshot: Snapshot) {
+		const meetingKey = snapshot.meetingKey()
+		const isCurrent = (snapshot.revision === '')
 		const meeting = this.meetings.get(meetingKey)
-		const copyOfSnapshot = this.copySnapshot(snapshot)
+		const snapshotClone = snapshot.clone()
 
 		if (meeting) {
 			// add the snapshot to our instance data
 			if (isCurrent) {
-				meeting.current = copyOfSnapshot
+				meeting.current = snapshotClone
 			} else {
-				meeting.snapshots.set(snapshot.revised, copyOfSnapshot)
+				meeting.snapshots.set(snapshot.revised, snapshotClone)
 			}
 
 			// synchronize our instance data with local storage
@@ -236,7 +194,7 @@ export class SubCalcStorage {
 	 * 
 	 * NOTE: This method will not remove the "current" snapshot.
 	 */
-	deleteSnapshot = (snapshot: MeetingSnapshot) => {
+	deleteSnapshot = (snapshot: Snapshot) => {
 		const meetingKey = this.meetingKey(snapshot.created)
 		const isCurrent = (snapshot.revision == '')
 
@@ -264,9 +222,9 @@ export class SubCalcStorage {
 			v: this.version,
 			created: meeting.created,
 			author: meeting.author,
-			current: this.meetingSnapshotToJSON(meeting.current),
+			current: meeting.current.toJSON(),
 			snapshots: meeting.snapshots.map((snapshot) => {
-				return this.meetingSnapshotToJSON(snapshot)
+				return snapshot.toJSON()
 			})
 		}
 
@@ -279,15 +237,6 @@ export class SubCalcStorage {
 			_u.alertUser(new Error(`Error saving ${localStorageKey} to local storage`), e)
 			return
 		}
-	}
-
-	/**
-	 * Create a JSON object from a meeting snapshot.
-	 * 
-	 * NOTE: This object is _not_ stringified yet.
-	 */
-	meetingSnapshotToJSON = (snapshot: MeetingSnapshot): Object => {
-		return { ...snapshot, created: undefined, currentSubcaucusID: undefined }
 	}
 
 	importSubCalc1Data = () => {
@@ -368,7 +317,7 @@ export class SubCalcStorage {
 			return undefined
 		}
 
-		let snapshots = new TSMap<string, MeetingSnapshot>()
+		let snapshots = new TSMap<string, Snapshot>()
 
 		jsonMeeting["snapshots"].forEach((jsonSnapshot: any) => {
 			const snapshot = this.jsonToMeetingSnapshot(jsonSnapshot, created, author)

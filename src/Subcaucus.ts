@@ -3,10 +3,18 @@
 // or maybe just use a JSON.parse reviver to type the data
 
 declare global {
+	interface SubcaucusJSON {
+		name: string,
+		count: number
+	}
 	interface SubcaucusInitializer {
-		name?: string
-		count?: number
-		delegates?: number
+		id: number,
+		with?: {
+			name?: string
+			count?: number
+			delegates?: number
+		},
+		json?: SubcaucusJSON
 	}
 }
 
@@ -23,19 +31,44 @@ export class Subcaucus {
 	 * @param {number} withID required number
 	 * @param {SubcaucusInitializer | undefined} init optional {name?: string, count?: number, delegates?: number}
 	 */
-	constructor(withID: number, init?: SubcaucusInitializer) {
-		if (init === undefined) init = {}
+	constructor(init: SubcaucusInitializer) {
+		this.id = init.id
 
-		this.id = withID
-		this.name = init["name"] ? String(init["name"]) : ''
-		this.count = init["count"] ? Number(init["count"]) : 0
-		this.delegates = init["delegates"] ? Number(init["delegates"]) : 0
+		this.name = ''
+		this.count = 0
+		this.delegates = 0
+
+		if (init.with) {
+			this.name = init.with["name"] || this.name
+			this.count = init.with["count"] || this.count
+			this.delegates = init.with["delegates"] || this.delegates
+		}
+
+		if (init.json) {
+			this.fromJSON(init.json)
+		}
 	}
 
-	toJSON = (): { name: string, count: number } => {
+	clone = (): Subcaucus => {
+		return new Subcaucus({
+			id: this.id,
+			with: {
+				name: this.name,
+				count: this.count,
+				delegates: this.delegates,
+			}
+		})
+	}
+
+	toJSON = (): SubcaucusJSON => {
 		return {
 			name: this.name,
 			count: this.count
 		}
+	}
+
+	fromJSON = (json: SubcaucusJSON) => {
+		this.name = json["name"]
+		this.count = json["count"]
 	}
 }
