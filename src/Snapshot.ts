@@ -8,25 +8,19 @@
 
 // see https://github.com/ClickSimply/typescript-map
 import { TSMap } from 'typescript-map'
+
+// see: https://github.com/mojotech/json-type-validation
+import { Decoder, object, string, number, dict } from '@mojotech/json-type-validation'
+
 // local to this app
 import * as _u from './Utilities'
 import { Subcaucus } from './Subcaucus'
 
 declare global {
-	interface SnapshotJSON {
-		created: TimestampString
-		author: number
-		revised: TimestampString
-		revision: string
-		name: string
-		allowed: number
-		seed: number
-		subcaucuses: any
-	}
 
 	interface SnapshotInitializer {
-		author: number,
-		created: TimestampString,
+		author: number
+		created: TimestampString
 		with?: {
 			revised?: TimestampString
 			revision?: string
@@ -37,12 +31,24 @@ declare global {
 		},
 		json?: SnapshotJSON
 	}
+
+	interface SnapshotJSON {
+		author: number
+		created: TimestampString
+		revised: TimestampString
+		revision: string
+		name: string
+		allowed: number
+		seed: number
+		subcaucuses: { [id: string]: SubcaucusJSON }
+	}
+
 }
 
 export class Snapshot {
 
-	readonly created: TimestampString
-	readonly author: number
+	created: TimestampString
+	author: number
 	revised: TimestampString
 	revision: string
 	name: string
@@ -50,15 +56,37 @@ export class Snapshot {
 	seed: number
 	subcaucuses: TSMap<number, Subcaucus>
 
+	static decoder: Decoder<SnapshotJSON> = object({
+		author: number(),
+		created: string(),
+		revised: string(),
+		revision: string(),
+		name: string(),
+		allowed: number(),
+		seed: number(),
+		subcaucuses: dict(Subcaucus.decoder)
+	})
+
 	/**
 	 * Creates a new snapshot instance.
 	 * 
-	 * NOTE: If there is an author number in the `init` object, it will override the
-	 * author number from the `author` parameter.
+	 * ```typescript
+	 * interface SnapshotInitializer {
+	 *   author: number
+	 *   created: TimestampString
+	 *   with?: {
+	 * 	   revised?: TimestampString
+	 * 	   revision?: string
+	 * 	   name?: string
+	 * 	   allowed?: number
+	 * 	   seed?: number
+	 * 	   subcaucuses?: TSMap<number, Subcaucus>
+	 *   }
+	 *   json?: SnapshotJSON
+	 * }
+	 * ```
 	 * 
-	 * @param {number} author author of the enclosing meeting number (may be overridden in init)
-	 * @param {TimestampString} created date the enclosing meeting was created (may be overridden in init)
-	 * @param {SnapshotInitializer | undefined} init optional `{created?: TimestampString, author?: number, revised?: TimestampString, revision?: string, name?: string, allowed?: number, seed?: number, subcaucuses?: TSMap<number, Subcaucus>}`
+	 * @param {SnapshotInitializer} init
 	 */
 	constructor(init: SnapshotInitializer) {
 		this.created = init.created
@@ -83,12 +111,6 @@ export class Snapshot {
 
 		if (init.json) {
 			this.fromJSON(init.json)
-		}
-
-		if (this.subcaucuses.length === 0) {
-			this.subcaucuses.set(1, new Subcaucus({ id: 1 }))
-			this.subcaucuses.set(2, new Subcaucus({ id: 2 }))
-			this.subcaucuses.set(3, new Subcaucus({ id: 3 }))
 		}
 
 	}
@@ -145,7 +167,28 @@ export class Snapshot {
 	}
 
 	fromJSON = (json: SnapshotJSON) => {
+		const decoded = Snapshot.decoder.run(json)
 
+		if (decoded.ok) {
+			this.created = decoded.result.created
+			this.author = decoded.result.author
+			this.revised = decoded.result.revised
+			this.revision = decoded.result.revision
+			this.name = decoded.result.name
+			this.allowed = decoded.result.allowed
+			this.seed = decoded.result.seed
+			this.subcaucuses = new TSMap<number, Subcaucus>()
+			Object.keys(decoded.result.subcaucuses).forEach((key) => {
+				const jsub = decoded.result.subcaucuses[key]
+				const keyNum = Number(key)
+				this.subcaucuses.set(keyNum, new Subcaucus({
+					id: keyNum,
+					json: jsub
+				}))
+			})
+		} else {
+			_u.debug(decoded.error)
+		}
 	}
 
 	/**
@@ -157,18 +200,31 @@ export class Snapshot {
 	}
 
 	/**
-	 * The maximum ID in use for subcacuses in this snapshot.
+	 * The next ID in use for subcacuses in this snapshot.
+	 * 
+	 * One more than the current maximum ID.
 	 */
-	maxSubcaucusID = (): number => {
-		return Math.max(...this.subcaucuses.keys())
+	nextSubcaucusID = (): number => {
+		if (this.subcaucuses.length === 0) {
+			return 1
+		}
+		const max = Math.max(...this.subcaucuses.keys())
+		return max + 1
 	}
 
-	/**
-	 * Add an empty subcaucus to this snapshot.
-	 */
-	addSubcaucus = () => {
-		const newID = this.maxSubcaucusID() + 1
-		this.subcaucuses.set(newID, new Subcaucus({ id: newID }))
+    /**
+     * Add a subcaucus (empty by default).
+     */
+	addSubcaucus = (name = '', count = 0, delegates = 0) => {
+		const newID = this.nextSubcaucusID()
+		this.subcaucuses.set(newID, new Subcaucus({
+			id: newID,
+			with: {
+				name: name,
+				count: count,
+				delegates: delegates
+			}
+		}))
 	}
 
 	/**

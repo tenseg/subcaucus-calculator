@@ -2,20 +2,26 @@
 // see https://github.com/mojotech/json-type-validation
 // or maybe just use a JSON.parse reviver to type the data
 
+// see: https://github.com/mojotech/json-type-validation
+import { Decoder, object, string, optional, number, boolean } from '@mojotech/json-type-validation'
+
+// local to this app
+import * as _u from './Utilities'
+
 declare global {
-	interface SubcaucusJSON {
-		name: string,
-		count: number
-	}
+
 	interface SubcaucusInitializer {
-		id: number,
-		with?: {
-			name?: string
-			count?: number
-			delegates?: number
-		},
+		id: number
+		with?: Partial<SubcaucusJSON>
 		json?: SubcaucusJSON
 	}
+
+	interface SubcaucusJSON {
+		name: string
+		count: number
+		delegates?: number
+	}
+
 }
 
 export class Subcaucus {
@@ -25,11 +31,27 @@ export class Subcaucus {
 	count: number
 	delegates: number
 
+	static decoder: Decoder<SubcaucusJSON> = object({
+		name: string(),
+		count: number(),
+		delegates: optional(number())
+	})
+
 	/**
 	 * Creates a new subcacucus instance.
 	 * 
-	 * @param {number} withID required number
-	 * @param {SubcaucusInitializer | undefined} init optional {name?: string, count?: number, delegates?: number}
+	 * ```typescript
+	 * interface SubcaucusInitializer {
+	 *   id: number
+	 *   with?: {
+	 *     name?: string
+	 *     count?: number
+	 * 	   delegates?: number
+	 *   }
+	 *   json?: SubcaucusJSON
+	 * }
+	 * ```
+	 * @param {SubcaucusInitializer} init
 	 */
 	constructor(init: SubcaucusInitializer) {
 		this.id = init.id
@@ -68,7 +90,14 @@ export class Subcaucus {
 	}
 
 	fromJSON = (json: SubcaucusJSON) => {
-		this.name = json["name"]
-		this.count = json["count"]
+		const decoded = Subcaucus.decoder.run(json)
+
+		if (decoded.ok) {
+			this.name = decoded.result.name
+			this.count = decoded.result.count
+			this.delegates = decoded.result.delegates || 0
+		} else {
+			_u.debug(decoded.error)
+		}
 	}
 }

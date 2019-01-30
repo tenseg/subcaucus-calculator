@@ -7,7 +7,8 @@ import { Menubar } from 'primereact/menubar'
 import { Accordion, AccordionTab } from 'primereact/accordion';
 // local to this app
 import * as _u from './Utilities'
-import { SubCalcStorage } from './SubCalcStorage'
+import { SubCalc } from './SubCalc'
+import { Snapshot } from './Snapshot'
 import { ValueCard } from './ValueCard'
 
 /**
@@ -20,8 +21,8 @@ enum SortOrder {
 }
 
 interface Props {
-    storage: SubCalcStorage
-    onLoad: ((snapshot?: MeetingSnapshot) => void)
+    subcalc: SubCalc
+    onLoad: ((snapshot?: Snapshot) => void)
     onNew: (() => void)
 }
 interface State {
@@ -44,7 +45,7 @@ export class Loader extends React.Component<Props, State> {
      */
     renderMenu = (): JSX.Element => {
         const items: any = []
-        if (this.props.storage.currentMeetingKey) {
+        if (this.props.subcalc.currentMeetingKey) {
             items.push({
                 label: "Back to the calculator",
                 icon: "pi pi-fw pi-caret-left",
@@ -67,16 +68,16 @@ export class Loader extends React.Component<Props, State> {
     }
 
     deleteMeeting = (meetingKey: string) => {
-        this.props.storage.deleteMeeting(meetingKey)
+        this.props.subcalc.deleteMeeting(meetingKey)
         this.setState({ deleteMeetingKey: '' })
     }
 
-    deleteSnapshot = (snapshot: MeetingSnapshot) => {
-        this.props.storage.deleteSnapshot(snapshot)
+    deleteSnapshot = (snapshot: Snapshot) => {
+        this.props.subcalc.deleteSnapshot(snapshot)
         this.forceUpdate()
     }
 
-    renderSnapshot = (snapshot: MeetingSnapshot): JSX.Element => {
+    renderSnapshot = (snapshot: Snapshot): JSX.Element => {
         const descriptor = snapshot.revision ? "snapshot" : "meeting"
         const created = new Date(Date.parse(snapshot.created))
         const createdDate = created.toLocaleString(undefined, {
@@ -126,7 +127,7 @@ export class Loader extends React.Component<Props, State> {
                             : 'p-button-warning'
                         }
                         onClick={descriptor === 'meeting'
-                            ? () => { this.setState({ deleteMeetingKey: this.props.storage.meetingKey(snapshot.created, snapshot.author) }) }
+                            ? () => { this.setState({ deleteMeetingKey: this.props.subcalc.meetingKey(snapshot.created, snapshot.author) }) }
                             : () => { this.deleteSnapshot(snapshot) }
                         }
                     />
@@ -135,7 +136,7 @@ export class Loader extends React.Component<Props, State> {
         )
     }
 
-    renderSnapshots = (snapshots: TSMap<string, MeetingSnapshot>): JSX.Element => {
+    renderSnapshots = (snapshots: TSMap<string, Snapshot>): JSX.Element => {
         return (
             <>
                 {snapshots.map(this.renderSnapshot)}
@@ -144,12 +145,12 @@ export class Loader extends React.Component<Props, State> {
     }
 
     renderMeetings = (): JSX.Element => {
-        const meetings = this.props.storage.meetings
+        const meetings = this.props.subcalc.meetings
 
         let indexOfCurrent = 0
         const meetingRows: Array<JSX.Element> = meetings.map((meeting, key, index) => {
 
-            if (this.props.storage.currentMeetingKey == key) {
+            if (this.props.subcalc.currentMeetingKey == key) {
                 indexOfCurrent = index || 0
                 console.log("indexOfCurrent", indexOfCurrent, "index", index, "key", key)
             }
@@ -218,7 +219,7 @@ export class Loader extends React.Component<Props, State> {
                             icon="pi pi-calendar-plus"
                             onClick={() => this.props.onNew()}
                         />
-                        {this.props.storage.currentMeetingKey
+                        {this.props.subcalc.currentMeetingKey
                             ? <Button id="cancel-loader-button"
                                 label="Cancel"
                                 icon="pi pi-times"
@@ -250,7 +251,7 @@ export class Loader extends React.Component<Props, State> {
                         }
                     >
                         <p>If you proceed with this deletion it will delete the whole meeting, <em>including all of its snapshots</em>.</p>
-                        {this.state.deleteMeetingKey === this.props.storage.currentMeetingKey
+                        {this.state.deleteMeetingKey === this.props.subcalc.currentMeetingKey
                             ? <p>
                                 The meeting you are deleting is also the current meeting
                                 in the calculator. If you delete it, you will have to pick

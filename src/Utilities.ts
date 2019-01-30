@@ -16,6 +16,9 @@ declare global {
 	type TimestampString = string
 	type ComparisonValue = -1 | 0 | 1
 
+	// about extending classes
+	// see: https://stackoverflow.com/a/53392268/383737
+
 	interface String {
 		trim(): string
 		hashCode(): number

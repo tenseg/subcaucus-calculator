@@ -1,6 +1,5 @@
 import * as React from 'react'
-// see https://github.com/ClickSimply/typescript-map
-import { TSMap } from 'typescript-map'
+
 // see https://www.primefaces.org/primereact
 import { Button } from 'primereact/button'
 import { Menubar } from 'primereact/menubar'
@@ -8,10 +7,13 @@ import { Growl } from 'primereact/growl'
 import 'primereact/resources/primereact.min.css'
 import 'primereact/resources/themes/nova-light/theme.css'
 import 'primeicons/primeicons.css'
+
 // local to this app
 import './App.scss'
 import * as _u from './Utilities'
-import { SubCalcStorage } from './SubCalcStorage'
+import { SubCalc } from './SubCalc'
+import { Meeting } from './Meeting'
+import { Snapshot } from './Snapshot'
 import { Subcaucus } from './Subcaucus'
 import { SubcaucusRow, SubcaucusRowAction } from './SubcaucusRow'
 import { ValueCard } from './ValueCard'
@@ -73,8 +75,6 @@ interface Props { }
  * React state for the SubCalc App.
  */
 interface State {
-    created: TimestampString
-    author: number
     revised: TimestampString
     revision: string
     name: string
@@ -93,56 +93,15 @@ interface State {
 export class App extends React.Component<Props, State> {
 
     /**
-     * An instance of `SubCalcStorage` that we use to
+     * An instance of `SubCalc` that we use to
      * read and write data from and to local storage.
      */
-    private storage = new SubCalcStorage()
+    private subcalc = new SubCalc()
 
     /**
-     * An array of `Subcaucus` objects used to track
-     * our subcaucuses and do calculations.
+     * The snapshot we are displaying.
      */
-    private subcaucuses = new TSMap<number, Subcaucus>()
-
-    /**
-     * Tracks the dirty state of the snapshot. This
-     * should be toggled to `'yes'` or `'confirm'` whenever 
-     * significant data in the snapshot changes. 
-     * When it is `'confirm'` a success message will
-     * be shown to the user.
-     * It is toggled back to `''` whenever we 
-     * write data out to storage.
-     */
-    private snapshotChanged: '' | 'yes' | 'confirm' = ''
-
-    /**
-     * Flags when we are intentionally loading a new snapshot
-     * so that we don't interpret the changed state of the 
-     * calculator as a change to the snapshot itself.
-     */
-    private loadingSnapshot = false
-
-    /**
-     * The time at which the snapshot we start with
-     * was last revised.
-     */
-    // private originalRevised: TimestampString = ''
-
-    /**
-     * The time of the last revision to significant
-     * data in this meeting. When this differs from
-     * `snapshotRevised` then we know we have what
-     * may become a new snapshot (if saved).
-     */
-    // private revised: TimestampString = ''
-
-    /**
-     * Ensures that new subcacucuses are created with
-     * unique IDs. Those IDs are used as part of
-     * the subcaucus row keys so that the components
-     * are only reused appropriately.
-     */
-    private currentSubcaucusID = 1
+    private snapshot: Snapshot
 
     /**
      * To be included with component key whenever you want
@@ -178,21 +137,21 @@ export class App extends React.Component<Props, State> {
 
         _u.setAlertFunction(this.growlAlert)
 
-        const meeting = this.storage.getMeetingFromLocalStorage()
+        const meeting = this.subcalc.getMeetingFromLocalStorage()
+        const timestamp = (new Date()).toTimestampString()
+        this.snapshot = new Snapshot({
+            created: timestamp,
+            author: this.subcalc.author
+        })
 
         if (false && _u.isDebugging()) {
-            this.subcaucuses = new TSMap<number, Subcaucus>()
-            const timestamp = (new Date()).toTimestampString()
-
-            this.addSubcaucus("C", 10, 0)
-            this.addSubcaucus("A", 0, 0)
-            this.addSubcaucus("B", 100, 5)
-            this.addSubcaucus("D", 1, 0)
-            this.addSubcaucus()
+            this.snapshot.addSubcaucus("C", 10, 0)
+            this.snapshot.addSubcaucus("A", 0, 0)
+            this.snapshot.addSubcaucus("B", 100, 5)
+            this.snapshot.addSubcaucus("D", 1, 0)
+            this.snapshot.addSubcaucus()
             // this.originalRevised = timestamp
             this.state = {
-                created: timestamp,
-                author: this.storage.author,
                 revised: timestamp,
                 revision: '',
                 name: 'Debugging', allowed: 10, cards: [],
@@ -213,15 +172,10 @@ export class App extends React.Component<Props, State> {
                 }
             }
         } else if (meeting) {
-            this.state = this.refreshAppFromSnapshot(meeting.current)
+            this.snapshot = meeting.current
+            this.setStateSnapshot()
         } else {
-            this.subcaucuses = new TSMap<number, Subcaucus>()
-            const timestamp = (new Date()).toTimestampString()
-            // this.originalRevised = timestamp
-
             this.state = {
-                created: timestamp,
-                author: this.storage.author,
                 revised: timestamp,
                 revision: '',
                 name: 'Could not read local storage!',
@@ -235,47 +189,49 @@ export class App extends React.Component<Props, State> {
                 sortCount: SortOrder.None,
             }
         }
+
+        if (this.snapshot.subcaucuses.length === 0) {
+            this.snapshot.addSubcaucus()
+            this.snapshot.addSubcaucus()
+            this.snapshot.addSubcaucus()
+        }
     }
 
     /**
      * Synchronizes instance variables with a new snapshot
-     * and returns new state to be used to synchronize state
+     * and does a `setState()` to synchronize the App
      * with the new snapshot as well.
-     * 
-     * NOTE: This function does _not_ set the state. In most
-     * cases it should probably be wrapped in a `setState()` call:
-     * 
-     * `this.setState(this.refreshAppFromSnapshot(snapshot))`
      */
-    refreshAppFromSnapshot = (snapshot: MeetingSnapshot): State => {
+    setStateSnapshot = (snapshot?: Snapshot) => {
+        // if we are passing in a new snapshot,
+        // then we should save it as an instance variable too,
+        // otherwise, we use the instance variable as the new snapshot
+        if (snapshot) {
+            this.snapshot = snapshot
+        } else {
+            snapshot = this.snapshot
+        }
+        this.subcalc.setCurrentMeetingKey(snapshot.meetingKey())
         this.keySuffix = String(Math.random())
-        this.subcaucuses = snapshot.subcaucuses
-        // this.originalRevised = snapshot.revised
-        this.currentSubcaucusID = snapshot.currentSubcaucusID
-        this.storage.setCurrentMeetingKey(this.storage.meetingKey(snapshot.created, snapshot.author))
-        return this.stateFromSnapshot(snapshot)
-    }
-
-    /**
-     * Returns a `State` object which reflects the snapshot.
-     */
-    stateFromSnapshot = (snapshot: MeetingSnapshot): State => {
-        const allowed = snapshot.allowed
-        return {
-            created: snapshot.created,
-            author: snapshot.author,
+        const state = {
             revised: snapshot.revised,
             revision: snapshot.revision,
             name: snapshot.name,
-            allowed: allowed,
+            allowed: snapshot.allowed,
             seed: snapshot.seed,
             // card status
-            cards: allowed ? [] : this.initialCardState,
+            cards: snapshot.allowed ? [] : this.initialCardState,
             present: Presenting.Calculator,
             // sorting info
             sortName: SortOrder.None,
             sortCount: SortOrder.None,
             summary: undefined
+        }
+        // if there is no state yet, then we create it
+        if (this.state) {
+            this.setState(state)
+        } else {
+            this.state = state
         }
     }
 
@@ -283,70 +239,16 @@ export class App extends React.Component<Props, State> {
      * Either load the snapshot or return to the calculator.
      * This is used as a callback from the loading component.
      */
-    loadSnapshot = (snapshot?: MeetingSnapshot) => {
+    loadSnapshot = (snapshot?: Snapshot) => {
         if (snapshot) {
-            this.setState(this.refreshAppFromSnapshot(snapshot))
+            this.setStateSnapshot(snapshot)
         } else {
             this.setState({ present: Presenting.Calculator })
         }
     }
 
-    /**
-     * Returns a `MeetingSnapshot` object which reflects the current state
-     * and the values of various instance variables.
-     */
-    snapshotFromState = (state?: State): MeetingSnapshot => {
-        if (!state) {
-            state = this.state
-        }
-        return {
-            created: state.created,
-            author: state.author,
-            revised: state.revised,
-            revision: state.revision,
-            name: state.name,
-            allowed: state.allowed,
-            seed: state.seed,
-            currentSubcaucusID: this.currentSubcaucusID,
-            subcaucuses: this.subcaucuses,
-        }
-    }
-
-    /**
-     * Invoked immediately after React updating occurs. 
-     * Not called for the initial render.
-     * 
-     * Used to make sure significant changes are written
-     * out to the storage manager.
-     */
-    componentDidUpdate = (previousProps: Props, previousState: State) => {
-
-        return
-
-        if (this.loadingSnapshot === false && (this.snapshotChanged
-            || this.state.name != previousState.name
-            || this.state.allowed != previousState.allowed
-            || this.state.seed != previousState.seed
-        )) {
-            _u.debug(`changing (snapshots ${this.snapshotChanged ? this.snapshotChanged : "no"}) revision date of ${this.state.name}, ${this.state.revision}`)
-            _u.debug(`snapshots ${this.snapshotChanged ? this.snapshotChanged : "no"}`)
-            _u.debug(`name ${this.state.name != previousState.name ? `${this.state.name} vs ${previousState.name}` : "no"}`)
-            _u.debug(`allowed ${this.state.allowed != previousState.allowed ? `${this.state.allowed} vs ${previousState.allowed}` : "no"}`)
-            _u.debug(`allowed ${this.state.seed != previousState.seed ? `${this.state.seed} vs ${previousState.seed}` : "no"}`)
-
-            // this.revised = (new Date()).toTimestampString()
-            const confirm = this.snapshotChanged === 'confirm'
-            this.snapshotChanged = ''
-            this.storage.writeMeetingSnapshot(this.snapshotFromState())
-            if (confirm) {
-                this.growlAlert(this.state.revision, 'success', 'Snapshot Saved')
-            }
-        }
-        this.loadingSnapshot = false
-    }
-
     writeToStorage = () => {
-        this.storage.writeMeetingSnapshot(this.snapshotFromState())
+        this.subcalc.writeMeetingSnapshot(this.snapshot)
     }
 
     setStateName = (name: string) => {
@@ -391,8 +293,7 @@ export class App extends React.Component<Props, State> {
      * set our state to reflect the new meeting.
      */
     newMeeting = () => {
-        const snapshot = this.storage.newMeeting()
-        this.setState(this.refreshAppFromSnapshot(snapshot))
+        this.setStateSnapshot(this.subcalc.newMeeting())
     }
 
     /**
@@ -400,7 +301,6 @@ export class App extends React.Component<Props, State> {
      * set our state to reflect the new meeting.
      */
     saveSnapshot = (revision: string) => {
-        this.snapshotChanged = 'confirm'
         this.setState({
             revision: revision,
             cards: this.removeCard(CardFor.SavingSnapshot),
@@ -409,32 +309,10 @@ export class App extends React.Component<Props, State> {
     }
 
     /**
-     * Increment the `currentSubcaucusID` so that each subcaucus gets a unique id.
-     */
-    nextSubcaucusID = () => this.currentSubcaucusID++
-
-    /**
-     * Add a subcaucus (empty by default).
-     */
-    addSubcaucus = (name = '', count = 0, delegates = 0) => {
-        const newSubcaucus = new Subcaucus(this.nextSubcaucusID(), {
-            name: name,
-            count: count,
-            delegates: delegates
-        })
-        this.subcaucuses.set(newSubcaucus.id, newSubcaucus)
-
-        // we should only force an update if the state already exists
-        // this allows us to add subcaucuses in the constructor
-        // as long as we make sure to do it before we create the state
-        if (this.state) this.setStateSubcaucuses()
-    }
-
-    /**
      * Provide a default name for this meeting, including today's date.
      */
     defaultName = (): string => {
-        return "Meeting on " + this.state.created.toDate().toLocaleDateString("en-US")
+        return "Meeting on " + this.snapshot.created.toDate().toLocaleDateString("en-US")
     }
 
     /**
@@ -538,7 +416,7 @@ export class App extends React.Component<Props, State> {
         _u.debug("subcaucus changed", subcaucusID, action)
         switch (action) {
             case 'remove':
-                this.subcaucuses.filter((subcaucus, key) => {
+                this.snapshot.subcaucuses.filter((subcaucus, key) => {
                     return key != subcaucusID
                 })
                 this.setStateSubcaucuses()
@@ -546,10 +424,10 @@ export class App extends React.Component<Props, State> {
             case 'enter':
                 return
             case 'sync':
-                return this.subcaucuses.get(subcaucusID)
+                return this.snapshot.subcaucuses.get(subcaucusID)
             default:
                 // this.subcaucuses[id] = changedSubcaucus
-                const subcaucus = this.subcaucuses.get(subcaucusID)
+                const subcaucus = this.snapshot.subcaucuses.get(subcaucusID)
                 if (subcaucus.name != action.name || subcaucus.count != action.count) {
                     subcaucus.name = action.name
                     subcaucus.count = action.count
@@ -564,12 +442,12 @@ export class App extends React.Component<Props, State> {
      */
     removeEmpties = (subset: 'all' | 'unnamed' = 'all') => {
         if (subset == 'all') {
-            this.subcaucuses.filter((subcaucus, key) => {
+            this.snapshot.subcaucuses.filter((subcaucus, key) => {
                 return subcaucus.count > 0
             })
         }
         if (subset == 'unnamed') {
-            this.subcaucuses.filter((subcaucus, k, i) => {
+            this.snapshot.subcaucuses.filter((subcaucus, k, i) => {
                 _u.debug("remove?", subcaucus.id, subcaucus.count, subcaucus.name, subcaucus.count > 0 || subcaucus.name != '', "key", k, "index", i)
                 return subcaucus.count > 0 || subcaucus.name != ''
             })
@@ -1066,7 +944,7 @@ export class App extends React.Component<Props, State> {
             sort = this.sortBySubcaucusCounts
         }
 
-        return this.subcaucuses.values().sort(sort).map((subcaucus): JSX.Element => {
+        return this.snapshot.subcaucuses.values().sort(sort).map((subcaucus): JSX.Element => {
             return (
                 <SubcaucusRow key={`${subcaucus.id} ${this.keySuffix}`}
                     id={subcaucus.id}
@@ -1195,7 +1073,10 @@ export class App extends React.Component<Props, State> {
                         <Button id="add-subcaucus-button"
                             label="Add a Subcaucus"
                             icon="pi pi-plus"
-                            onClick={() => this.addSubcaucus()}
+                            onClick={() => {
+                                this.snapshot.addSubcaucus()
+                                this.setStateSubcaucuses()
+                            }}
                         />
                         <Button id="remove-empty-subcaucuses-button"
                             label="Remove Empties"
@@ -1239,11 +1120,11 @@ export class App extends React.Component<Props, State> {
                 <p>This is debugging info for <a href="https://grand.clst.org:3000/tenseg/subcalc-pr/issues" target="_repository">subcalc-pr</a> (with <a href="https://reactjs.org/docs/react-component.html" target="_react">ReactJS</a>, <a href="https://www.primefaces.org/primereact/" target="_primereact">PrimeReact</a>, <a href="https://www.primefaces.org/primeng/#/icons" target="_primeicons">PrimeIcons</a>) derrived from <a href="https://bitbucket.org/tenseg/subcalc-js/src" target="_bitbucket">subcalc-js</a>.
                         </p>
                 <div style={{ float: "right" }}>
-                    <ShowJSON name="this.storage.meetings (TSMap)" data={this.storage.meetings} />
+                    <ShowJSON name="this.storage" data={this.subcalc} />
                 </div>
                 <pre>{"rendered App " + (new Date()).toLocaleTimeString()}</pre>
                 <ShowJSON name="this.state" data={this.state} /><br />
-                <ShowJSON name="this.subcaucuses (TSMap)" data={this.subcaucuses} />
+                <ShowJSON name="this.snapshot" data={this.snapshot} />
                 <p style={{ clear: "both" }}>Done.</p>
             </div>
         )
@@ -1275,7 +1156,7 @@ export class App extends React.Component<Props, State> {
      */
     render() {
 
-        _u.debug("rendering", this.subcaucuses)
+        _u.debug("rendering", this.snapshot)
 
         return (
             <div id="app">
@@ -1285,7 +1166,7 @@ export class App extends React.Component<Props, State> {
                         : ''}
                     {this.state.present == Presenting.Loading
                         ? <Loader
-                            storage={this.storage}
+                            subcalc={this.subcalc}
                             onLoad={this.loadSnapshot}
                             onNew={this.newMeeting}
                         />

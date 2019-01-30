@@ -21,7 +21,7 @@ export class ShowJSON extends React.Component<Props, State> {
 		return (
 			<div className="show-json">
 				<pre>
-					{name ? `${name} = ` : ''}
+					{this.props.name ? `${this.props.name} = ` : ''}
 					{jsonString}
 				</pre>
 			</div>

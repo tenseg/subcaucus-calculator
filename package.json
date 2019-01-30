@@ -4,6 +4,7 @@
   "homepage": "./",
   "private": true,
   "dependencies": {
+    "@mojotech/json-type-validation": "^3.1.0",
     "classnames": "^2.2.6",
     "node-sass": "^4.11.0",
     "primeicons": "^1.0.0",
