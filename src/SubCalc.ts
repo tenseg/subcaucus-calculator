@@ -18,6 +18,9 @@ import { Snapshot } from './Snapshot'
 
 declare global {
 
+	/**
+	 * JSON representation of subcalc2 in storage.
+	 */
 	interface SubCalcJSON {
 		v: number
 		author: number
@@ -59,7 +62,7 @@ export class SubCalc {
 	 * A prefix to be used when creating local storage items
 	 * for each meeting.
 	 */
-	meetingPrefix = "sc-meeting"
+	storedMeetingPrefix = "sc-meeting"
 
 	static decoder: Decoder<SubCalcJSON> = object({
 		v: number(),
@@ -74,11 +77,11 @@ export class SubCalc {
 
 		// then we look for local data
 
-		this.importSubCalc2Data()
+		this.readSubCalc2Data()
 
 		if (!this.author) {
 
-			this.importSubCalc1Data()
+			this.readSubCalc1Data()
 
 			if (!this.author) {
 
@@ -110,6 +113,17 @@ export class SubCalc {
 		return `${created} ${author}`
 	}
 
+	/**
+	 * Returns a string to be used to retrive a meeting from local storage.
+	 */
+	storedMeetingKey = (meetingKey: string) => {
+		return `${this.storedMeetingPrefix} ${meetingKey}`
+	}
+
+	/**
+	 * Ensures that not only is the current meeting set properly,
+	 * but that this change is reflected in local storage as well.
+	 */
 	setCurrentMeetingKey = (meetingKey: string) => {
 		this.currentMeetingKey = meetingKey
 		const jsonSubCalc = {
@@ -125,6 +139,18 @@ export class SubCalc {
 			_u.alertUser(new Error("Failed to save subcalc2 to local storage"), e)
 			return
 		}
+	}
+
+	/**
+	 * Returns a meeting from the SubCalc instance's list of meetings.
+	 * 
+	 * Defaults to returning the current meeting.
+	 */
+	getMeeting = (meetingKey?: string): Meeting => {
+		if (!meetingKey) {
+			meetingKey = this.currentMeetingKey
+		}
+		return this.meetings.get(meetingKey)
 	}
 
 	/**
@@ -150,7 +176,7 @@ export class SubCalc {
 		}))
 
 		this.setCurrentMeetingKey(meetingKey)
-		this.writeMeetingSnapshot(snapshot)
+		this.writeSnapshot(snapshot)
 
 		return snapshot
 	}
@@ -162,21 +188,15 @@ export class SubCalc {
 
 		this.setCurrentMeetingKey(meeting.key)
 
-		const jsonMeeting = {
-			v: this.version,
-			created: meeting.created,
-			author: meeting.author,
-			current: meeting.current.toJSON(),
-			snapshots: meeting.snapshots.toJSON()
-		}
+		const jsonMeeting = meeting.toJSON()
 
-		const localStorageKey = `${this.meetingPrefix} ${meeting.key}`
+		const storedMeetingKey = this.storedMeetingKey(meeting.key)
 		try {
 			const jsonMeetingString = JSON.stringify(jsonMeeting)
-			_u.debug(`storing ${localStorageKey}`, jsonMeetingString)
-			localStorage.setItem(`${localStorageKey}`, jsonMeetingString)
+			_u.debug(`storing ${storedMeetingKey}`, jsonMeetingString)
+			localStorage.setItem(storedMeetingKey, jsonMeetingString)
 		} catch (e) {
-			_u.alertUser(new Error(`Error saving ${localStorageKey} to local storage`), e)
+			_u.alertUser(new Error(`Error saving ${storedMeetingKey} to local storage`), e)
 			return
 		}
 	}
@@ -184,7 +204,7 @@ export class SubCalc {
 	/**
 	 * Writes the a meeting snapshot to local storage.
 	 */
-	writeMeetingSnapshot(snapshot: Snapshot) {
+	writeSnapshot(snapshot: Snapshot) {
 		const meetingKey = snapshot.meetingKey()
 		const isCurrent = (snapshot.revision === '')
 		const meeting = this.meetings.get(meetingKey)
@@ -216,7 +236,7 @@ export class SubCalc {
 		}
 		try {
 			this.meetings.delete(meetingKey)
-			localStorage.removeItem(`${this.meetingPrefix} ${meetingKey}`)
+			localStorage.removeItem(`${this.storedMeetingPrefix} ${meetingKey}`)
 		} catch (e) {
 			_u.alertUser(new Error(`Failed to remove ${meetingKey} from local storage`), e)
 			return
@@ -246,14 +266,18 @@ export class SubCalc {
 		this.writeMeeting(meeting)
 	}
 
-	importSubCalc1Data = () => {
+	/**
+	 * TODO: Reads in original subcalc local storage
+	 * and converts it to subcalc2.
+	 */
+	readSubCalc1Data = () => {
 
 	}
 
 	/**
 	 * Try to populate this instance with subcalc2 data from local storage.
 	 */
-	importSubCalc2Data = () => {
+	readSubCalc2Data = () => {
 		let json: SubCalcJSON
 
 		try {
@@ -280,10 +304,10 @@ export class SubCalc {
 		this.meetings = new TSMap<string, Meeting>()
 
 		for (let i = 0; i < length; i++) {
-			const key = localStorage.key(i)
-			if (!key) break
-			if (key.startsWith(this.meetingPrefix)) {
-				const meeting = this.getMeetingFromLocalStorage(key)
+			const storedKey = localStorage.key(i)
+			if (!storedKey) break
+			if (storedKey.startsWith(this.storedMeetingPrefix)) {
+				const meeting = this.readMeeting(storedKey)
 				if (meeting) {
 					this.meetings.set(meeting.key, meeting)
 				}
@@ -293,25 +317,37 @@ export class SubCalc {
 
 	/**
 	 * Given a meeting key, this functions looks for that meeting in
-	 * local storage and creates a meeting object to hold the information.
+	 * local storage and returns a new meeting object to holding that information.
+	 * 
+	 * Defaults to reading in the current meeting from storage.
 	 */
-	getMeetingFromLocalStorage = (key?: string): Meeting | undefined => {
+	readMeeting = (storedMeetingKey?: string): Meeting | undefined => {
 		let json: MeetingJSON
 
-		key = key || `${this.meetingPrefix} ${this.currentMeetingKey}`
+		if (!storedMeetingKey) {
+			storedMeetingKey = this.storedMeetingKey(this.currentMeetingKey)
+		}
 
 		try {
-			json = JSON.parse(localStorage.getItem(key) || 'false')
+			json = JSON.parse(localStorage.getItem(storedMeetingKey) || 'false')
 		} catch (e) {
 			_u.debug(e)
 			return undefined
 		}
 
-		return new Meeting({
-			key: key,
-			author: 0,
-			json: json
-		})
+		const decoded = Meeting.decoder.run(json)
+
+		if (decoded.ok) {
+			return new Meeting({
+				key: this.meetingKey(decoded.result.created, decoded.result.author),
+				author: decoded.result.author,
+				json: decoded.result
+			})
+		} else {
+			_u.debug(decoded.error)
+		}
+
+		return undefined
 
 	}
 

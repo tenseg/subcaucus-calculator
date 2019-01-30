@@ -137,14 +137,18 @@ export class App extends React.Component<Props, State> {
 
         _u.setAlertFunction(this.growlAlert)
 
-        const meeting = this.subcalc.getMeetingFromLocalStorage()
+        // get the current meeting from storage
+        const meeting = this.subcalc.getMeeting()
         const timestamp = (new Date()).toTimestampString()
+
+        // prepare a new snapshot to hold edits to come
         this.snapshot = new Snapshot({
             created: timestamp,
             author: this.subcalc.author
         })
 
         if (false && _u.isDebugging()) {
+            // if debugging, fill the snapshot and state with peculiar information
             this.snapshot.addSubcaucus("C", 10, 0)
             this.snapshot.addSubcaucus("A", 0, 0)
             this.snapshot.addSubcaucus("B", 100, 5)
@@ -172,9 +176,13 @@ export class App extends React.Component<Props, State> {
                 }
             }
         } else if (meeting) {
+            // if we found a current meeting,
+            // then use it's current snapshot instead
             this.snapshot = meeting.current
             this.setStateSnapshot()
         } else {
+            // no meeting was found, 
+            // this is an error since one should have been created
             this.state = {
                 revised: timestamp,
                 revision: '',
@@ -190,17 +198,14 @@ export class App extends React.Component<Props, State> {
             }
         }
 
-        if (this.snapshot.subcaucuses.length === 0) {
-            this.snapshot.addSubcaucus()
-            this.snapshot.addSubcaucus()
-            this.snapshot.addSubcaucus()
-        }
     }
 
     /**
      * Synchronizes instance variables with a new snapshot
      * and does a `setState()` to synchronize the App
      * with the new snapshot as well.
+     * 
+     * Defaults to synchronizing with the current snapshot.
      */
     setStateSnapshot = (snapshot?: Snapshot) => {
         // if we are passing in a new snapshot,
@@ -210,6 +215,14 @@ export class App extends React.Component<Props, State> {
             this.snapshot = snapshot
         } else {
             snapshot = this.snapshot
+        }
+        // if we get here and still have a brand new snapshot
+        // then fill it with a few empty subcaucuses so that
+        // the user has a hint of how to proceed
+        if (snapshot.subcaucuses.length === 0) {
+            snapshot.addSubcaucus()
+            snapshot.addSubcaucus()
+            snapshot.addSubcaucus()
         }
         this.subcalc.setCurrentMeetingKey(snapshot.meetingKey())
         this.keySuffix = String(Math.random())
@@ -248,10 +261,11 @@ export class App extends React.Component<Props, State> {
     }
 
     writeToStorage = () => {
-        this.subcalc.writeMeetingSnapshot(this.snapshot)
+        this.subcalc.writeSnapshot(this.snapshot)
     }
 
     setStateName = (name: string) => {
+        this.snapshot.name = name
         this.setState({
             name: name,
             revised: (new Date()).toTimestampString(),
@@ -260,6 +274,7 @@ export class App extends React.Component<Props, State> {
     }
 
     setStateAllowed = (allowed: number) => {
+        this.snapshot.allowed = allowed
         this.setState({
             allowed: allowed,
             revised: (new Date()).toTimestampString(),
@@ -301,6 +316,7 @@ export class App extends React.Component<Props, State> {
      * set our state to reflect the new meeting.
      */
     saveSnapshot = (revision: string) => {
+        this.subcalc.getMeeting().addSnapshot(revision)
         this.setState({
             revision: revision,
             cards: this.removeCard(CardFor.SavingSnapshot),
@@ -412,27 +428,21 @@ export class App extends React.Component<Props, State> {
      * Used by the `SubcaucusRow` via a callback to update the 
      * subcaucus array here in the app. 
      */
-    handleSubcaucusChange = (subcaucusID: number, action: SubcaucusRowAction) => {
-        _u.debug("subcaucus changed", subcaucusID, action)
+    handleSubcaucusChange = (subcaucus: Subcaucus, action: SubcaucusRowAction) => {
+        _u.debug("subcaucus changed", subcaucus.id, action)
         switch (action) {
             case 'remove':
                 this.snapshot.subcaucuses.filter((subcaucus, key) => {
-                    return key != subcaucusID
+                    return key != subcaucus.id
                 })
                 this.setStateSubcaucuses()
                 return
             case 'enter':
+                // TODO: handle special behavior on tab/enter
                 return
-            case 'sync':
-                return this.snapshot.subcaucuses.get(subcaucusID)
-            default:
-                // this.subcaucuses[id] = changedSubcaucus
-                const subcaucus = this.snapshot.subcaucuses.get(subcaucusID)
-                if (subcaucus.name != action.name || subcaucus.count != action.count) {
-                    subcaucus.name = action.name
-                    subcaucus.count = action.count
-                    this.setStateSubcaucuses()
-                }
+            case 'recalc':
+                // this is a signal to recalculate
+                this.setStateSubcaucuses()
                 return
         }
     }
@@ -947,7 +957,7 @@ export class App extends React.Component<Props, State> {
         return this.snapshot.subcaucuses.values().sort(sort).map((subcaucus): JSX.Element => {
             return (
                 <SubcaucusRow key={`${subcaucus.id} ${this.keySuffix}`}
-                    id={subcaucus.id}
+                    subcaucus={subcaucus}
                     exchange={this.handleSubcaucusChange}
                 />
             )

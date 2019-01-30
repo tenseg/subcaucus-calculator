@@ -14,6 +14,10 @@ import { Snapshot } from './Snapshot'
 
 declare global {
 
+	/**
+	 * An object with which to initialize a meeting.
+	 * Both a `key` string and an `author` number are required.
+	 */
 	interface MeetingInitializer {
 		key: string
 		author: number
@@ -25,6 +29,9 @@ declare global {
 		json?: MeetingJSON
 	}
 
+	/**
+	 * JSON representation of a meeting.
+	 */
 	interface MeetingJSON {
 		v: number
 		author: number
@@ -35,15 +42,43 @@ declare global {
 
 }
 
+/**
+ * A meeting, made up of an author, a created timestamp,
+ * and several snapshots.
+ */
 export class Meeting {
 
+	/**
+	 * The identifier of this meeting,
+	 * presently made up of the created timestamp
+	 * and the author number.
+	 */
 	readonly key: string
+
+	/**
+	 * The author number of the creator of this meeting.
+	 */
 	author: number
+
+	/**
+	 * The time this meeting was created.
+	 */
 	created: TimestampString
+
+	/**
+	 * A snapshot of the most recent state of this meeting.
+	 */
 	current: Snapshot
+
+	/**
+	 * Snapshots of the state of this meeting named and saved by the user.
+	 */
 	snapshots: TSMap<TimestampString, Snapshot>
 
 
+	/**
+	 * A decoder to help validate JSON for this class.
+	 */
 	static decoder: Decoder<MeetingJSON> = object({
 		v: number(),
 		author: number(),
@@ -90,6 +125,10 @@ export class Meeting {
 		}
 	}
 
+	/**
+	 * Provides a deep copy of this meeting instance
+	 * with no lingering deeper references.
+	 */
 	clone = (): Meeting => {
 		return new Meeting({
 			key: this.key,
@@ -102,6 +141,11 @@ export class Meeting {
 		})
 	}
 
+	/**
+	 * Converts this meeting instance into a JSON representation.
+	 * 
+	 * NOTE: This is _not_ yet stringified.
+	 */
 	toJSON = (): MeetingJSON => {
 		return {
 			v: 2,
@@ -112,6 +156,12 @@ export class Meeting {
 		}
 	}
 
+	/**
+	 * Fills this instace with data from a JSON representation
+	 * of a meeting.
+	 * 
+	 * NOTE: This does _not_ parse a JSON string, but takes an actual object.
+	 */
 	fromJSON = (json: MeetingJSON) => {
 		const decoded = Meeting.decoder.run(json)
 
@@ -134,5 +184,15 @@ export class Meeting {
 		} else {
 			_u.debug(decoded.error)
 		}
+	}
+
+	/**
+	 * Add a snapshot to the meeting using the current snapshot with a new name.
+	 */
+	addSnapshot = (revision: string) => {
+		const snapshot = this.current.clone()
+		snapshot.revised = (new Date()).toTimestampString()
+		snapshot.revision = revision
+		this.snapshots.set(snapshot.revised, snapshot)
 	}
 }

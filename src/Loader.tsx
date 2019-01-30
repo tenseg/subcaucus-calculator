@@ -139,7 +139,9 @@ export class Loader extends React.Component<Props, State> {
     renderSnapshots = (snapshots: TSMap<string, Snapshot>): JSX.Element => {
         return (
             <>
-                {snapshots.map(this.renderSnapshot)}
+                {snapshots.map((snapshot) => {
+                    return this.renderSnapshot(snapshot)
+                })}
             </>
         )
     }
@@ -154,7 +156,6 @@ export class Loader extends React.Component<Props, State> {
                 indexOfCurrent = index || 0
                 console.log("indexOfCurrent", indexOfCurrent, "index", index, "key", key)
             }
-            const meetingKey = `${meeting.created}-${meeting.author}`
             const hasSnapshots = meeting.snapshots.length > 0
 
             const created = new Date(Date.parse(meeting.created))
@@ -167,7 +168,7 @@ export class Loader extends React.Component<Props, State> {
                 second: undefined,
             })
 
-            return <AccordionTab key={`loader-meeting-${meetingKey}`}
+            return <AccordionTab key={`loader-meeting-${meeting.key}`}
                 headerClassName="loader-meeting-accordion-header"
                 contentClassName="loader-meeting-accordion-content"
                 header={
