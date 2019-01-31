@@ -205,3 +205,11 @@ export function unwrapBoolean(maybeBoolean?: boolean, empty = false): boolean {
 export function randomSeed(): number {
 	return Math.floor(Math.random() * 1000000)
 }
+
+/**
+ * Provides a uniqueNumber, simply counting up each time a number is provided.
+ */
+let _tg_counter = 0
+export function uniqueNumber(): number {
+	return _tg_counter++
+}

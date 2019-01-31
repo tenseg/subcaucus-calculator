@@ -47,6 +47,12 @@ declare global {
 
 export class Snapshot {
 
+	snapshotID = ` ------ ${_u.uniqueNumber()} ------ `
+	debug = (): string => {
+		return "\nSnapshot" + this.snapshotID
+			+ this.name + "/" + this.revision + "/" + this.allowed
+			+ " " + this.subcaucuses.map((s) => s.debug()).join(", ")
+	}
 	created: TimestampString
 	author: number
 	revised: TimestampString
@@ -121,10 +127,12 @@ export class Snapshot {
 	 * 
 	 * See: https://www.nickang.com/how-to-clone-class-instance-javascript/
 	 */
-	clone = (): Snapshot => {
+	recreate = (): Snapshot => {
+		// TSMap clones break classes and don't go deep enough
+		// so we loop through and recreate subcaucuses
 		let subcaucuses = new TSMap<number, Subcaucus>()
 		this.subcaucuses.forEach((subcaucus) => {
-			subcaucuses.set(subcaucus.id, subcaucus.clone())
+			subcaucuses.set(subcaucus.id, subcaucus.recreate())
 		})
 		return new Snapshot({
 			author: this.author,

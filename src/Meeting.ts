@@ -48,6 +48,13 @@ declare global {
  */
 export class Meeting {
 
+	meetingID = ` >>>>>> ${_u.uniqueNumber()} <<<<<< `
+	debug = (): string => {
+		return "\nMeeting " + this.meetingID
+			+ this.current.name
+			+ "\ncurrent " + this.current.debug()
+			+ "\nsnapshots " + this.snapshots.map((s) => s.debug()).join("; ")
+	}
 	/**
 	 * The identifier of this meeting,
 	 * presently made up of the created timestamp
@@ -103,6 +110,10 @@ export class Meeting {
 	 *   json?: MeetingJSON
 	 * }
 	 * ```
+	 * Using `with` will assign the `current` and `snapshots` by reference,
+	 * still connected to the instances that you send in.
+	 * 
+	 * Using the `json` option will create new instances of `current` and `snapshots`.
 	 * 
 	 * @param {MeetingInitializer} init
 	 */
@@ -129,14 +140,20 @@ export class Meeting {
 	 * Provides a deep copy of this meeting instance
 	 * with no lingering deeper references.
 	 */
-	clone = (): Meeting => {
+	recreate = (): Meeting => {
+		// TSMap clones break classes and don't go deep enough
+		// so we loop through and recreate snapshots
+		const snapshots = new TSMap<string, Snapshot>()
+		this.snapshots.forEach((snapshot) => {
+			snapshots.set(snapshot.revised, snapshot.recreate())
+		})
 		return new Meeting({
 			key: this.key,
 			author: this.author,
 			with: {
 				created: this.created,
-				current: this.current,
-				snapshots: this.snapshots.clone(),
+				current: this.current.recreate(),
+				snapshots: snapshots,
 			}
 		})
 	}
@@ -190,9 +207,13 @@ export class Meeting {
 	 * Add a snapshot to the meeting using the current snapshot with a new name.
 	 */
 	addSnapshot = (revision: string) => {
-		const snapshot = this.current.clone()
+		const snapshot = this.current.recreate()
 		snapshot.revised = (new Date()).toTimestampString()
 		snapshot.revision = revision
 		this.snapshots.set(snapshot.revised, snapshot)
+	}
+
+	setCurrentSnapshot = (snapshot: Snapshot) => {
+		this.current = snapshot.recreate()
 	}
 }

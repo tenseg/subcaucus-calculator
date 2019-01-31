@@ -35,6 +35,10 @@ declare global {
  */
 export class SubCalc {
 
+	debug = (): string => {
+		return "" + this.meetings.map((m) => m.debug()).join("\n")
+	}
+
 	/**
 	 * Version helps to future-proof the stored JSON.
 	 */
@@ -141,6 +145,13 @@ export class SubCalc {
 		}
 	}
 
+	setCurrentSnapshot = (snapshot: Snapshot) => {
+		const meeting = this.meetings.get(snapshot.meetingKey())
+		meeting.setCurrentSnapshot(snapshot)
+		this.setCurrentMeetingKey(meeting.key)
+		this.writeMeeting(meeting)
+	}
+
 	/**
 	 * Returns a meeting from the SubCalc instance's list of meetings.
 	 * 
@@ -150,6 +161,7 @@ export class SubCalc {
 		if (!meetingKey) {
 			meetingKey = this.currentMeetingKey
 		}
+		this.setCurrentMeetingKey(meetingKey)
 		return this.meetings.get(meetingKey)
 	}
 
@@ -208,7 +220,7 @@ export class SubCalc {
 		const meetingKey = snapshot.meetingKey()
 		const isCurrent = (snapshot.revision === '')
 		const meeting = this.meetings.get(meetingKey)
-		const snapshotClone = snapshot.clone()
+		const snapshotClone = snapshot.recreate()
 
 		if (meeting) {
 			// add the snapshot to our instance data

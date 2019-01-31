@@ -224,7 +224,7 @@ export class App extends React.Component<Props, State> {
             snapshot.addSubcaucus()
             snapshot.addSubcaucus()
         }
-        this.subcalc.setCurrentMeetingKey(snapshot.meetingKey())
+        this.subcalc.setCurrentSnapshot(snapshot)
         this.keySuffix = String(Math.random())
         const state = {
             revised: snapshot.revised,
@@ -1126,15 +1126,19 @@ export class App extends React.Component<Props, State> {
         if (!_u.isDebugging) return <></>
 
         return (
-            <div className="debugging">
+            <div key={_u.randomSeed()} className="debugging">
                 <p>This is debugging info for <a href="https://grand.clst.org:3000/tenseg/subcalc-pr/issues" target="_repository">subcalc-pr</a> (with <a href="https://reactjs.org/docs/react-component.html" target="_react">ReactJS</a>, <a href="https://www.primefaces.org/primereact/" target="_primereact">PrimeReact</a>, <a href="https://www.primefaces.org/primeng/#/icons" target="_primeicons">PrimeIcons</a>) derrived from <a href="https://bitbucket.org/tenseg/subcalc-js/src" target="_bitbucket">subcalc-js</a>.
                         </p>
                 <div style={{ float: "right" }}>
                     <ShowJSON name="this.storage" data={this.subcalc} />
                 </div>
                 <pre>{"rendered App " + (new Date()).toLocaleTimeString()}</pre>
+                <pre>{"snapshot: " + this.snapshot.debug()}</pre>
+                <pre>{"meeting: " + this.subcalc.getMeeting().debug()}</pre>
+                <pre>{"subcalc: " + this.subcalc.debug()}</pre>
                 <ShowJSON name="this.state" data={this.state} /><br />
-                <ShowJSON name="this.snapshot" data={this.snapshot} />
+                <ShowJSON name={`snapshot ${this.snapshot.snapshotID}`} data={this.snapshot} />
+                <ShowJSON name={`meeting`} data={this.subcalc.getMeeting()} />
                 <p style={{ clear: "both" }}>Done.</p>
             </div>
         )

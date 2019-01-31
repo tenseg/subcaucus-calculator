@@ -26,6 +26,9 @@ declare global {
 
 export class Subcaucus {
 
+	debug = (): string => {
+		return `${this.name} (${this.count})`
+	}
 	readonly id: number
 	name: string
 	count: number
@@ -71,7 +74,7 @@ export class Subcaucus {
 		}
 	}
 
-	clone = (): Subcaucus => {
+	recreate = (): Subcaucus => {
 		return new Subcaucus({
 			id: this.id,
 			with: {

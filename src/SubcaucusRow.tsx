@@ -49,6 +49,7 @@ export class SubcaucusRow extends React.Component<Props, State> {
 		var value = event.currentTarget.value
 		this.props.subcaucus.name = value
 		this.setState({ name: value })
+		this.props.exchange(this.props.subcaucus, 'recalc')
 	}
 
 	handleCount = () => (event: React.FormEvent<HTMLInputElement>) => {

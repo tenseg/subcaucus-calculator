@@ -77,8 +77,8 @@ export class Loader extends React.Component<Props, State> {
         this.forceUpdate()
     }
 
-    renderSnapshot = (snapshot: Snapshot): JSX.Element => {
-        const descriptor = snapshot.revision ? "snapshot" : "meeting"
+    renderSnapshot = (snapshot: Snapshot, descriptor: 'snapshot' | 'meeting' = "snapshot"): JSX.Element => {
+        const isMeeting = descriptor === 'meeting'
         const created = new Date(Date.parse(snapshot.created))
         const createdDate = created.toLocaleString(undefined, {
             year: 'numeric',
@@ -115,18 +115,25 @@ export class Loader extends React.Component<Props, State> {
                         {revisedString}
                     </div>
                     <div className="loader-snapshot-name">
-                        <span className={"pi " + (snapshot.revision ? "pi-clock" : "pi-calendar")}>&nbsp;</span>
-                        {snapshot.revision || "As it was last edited"}
+                        <span className={"pi " + (isMeeting ? "pi-calendar" : "pi-clock")}>&nbsp;</span>
+                        {(isMeeting
+                            ? "As it was last edited"
+                            + (snapshot.revision
+                                ? ` (${snapshot.revision})`
+                                : ""
+                            )
+                            : snapshot.revision
+                        )}
                     </div>
                 </div>
                 <div className="loader-snapshot-actions">
                     <Button
                         icon="pi pi-trash"
-                        className={descriptor === 'meeting'
+                        className={isMeeting
                             ? 'p-button-danger'
                             : 'p-button-warning'
                         }
-                        onClick={descriptor === 'meeting'
+                        onClick={isMeeting
                             ? () => { this.setState({ deleteMeetingKey: this.props.subcalc.meetingKey(snapshot.created, snapshot.author) }) }
                             : () => { this.deleteSnapshot(snapshot) }
                         }
@@ -178,7 +185,7 @@ export class Loader extends React.Component<Props, State> {
                     </div>
                 }
             >
-                {this.renderSnapshot(meeting.current)}
+                {this.renderSnapshot(meeting.current, "meeting")}
                 {hasSnapshots ? this.renderSnapshots(meeting.snapshots) : ""}
             </AccordionTab>
         })
