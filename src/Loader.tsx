@@ -25,17 +25,13 @@ interface Props {
     onLoad: ((snapshot?: Snapshot) => void)
     onNew: (() => void)
 }
-interface State {
-    deleteMeetingKey: string
-}
+interface State { }
 
 export class Loader extends React.Component<Props, State> {
 
     constructor(props: Props) {
         super(props)
-        this.state = {
-            deleteMeetingKey: ''
-        }
+        this.state = {}
     }
 
     /**
@@ -45,18 +41,11 @@ export class Loader extends React.Component<Props, State> {
      */
     renderMenu = (): JSX.Element => {
         const items: any = []
-        if (this.props.subcalc.currentMeetingKey) {
-            items.push({
-                label: "Back to the calculator",
-                icon: "pi pi-fw pi-caret-left",
-                command: () => this.props.onLoad()
-            })
-        } else {
-            items.push({
-                label: "Minnesota DFL Subcaucus Calculator",
-                disabled: true
-            })
-        }
+        items.push({
+            label: "Back to the calculator",
+            icon: "pi pi-fw pi-caret-left",
+            command: () => this.props.onLoad()
+        })
         return <Menubar key="loader-menu" model={items} id="app-main-menu" />
     }
 
@@ -67,18 +56,12 @@ export class Loader extends React.Component<Props, State> {
         return ["pi pi-chevron-circle-down", "pi pi-circle-off", "pi pi-chevron-circle-up"][order + 1]
     }
 
-    deleteMeeting = (meetingKey: string) => {
-        this.props.subcalc.deleteMeeting(meetingKey)
-        this.setState({ deleteMeetingKey: '' })
-    }
-
     deleteSnapshot = (snapshot: Snapshot) => {
         this.props.subcalc.deleteSnapshot(snapshot)
-        this.forceUpdate()
+        this.forceUpdate
     }
 
-    renderSnapshot = (snapshot: Snapshot, descriptor: 'snapshot' | 'meeting' = "snapshot"): JSX.Element => {
-        const isMeeting = descriptor === 'meeting'
+    renderSnapshot = (snapshot: Snapshot): JSX.Element => {
         const created = new Date(Date.parse(snapshot.created))
         const createdDate = created.toLocaleString(undefined, {
             year: 'numeric',
@@ -107,36 +90,23 @@ export class Loader extends React.Component<Props, State> {
             })
 
         return (
-            <div key={`loader-snapshot-${snapshot.revised}-${snapshot.author}`} className={`loader-snapshot ${descriptor}`}>
+            <div key={`loader-snapshot-${snapshot.revised}-${snapshot.author}`} className={`loader-snapshot`}>
                 <div className="loader-snapshot-button button"
-                    onClick={() => { this.props.onLoad(snapshot) }}
+                    onClick={() => this.props.onLoad(snapshot)}
                 >
                     <div className="loader-snapshot-revised">
                         {revisedString}
                     </div>
                     <div className="loader-snapshot-name">
-                        <span className={"pi " + (isMeeting ? "pi-calendar" : "pi-clock")}>&nbsp;</span>
-                        {(isMeeting
-                            ? "As it was last edited"
-                            + (snapshot.revision
-                                ? ` (${snapshot.revision})`
-                                : ""
-                            )
-                            : snapshot.revision
-                        )}
+                        <span className={"pi pi-clock"}>&nbsp;</span>
+                        {snapshot.revision}
                     </div>
                 </div>
                 <div className="loader-snapshot-actions">
                     <Button
                         icon="pi pi-trash"
-                        className={isMeeting
-                            ? 'p-button-danger'
-                            : 'p-button-warning'
-                        }
-                        onClick={isMeeting
-                            ? () => { this.setState({ deleteMeetingKey: this.props.subcalc.meetingKey(snapshot.created, snapshot.author) }) }
-                            : () => { this.deleteSnapshot(snapshot) }
-                        }
+                        className="p-button-danger"
+                        onClick={() => this.deleteSnapshot(snapshot)}
                     />
                 </div>
             </div>
@@ -159,12 +129,6 @@ export class Loader extends React.Component<Props, State> {
         let indexOfCurrent = 0
         const meetingRows: Array<JSX.Element> = meetings.map((meeting, key, index) => {
 
-            if (this.props.subcalc.currentMeetingKey == key) {
-                indexOfCurrent = index || 0
-                console.log("indexOfCurrent", indexOfCurrent, "index", index, "key", key)
-            }
-            const hasSnapshots = meeting.snapshots.length > 0
-
             const created = new Date(Date.parse(meeting.created))
             const createdDate = created.toLocaleString(undefined, {
                 year: 'numeric',
@@ -185,8 +149,7 @@ export class Loader extends React.Component<Props, State> {
                     </div>
                 }
             >
-                {this.renderSnapshot(meeting.current, "meeting")}
-                {hasSnapshots ? this.renderSnapshots(meeting.snapshots) : ""}
+                {this.renderSnapshots(meeting.snapshots)}
             </AccordionTab>
         })
 
@@ -205,7 +168,7 @@ export class Loader extends React.Component<Props, State> {
                 {this.renderMenu()}
                 <div id="meeting-info">
                     <div id="meeting-name" className="not-button">
-                        Pick a meeting below to load it...
+                        Pick a snapshot below to load it...
                     </div>
                 </div>
                 <div id="loader-container">
@@ -227,50 +190,14 @@ export class Loader extends React.Component<Props, State> {
                             icon="pi pi-calendar-plus"
                             onClick={() => this.props.onNew()}
                         />
-                        {this.props.subcalc.currentMeetingKey
-                            ? <Button id="cancel-loader-button"
-                                label="Cancel"
-                                icon="pi pi-times"
-                                className="p-button-secondary"
-                                onClick={() => this.props.onLoad()}
-                            />
-                            : <></>
-                        }
+                        ? <Button id="cancel-loader-button"
+                            label="Cancel"
+                            icon="pi pi-times"
+                            className="p-button-secondary"
+                            onClick={() => this.props.onLoad()}
+                        />
                     </div>
                 </div>
-                {this.state.deleteMeetingKey
-                    ? <ValueCard
-                        title="Delete whole meeting?"
-                        footer={
-                            <>
-                                <Button id="confirm-delete-meeting-button"
-                                    label="Delete whole meeting"
-                                    icon="pi pi-trash"
-                                    className="p-button-danger"
-                                    onClick={() => this.deleteMeeting(this.state.deleteMeetingKey)}
-                                />
-                                <Button id="cancel-delete-meeting-button"
-                                    label="Cancel"
-                                    icon="pi pi-times"
-                                    className="p-button-secondary"
-                                    onClick={() => this.setState({ deleteMeetingKey: '' })}
-                                />
-                            </>
-                        }
-                    >
-                        <p>If you proceed with this deletion it will delete the whole meeting, <em>including all of its snapshots</em>.</p>
-                        {this.state.deleteMeetingKey === this.props.subcalc.currentMeetingKey
-                            ? <p>
-                                The meeting you are deleting is also the current meeting
-                                in the calculator. If you delete it, you will have to pick
-                                another meeting to load or create a new meeting in order
-                                to get back to the calculator.
-                            </p>
-                            : <></>
-                        }
-                    </ValueCard>
-                    : <></>
-                }
             </div>
         )
     }

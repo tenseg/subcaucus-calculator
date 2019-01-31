@@ -213,3 +213,10 @@ let _tg_counter = 0
 export function uniqueNumber(): number {
 	return _tg_counter++
 }
+
+/**
+ * Returns the TimestampString of the current time.
+ */
+export function now(): TimestampString {
+	return (new Date()).toTimestampString()
+}

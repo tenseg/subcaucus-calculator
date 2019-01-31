@@ -97,7 +97,7 @@ export class Snapshot {
 	constructor(init: SnapshotInitializer) {
 		this.created = init.created
 		this.author = init.author
-		this.revised = (new Date()).toTimestampString()
+		this.revised = _u.now()
 		this.revision = ''
 		this.name = ''
 		this.allowed = 0

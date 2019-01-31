@@ -22,8 +22,8 @@ declare global {
 		key: string
 		author: number
 		with?: {
+			name?: string
 			created?: TimestampString
-			current?: Snapshot
 			snapshots?: TSMap<TimestampString, Snapshot>
 		}
 		json?: MeetingJSON
@@ -35,8 +35,8 @@ declare global {
 	interface MeetingJSON {
 		v: number
 		author: number
+		name: string
 		created: TimestampString
-		current: SnapshotJSON
 		snapshots: Array<SnapshotJSON>
 	}
 
@@ -68,6 +68,11 @@ export class Meeting {
 	author: number
 
 	/**
+	 * The name by which this meeting is known. This name is shared by all the snapshots.
+	 */
+	name: string
+
+	/**
 	 * The time this meeting was created.
 	 */
 	created: TimestampString
@@ -89,8 +94,8 @@ export class Meeting {
 	static decoder: Decoder<MeetingJSON> = object({
 		v: number(),
 		author: number(),
+		name: string(),
 		created: string(),
-		current: Snapshot.decoder,
 		snapshots: array(Snapshot.decoder)
 	})
 
@@ -103,6 +108,7 @@ export class Meeting {
 	 *   key: string
 	 *   author: number
 	 *   with?: {
+	 *     name?: string
 	 *     created?: TimestampString
 	 *     current?: Snapshot
 	 *     snapshots?: TSMap<string, Snapshot>
@@ -121,11 +127,13 @@ export class Meeting {
 		this.key = init.key
 		this.author = init.author
 
-		this.created = (new Date()).toTimestampString()
+		this.name = "No Name"
+		this.created = _u.now()
 		this.current = new Snapshot({ author: this.author, created: this.created })
 		this.snapshots = new TSMap<TimestampString, Snapshot>()
 
 		if (init.with) {
+			this.name = init.with["name"] || this.name
 			this.created = init.with["created"] || this.created
 			this.current = init.with["current"] || this.current
 			this.snapshots = init.with["snapshots"] || this.snapshots
@@ -152,7 +160,6 @@ export class Meeting {
 			author: this.author,
 			with: {
 				created: this.created,
-				current: this.current.recreate(),
 				snapshots: snapshots,
 			}
 		})
@@ -167,8 +174,8 @@ export class Meeting {
 		return {
 			v: 2,
 			author: this.author,
+			name: this.name,
 			created: this.created,
-			current: this.current.toJSON(),
 			snapshots: this.snapshots.map((snapshot) => snapshot.toJSON())
 		}
 	}
@@ -184,12 +191,8 @@ export class Meeting {
 
 		if (decoded.ok) {
 			this.author = decoded.result.author
+			this.name = decoded.result.name
 			this.created = decoded.result.created
-			this.current = new Snapshot({
-				author: this.author,
-				created: this.created,
-				json: decoded.result.current
-			})
 			this.snapshots = new TSMap<TimestampString, Snapshot>()
 			decoded.result.snapshots.forEach((jsnap) => {
 				this.snapshots.set(jsnap.revised, new Snapshot({
@@ -208,7 +211,7 @@ export class Meeting {
 	 */
 	addSnapshot = (revision: string) => {
 		const snapshot = this.current.recreate()
-		snapshot.revised = (new Date()).toTimestampString()
+		snapshot.revised = _u.now()
 		snapshot.revision = revision
 		this.snapshots.set(snapshot.revised, snapshot)
 	}

@@ -12,7 +12,6 @@ import 'primeicons/primeicons.css'
 import './App.scss'
 import * as _u from './Utilities'
 import { SubCalc } from './SubCalc'
-import { Meeting } from './Meeting'
 import { Snapshot } from './Snapshot'
 import { Subcaucus } from './Subcaucus'
 import { SubcaucusRow, SubcaucusRowAction } from './SubcaucusRow'
@@ -119,7 +118,7 @@ export class App extends React.Component<Props, State> {
     initialCardState: Array<CardFor> = [
         CardFor.WelcomeAndSetName,
         CardFor.ChangingDelegates,
-        CardFor.ShowingInstructions
+        // CardFor.ShowingInstructions
     ]
 
     /**
@@ -137,15 +136,18 @@ export class App extends React.Component<Props, State> {
 
         _u.setAlertFunction(this.growlAlert)
 
-        // get the current meeting from storage
-        const meeting = this.subcalc.getMeeting()
-        const timestamp = (new Date()).toTimestampString()
+        const timestamp = _u.now()
 
         // prepare a new snapshot to hold edits to come
+        // this will be immediately overwritten by the
+        // setStateSnapshot() below, but the compiler
+        // wants it to be happy about the constructor
         this.snapshot = new Snapshot({
             created: timestamp,
             author: this.subcalc.author
         })
+
+        this.setStateSnapshot()
 
         if (false && _u.isDebugging()) {
             // if debugging, fill the snapshot and state with peculiar information
@@ -175,27 +177,6 @@ export class App extends React.Component<Props, State> {
                     nonViableCount: 3,
                 }
             }
-        } else if (meeting) {
-            // if we found a current meeting,
-            // then use it's current snapshot instead
-            this.snapshot = meeting.current
-            this.setStateSnapshot()
-        } else {
-            // no meeting was found, 
-            // this is an error since one should have been created
-            this.state = {
-                revised: timestamp,
-                revision: '',
-                name: 'Could not read local storage!',
-                allowed: 1,
-                seed: 1,
-                // card status
-                cards: [],
-                present: Presenting.Loading,
-                // sorting info
-                sortName: SortOrder.None,
-                sortCount: SortOrder.None,
-            }
         }
 
     }
@@ -207,33 +188,26 @@ export class App extends React.Component<Props, State> {
      * 
      * Defaults to synchronizing with the current snapshot.
      */
-    setStateSnapshot = (snapshot?: Snapshot) => {
-        // if we are passing in a new snapshot,
-        // then we should save it as an instance variable too,
-        // otherwise, we use the instance variable as the new snapshot
-        if (snapshot) {
-            this.snapshot = snapshot
-        } else {
-            snapshot = this.snapshot
-        }
+    setStateSnapshot = () => {
+        this.snapshot = this.subcalc.snapshot
+
         // if we get here and still have a brand new snapshot
         // then fill it with a few empty subcaucuses so that
         // the user has a hint of how to proceed
-        if (snapshot.subcaucuses.length === 0) {
-            snapshot.addSubcaucus()
-            snapshot.addSubcaucus()
-            snapshot.addSubcaucus()
+        if (this.snapshot.subcaucuses.length === 0) {
+            this.snapshot.addSubcaucus()
+            this.snapshot.addSubcaucus()
+            this.snapshot.addSubcaucus()
         }
-        this.subcalc.setCurrentSnapshot(snapshot)
         this.keySuffix = String(Math.random())
         const state = {
-            revised: snapshot.revised,
-            revision: snapshot.revision,
-            name: snapshot.name,
-            allowed: snapshot.allowed,
-            seed: snapshot.seed,
+            revised: this.snapshot.revised,
+            revision: this.snapshot.revision,
+            name: this.snapshot.name,
+            allowed: this.snapshot.allowed,
+            seed: this.snapshot.seed,
             // card status
-            cards: snapshot.allowed ? [] : this.initialCardState,
+            cards: this.snapshot.allowed ? [] : this.initialCardState,
             present: Presenting.Calculator,
             // sorting info
             sortName: SortOrder.None,
@@ -254,21 +228,22 @@ export class App extends React.Component<Props, State> {
      */
     loadSnapshot = (snapshot?: Snapshot) => {
         if (snapshot) {
-            this.setStateSnapshot(snapshot)
+            this.subcalc.setSnapshot(snapshot)
+            this.setStateSnapshot()
         } else {
             this.setState({ present: Presenting.Calculator })
         }
     }
 
     writeToStorage = () => {
-        this.subcalc.writeSnapshot(this.snapshot)
+        this.subcalc.write()
     }
 
     setStateName = (name: string) => {
         this.snapshot.name = name
         this.setState({
             name: name,
-            revised: (new Date()).toTimestampString(),
+            revised: _u.now(),
             revision: '',
         }, this.writeToStorage)
     }
@@ -277,7 +252,7 @@ export class App extends React.Component<Props, State> {
         this.snapshot.allowed = allowed
         this.setState({
             allowed: allowed,
-            revised: (new Date()).toTimestampString(),
+            revised: _u.now(),
             revision: '',
         }, this.writeToStorage)
     }
@@ -285,7 +260,7 @@ export class App extends React.Component<Props, State> {
     setStateSeed = (seed: number) => {
         this.setState({
             seed: seed,
-            revised: (new Date()).toTimestampString(),
+            revised: _u.now(),
             revision: '',
         }, this.writeToStorage)
     }
@@ -298,7 +273,7 @@ export class App extends React.Component<Props, State> {
      */
     setStateSubcaucuses = () => {
         this.setState({
-            revised: (new Date()).toTimestampString(),
+            revised: _u.now(),
             revision: '',
         }, this.writeToStorage)
     }
@@ -308,7 +283,8 @@ export class App extends React.Component<Props, State> {
      * set our state to reflect the new meeting.
      */
     newMeeting = () => {
-        this.setStateSnapshot(this.subcalc.newMeeting())
+        this.subcalc.newMeetingSnapshot()
+        this.setStateSnapshot()
     }
 
     /**
@@ -1133,8 +1109,7 @@ export class App extends React.Component<Props, State> {
                     <ShowJSON name="this.storage" data={this.subcalc} />
                 </div>
                 <pre>{"rendered App " + (new Date()).toLocaleTimeString()}</pre>
-                <pre>{"snapshot: " + this.snapshot.debug()}</pre>
-                <pre>{"meeting: " + this.subcalc.getMeeting().debug()}</pre>
+                <pre>{"app: " + this.snapshot.debug()}</pre>
                 <pre>{"subcalc: " + this.subcalc.debug()}</pre>
                 <ShowJSON name="this.state" data={this.state} /><br />
                 <ShowJSON name={`snapshot ${this.snapshot.snapshotID}`} data={this.snapshot} />
