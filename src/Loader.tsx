@@ -125,9 +125,15 @@ export class Loader extends React.Component<Props, State> {
 
     renderMeetings = (): JSX.Element => {
         const meetings = this.props.subcalc.meetings
+        const currentMeetingKey = this.props.subcalc.snapshot.meetingKey()
 
-        let indexOfCurrent = 0
+        let indexOfCurrent = 0 // used to turn "down" the current meeting in the loader
+
         const meetingRows: Array<JSX.Element> = meetings.map((meeting, key, index) => {
+
+            if (currentMeetingKey == key) {
+                indexOfCurrent = index || 0
+            }
 
             const created = new Date(Date.parse(meeting.created))
             const createdDate = created.toLocaleString(undefined, {
@@ -139,7 +145,7 @@ export class Loader extends React.Component<Props, State> {
                 second: undefined,
             })
 
-            return <AccordionTab key={`loader-meeting-${meeting.key}`}
+            return <AccordionTab key={`loader-meeting-${key}`}
                 headerClassName="loader-meeting-accordion-header"
                 contentClassName="loader-meeting-accordion-content"
                 header={

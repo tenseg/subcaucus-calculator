@@ -43,6 +43,7 @@ enum CardFor {
     ChangingName,
     ChangingDelegates,
     SavingSnapshot,
+    SavingSnapshotBeforeLoading,
     RemovingEmpties,
     ShowingAbout,
     ShowingBy,
@@ -303,7 +304,6 @@ export class App extends React.Component<Props, State> {
         this.subcalc.saveSnapshot(revision)
         this.setState({
             revision: revision,
-            cards: this.removeCard(CardFor.SavingSnapshot),
         }, this.writeToStorage)
         this.growlAlert(revision, 'success', 'Snapshot Saved')
     }
@@ -507,7 +507,13 @@ export class App extends React.Component<Props, State> {
                         label: "Open snapshot",
                         icon: "pi pi-fw pi-folder-open",
                         disabled: this.subcalc.meetings.length === 0,
-                        command: () => this.setState({ present: Presenting.Loading })
+                        command: () => {
+                            if (this.state.revision == "") {
+                                this.addCardState(CardFor.SavingSnapshotBeforeLoading)
+                            } else {
+                                this.setState({ present: Presenting.Loading })
+                            }
+                        }
                     },
                     {
                         label: "Save snapshot",
@@ -729,7 +735,7 @@ export class App extends React.Component<Props, State> {
             <ValueCard key="snapshot-value" id="snapshot-value"
                 title="Name for the snapshot?"
                 value=""
-                defaultValue={`Revision of ${this.state.revision || this.state.name}`}
+                defaultValue={`Revision of ${this.state.name}`}
                 allowEmpty={false}
                 extraButtons={
                     <Button id="cancel-save-snapshot-button"
@@ -740,18 +746,64 @@ export class App extends React.Component<Props, State> {
                     />
                 }
                 onSave={(value?: string) => {
-                    if (value == undefined) {
-                        this.removeCardState(CardFor.SavingSnapshot)
-                    } else {
+                    this.removeCardState(CardFor.SavingSnapshot)
+                    if (value) {
                         this.saveSnapshot(value)
                     }
                 }}
             >
-                <p>Specify the number of delegates that your meeting or caucus is allowed to send on to the next level. This is the number of delegates to be elected by your meeting.
+                <p>Consider names like "First walk" or "Final result".
                 {this.state.allowed
                         ? <span> If this is actually a new event, you may want to start a new meeting instead</span>
                         : <></>
                     }
+                </p>
+            </ValueCard>
+        )
+    }
+
+    /**
+     * Returns JSX for the card to save a 
+     * snapshot of the current state of the
+     * calculator before loading another snapshot.
+     * 
+     * NOTE: Do not `setState()` in this method.
+     */
+    renderSavingSnapshotBeforeLoading = (): JSX.Element => {
+        return (
+            <ValueCard key="snapshot-value" id="snapshot-value"
+                title="Save changes?"
+                value=""
+                defaultValue={`Revision of ${this.state.revision || this.state.name}`}
+                allowEmpty={false}
+                extraButtons={
+                    <>
+                        <Button id="just-load-snapshot-button"
+                            label="Just open"
+                            icon="pi pi-folder-open"
+                            className="p-button-warning"
+                            onClick={() => {
+                                this.removeCardState(CardFor.SavingSnapshotBeforeLoading)
+                                this.setState({ present: Presenting.Loading })
+                            }}
+                        />
+                        <Button id="cancel-save-and-load-snapshot-button"
+                            label="Cancel"
+                            icon="pi pi-times"
+                            className="p-button-secondary"
+                            onClick={() => this.removeCardState(CardFor.SavingSnapshotBeforeLoading)}
+                        />
+                    </>
+                }
+                onSave={(value?: string) => {
+                    this.removeCardState(CardFor.SavingSnapshotBeforeLoading)
+                    if (value) {
+                        this.saveSnapshot(value)
+                        this.setState({ present: Presenting.Loading })
+                    }
+                }}
+            >
+                <p>It looks like you have changed something. Do you want to save a snapshot? If so, provide a name like "First walk" or "Final result". If you don't save a snapshot your changes may be lost when you open a past snapshot.
                 </p>
             </ValueCard>
         )
@@ -854,6 +906,7 @@ export class App extends React.Component<Props, State> {
                 case CardFor.ShowingInstructions: return this.renderInstructions()
                 case CardFor.ShowingAbout: return this.renderAbout()
                 case CardFor.ShowingBy: return this.renderBy()
+                case CardFor.SavingSnapshotBeforeLoading: return this.renderSavingSnapshotBeforeLoading()
                 case CardFor.SavingSnapshot: return this.renderSavingSnapshot()
                 case CardFor.ChangingName: return this.renderChangingName()
                 case CardFor.ChangingDelegates: return this.renderChangingDelegates()
