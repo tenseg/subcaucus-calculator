@@ -219,16 +219,28 @@ export class SubCalc {
 			this.meetings.set(meetingKey, meeting)
 		}
 
-		// if the name of the snapshot is different from the name of the meeting
-		// then we should both rename the meeting and any prior snapshots
-		if (this.snapshot.name !== meeting.name) {
-			meeting.name = this.snapshot.name
-			meeting.snapshots.forEach((snapshot) => snapshot.name = meeting.name)
-		}
-
 		// add a clone of the current snapshot to the meeting
 		meeting.snapshots.set(this.snapshot.revised, this.snapshot.recreate())
 		this.writeMeeting(meeting) // writes the meeting to local storage
+	}
+
+	/**
+	 * Uses the current snapshot to rename the meeting and
+	 * propagates that change to all the other snapshots in the meeting.
+	 */
+	renameMeeting = (name: string) => {
+		// rename the current snapshot
+		this.snapshot.name = name
+		this.write()
+
+		const meetingKey = this.snapshot.meetingKey()
+		let meeting = this.meetings.get(meetingKey)
+
+		if (meeting) {
+			meeting.name = name
+			meeting.snapshots.forEach((snapshot) => snapshot.name = name)
+			this.writeMeeting(meeting)
+		}
 	}
 
 	/**

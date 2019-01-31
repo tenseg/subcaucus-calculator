@@ -248,10 +248,10 @@ export class App extends React.Component<Props, State> {
      * since the meeting name will apply to all snapshots from this meeting.
      */
     setStateName = (name: string) => {
-        this.snapshot.name = name
+        this.subcalc.renameMeeting(name)
         this.setState({
             name: name,
-        }, this.writeToStorage)
+        })
     }
 
     /**
