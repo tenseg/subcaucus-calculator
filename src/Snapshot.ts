@@ -200,6 +200,33 @@ export class Snapshot {
 	}
 
 	/**
+	 * Update the snapshot with new values. 
+	 * If signalling a change to subcaucuses
+	 * just send without any update.
+	 */
+	revise = (update?: {
+		name?: string,
+		allowed?: number,
+		seed?: number,
+	}) => {
+		// we mark the snapshot as revised even if no updates were sent
+		// because it may be a signal that the subcaucuses changed
+		this.revised = _u.now()
+		this.revision = ""
+		if (update) {
+			if (update.name) {
+				this.name = update.name
+			}
+			if (update.allowed) {
+				this.allowed = update.allowed
+			}
+			if (update.seed) {
+				this.seed = update.seed
+			}
+		}
+	}
+
+	/**
 	 * Derive the appropriate meeting key from
 	 * the data in this snapshot.
 	 */

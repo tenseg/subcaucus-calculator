@@ -144,7 +144,7 @@ export class Loader extends React.Component<Props, State> {
                 contentClassName="loader-meeting-accordion-content"
                 header={
                     <div className="loader-meeting-header">
-                        <div className="loader-meeting-name">{meeting.current.name}</div>
+                        <div className="loader-meeting-name">{meeting.name}</div>
                         <div className="loader-meeting-timestamp">{createdDate}</div>
                     </div>
                 }
@@ -190,7 +190,7 @@ export class Loader extends React.Component<Props, State> {
                             icon="pi pi-calendar-plus"
                             onClick={() => this.props.onNew()}
                         />
-                        ? <Button id="cancel-loader-button"
+                        <Button id="cancel-loader-button"
                             label="Cancel"
                             icon="pi pi-times"
                             className="p-button-secondary"

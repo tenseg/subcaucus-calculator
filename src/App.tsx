@@ -74,7 +74,6 @@ interface Props { }
  * React state for the SubCalc App.
  */
 interface State {
-    revised: TimestampString
     revision: string
     name: string
     allowed: number
@@ -158,7 +157,6 @@ export class App extends React.Component<Props, State> {
             this.snapshot.addSubcaucus()
             // this.originalRevised = timestamp
             this.state = {
-                revised: timestamp,
                 revision: '',
                 name: 'Debugging', allowed: 10, cards: [],
                 // name: '', allowed: 0, cards: this.initialCardState,
@@ -235,45 +233,55 @@ export class App extends React.Component<Props, State> {
         }
     }
 
+    /**
+     * Write out to local storage via SubCalc.
+     */
     writeToStorage = () => {
         this.subcalc.write()
     }
 
+    /**
+     * Change the meeting name here and in storage.
+     * 
+     * NOTE: This is _not_ considered a revision of the snapshot
+     * since the meeting name will apply to all snapshots from this meeting.
+     */
     setStateName = (name: string) => {
         this.snapshot.name = name
         this.setState({
             name: name,
-            revised: _u.now(),
-            revision: '',
         }, this.writeToStorage)
     }
 
+    /**
+     * Change the number of delegates allowed here and in storage.
+     */
     setStateAllowed = (allowed: number) => {
-        this.snapshot.allowed = allowed
+        this.snapshot.revise({ allowed: allowed })
         this.setState({
             allowed: allowed,
-            revised: _u.now(),
-            revision: '',
-        }, this.writeToStorage)
-    }
-
-    setStateSeed = (seed: number) => {
-        this.setState({
-            seed: seed,
-            revised: _u.now(),
             revision: '',
         }, this.writeToStorage)
     }
 
     /**
-     * Since the subcaucuses are kept in an instance variable,
-     * we cannot use `setState()` to update the interface.
-     * This method changes the relevant instance variables
-     * and forces an fresh render of the SubCalc App.
+     * Change the random seed (the "coin") here and in storage.
+     */
+    setStateSeed = (seed: number) => {
+        this.snapshot.revise({ seed: seed })
+        this.setState({
+            seed: seed,
+            revision: '',
+        }, this.writeToStorage)
+    }
+
+    /**
+     * Change force and update of the interface and storage
+     * due to changes in the subcaucuses.
      */
     setStateSubcaucuses = () => {
+        this.snapshot.revise()
         this.setState({
-            revised: _u.now(),
             revision: '',
         }, this.writeToStorage)
     }
@@ -292,7 +300,7 @@ export class App extends React.Component<Props, State> {
      * set our state to reflect the new meeting.
      */
     saveSnapshot = (revision: string) => {
-        this.subcalc.getMeeting().addSnapshot(revision)
+        this.subcalc.saveSnapshot(revision)
         this.setState({
             revision: revision,
             cards: this.removeCard(CardFor.SavingSnapshot),
@@ -491,25 +499,26 @@ export class App extends React.Component<Props, State> {
                 icon: "pi pi-fw pi-calendar",
                 items: [
                     {
-                        label: "Save snapshot",
-                        icon: "pi pi-fw pi-clock",
-                        command: () => this.addCardState(CardFor.SavingSnapshot),
-                    },
-                    {
                         label: "New meeting",
                         icon: "pi pi-fw pi-calendar-plus",
                         command: () => this.newMeeting()
+                    },
+                    {
+                        label: "Open snapshot",
+                        icon: "pi pi-fw pi-folder-open",
+                        disabled: this.subcalc.meetings.length === 0,
+                        command: () => this.setState({ present: Presenting.Loading })
+                    },
+                    {
+                        label: "Save snapshot",
+                        icon: "pi pi-fw pi-clock",
+                        command: () => this.addCardState(CardFor.SavingSnapshot),
                     },
                     // {
                     //     label: "Duplicate meeting",
                     //     icon: "pi pi-fw pi-clone",
                     //     command: () => this.growlAlert("Duplicate meeting.", 'warn', 'TODO')
                     // },
-                    {
-                        label: "Load meeting",
-                        icon: "pi pi-fw pi-folder-open",
-                        command: () => this.setState({ present: Presenting.Loading })
-                    },
                     {
                         label: "Flip the coin",
                         icon: "pi pi-fw pi-refresh",
@@ -1113,7 +1122,6 @@ export class App extends React.Component<Props, State> {
                 <pre>{"subcalc: " + this.subcalc.debug()}</pre>
                 <ShowJSON name="this.state" data={this.state} /><br />
                 <ShowJSON name={`snapshot ${this.snapshot.snapshotID}`} data={this.snapshot} />
-                <ShowJSON name={`meeting`} data={this.subcalc.getMeeting()} />
                 <p style={{ clear: "both" }}>Done.</p>
             </div>
         )

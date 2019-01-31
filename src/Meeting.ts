@@ -51,8 +51,7 @@ export class Meeting {
 	meetingID = ` >>>>>> ${_u.uniqueNumber()} <<<<<< `
 	debug = (): string => {
 		return "\nMeeting " + this.meetingID
-			+ this.current.name
-			+ "\ncurrent " + this.current.debug()
+			+ this.name
 			+ "\nsnapshots " + this.snapshots.map((s) => s.debug()).join("; ")
 	}
 	/**
@@ -76,11 +75,6 @@ export class Meeting {
 	 * The time this meeting was created.
 	 */
 	created: TimestampString
-
-	/**
-	 * A snapshot of the most recent state of this meeting.
-	 */
-	current: Snapshot
 
 	/**
 	 * Snapshots of the state of this meeting named and saved by the user.
@@ -129,13 +123,11 @@ export class Meeting {
 
 		this.name = "No Name"
 		this.created = _u.now()
-		this.current = new Snapshot({ author: this.author, created: this.created })
 		this.snapshots = new TSMap<TimestampString, Snapshot>()
 
 		if (init.with) {
 			this.name = init.with["name"] || this.name
 			this.created = init.with["created"] || this.created
-			this.current = init.with["current"] || this.current
 			this.snapshots = init.with["snapshots"] || this.snapshots
 		}
 
@@ -206,17 +198,4 @@ export class Meeting {
 		}
 	}
 
-	/**
-	 * Add a snapshot to the meeting using the current snapshot with a new name.
-	 */
-	addSnapshot = (revision: string) => {
-		const snapshot = this.current.recreate()
-		snapshot.revised = _u.now()
-		snapshot.revision = revision
-		this.snapshots.set(snapshot.revised, snapshot)
-	}
-
-	setCurrentSnapshot = (snapshot: Snapshot) => {
-		this.current = snapshot.recreate()
-	}
 }

@@ -142,18 +142,6 @@ export class SubCalc {
 	}
 
 	/**
-	 * Returns a meeting from the SubCalc instance's list of meetings.
-	 * 
-	 * Defaults to returning the key of the current snapshot's meeting.
-	 */
-	getMeeting = (meetingKey?: string): Meeting => {
-		if (!meetingKey) {
-			meetingKey = this.snapshot.meetingKey()
-		}
-		return this.meetings.get(meetingKey)
-	}
-
-	/**
 	 * Creates a new meeting and returns a new snapshot
 	 * associated with that meeting. Note that the new
 	 * snapshot will not be one saved to the meeting yet.
@@ -216,11 +204,11 @@ export class SubCalc {
 		this.write() // writes the current snapshot to local storage
 
 		const meetingKey = this.snapshot.meetingKey()
-		const meeting = this.meetings.get(meetingKey)
+		let meeting = this.meetings.get(meetingKey)
 
 		// if the meeting does not yet exist, then we create it
 		if (!meeting) {
-			const meeting = new Meeting({
+			meeting = new Meeting({
 				key: meetingKey,
 				author: this.snapshot.author,
 				with: {
@@ -229,6 +217,13 @@ export class SubCalc {
 				}
 			})
 			this.meetings.set(meetingKey, meeting)
+		}
+
+		// if the name of the snapshot is different from the name of the meeting
+		// then we should both rename the meeting and any prior snapshots
+		if (this.snapshot.name !== meeting.name) {
+			meeting.name = this.snapshot.name
+			meeting.snapshots.forEach((snapshot) => snapshot.name = meeting.name)
 		}
 
 		// add a clone of the current snapshot to the meeting
