@@ -47,9 +47,9 @@ declare global {
 
 export class Snapshot {
 
-	snapshotID = ` ------ ${_u.uniqueNumber()} ------ `
+	debugID = ` ------ ${_u.uniqueNumber()} ------ `
 	debug = (): string => {
-		return "\nSnapshot" + this.snapshotID
+		return "\nSnapshot" + this.debugID
 			+ this.name + "/" + this.revision + "/" + this.allowed
 			+ " " + this.subcaucuses.map((s) => s.debug()).join(", ")
 	}

@@ -48,9 +48,9 @@ declare global {
  */
 export class Meeting {
 
-	meetingID = ` >>>>>> ${_u.uniqueNumber()} <<<<<< `
+	debugID = ` >>>>>> ${_u.uniqueNumber()} <<<<<< `
 	debug = (): string => {
-		return "\nMeeting " + this.meetingID
+		return "\nMeeting " + this.debugID
 			+ this.name
 			+ "\nsnapshots " + this.snapshots.map((s) => s.debug()).join("; ")
 	}

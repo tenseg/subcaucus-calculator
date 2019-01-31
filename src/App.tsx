@@ -1174,7 +1174,7 @@ export class App extends React.Component<Props, State> {
                 <pre>{"app: " + this.snapshot.debug()}</pre>
                 <pre>{"subcalc: " + this.subcalc.debug()}</pre>
                 <ShowJSON name="this.state" data={this.state} /><br />
-                <ShowJSON name={`snapshot ${this.snapshot.snapshotID}`} data={this.snapshot} />
+                <ShowJSON name={`snapshot ${this.snapshot.debugID}`} data={this.snapshot} />
                 <p style={{ clear: "both" }}>Done.</p>
             </div>
         )
