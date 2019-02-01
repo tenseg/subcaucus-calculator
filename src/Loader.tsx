@@ -25,13 +25,17 @@ interface Props {
     onLoad: ((snapshot?: Snapshot) => void)
     onNew: (() => void)
 }
-interface State { }
+interface State {
+    sortBy: 'name' | 'date'
+}
 
 export class Loader extends React.Component<Props, State> {
 
     constructor(props: Props) {
         super(props)
-        this.state = {}
+        this.state = {
+            sortBy: "date"
+        }
     }
 
     /**
@@ -50,10 +54,24 @@ export class Loader extends React.Component<Props, State> {
     }
 
     /**
-     * Returns an icon to represent the supplied `SortOrder`.
+     * Returns an icon to represent the button.
      */
-    sortOrderIcon = (order: SortOrder): string => {
-        return ["pi pi-chevron-circle-down", "pi pi-circle-off", "pi pi-chevron-circle-up"][order + 1]
+    sortOrderIcon = (button: 'name' | 'date'): string => {
+        return button === 'name'
+            ? this.state.sortBy === "name"
+                ? "pi pi-chevron-circle-up"
+                : "pi pi-chevron-circle-off"
+            : this.state.sortBy === "date"
+                ? "pi pi-chevron-circle-down"
+                : "pi pi-chevron-circle-off"
+    }
+
+    toggleSortOrder = () => {
+        this.setState({
+            sortBy: this.state.sortBy === "name"
+                ? "date"
+                : "name"
+        })
     }
 
     deleteSnapshot = (snapshot: Snapshot) => {
@@ -131,10 +149,10 @@ export class Loader extends React.Component<Props, State> {
         const revA = `${a.created} ${a.author} ${a.revised}`
         const revB = `${b.created} ${b.author} ${b.revised}`
         if (revA < revB) {
-            comparison = -1;
+            comparison = 1;
         }
         if (revA > revB) {
-            comparison = 1;
+            comparison = -1;
         }
         return comparison
     }
@@ -144,8 +162,8 @@ export class Loader extends React.Component<Props, State> {
      */
     sortBySnapshotName = (a: Snapshot, b: Snapshot): number => {
         let comparison = 0
-        const revA = `${a.name} ${a.created} ${a.author} ${a.revision}`.toUpperCase
-        const revB = `${b.name} ${a.created} ${a.author} ${b.revision}`.toUpperCase
+        const revA = `${a.name} ${a.created} ${a.author} ${a.revision}`.toUpperCase()
+        const revB = `${b.name} ${b.created} ${b.author} ${b.revision}`.toUpperCase()
         if (revA < revB) {
             comparison = -1;
         }
@@ -170,7 +188,7 @@ export class Loader extends React.Component<Props, State> {
         })
 
         return (
-            <AccordionTab key={`loader-meeting-${snap.meetingKey()}`}
+            <AccordionTab key={`loader-meeting-${snap.meetingKey()} ${this.state.sortBy}`}
                 headerClassName="loader-meeting-accordion-header"
                 contentClassName="loader-meeting-accordion-content"
                 header={
@@ -214,10 +232,14 @@ export class Loader extends React.Component<Props, State> {
         let meetingIndex = 0
         let indexOfCurrent = 0
         let meetingSnapshots: Array<Snapshot> = []
-        snapshots.sort(this.sortBySnapshotName).forEach((snapshot) => {
-            if (meetingKey != snapshot.meetingKey()) {
+        const sort = this.state.sortBy === "name"
+            ? this.sortBySnapshotName
+            : this.sortBySnapshotRevision
+
+        snapshots.sort(sort).forEach((snapshot) => {
+            if (meetingKey !== snapshot.meetingKey()) {
                 meetingKey = snapshot.meetingKey()
-                if (meetingKey == currentMeetingKey) {
+                if (meetingKey === currentMeetingKey) {
                     indexOfCurrent = meetingIndex
                 }
                 meetingIndex++
@@ -228,11 +250,14 @@ export class Loader extends React.Component<Props, State> {
             }
             meetingSnapshots.push(snapshot)
         })
+
         tabs.push(this.renderMeeting(meetingSnapshots))
 
         return (
             <div key={`loader-meetings`} className="loader-meetings">
-                <Accordion activeIndex={indexOfCurrent}>
+                <Accordion key={`${this.state.sortBy}`}
+                    activeIndex={indexOfCurrent}
+                >
                     {tabs}
                 </Accordion>
             </div>
@@ -252,12 +277,14 @@ export class Loader extends React.Component<Props, State> {
                     <div id="loader-header">
                         <Button id="loader-name-head"
                             label="Name"
-                            icon={this.sortOrderIcon(0)}
+                            icon={this.sortOrderIcon("name")}
+                            onClick={() => this.toggleSortOrder()}
                         />
                         <Button id="loader-timestamp-head"
                             label="Last Revised"
                             iconPos="right"
-                            icon={this.sortOrderIcon(0)}
+                            icon={this.sortOrderIcon("date")}
+                            onClick={() => this.toggleSortOrder()}
                         />
                     </div>
                     {this.renderMeetings()}
