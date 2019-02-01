@@ -19,7 +19,7 @@ import { Subcaucus } from './Subcaucus'
 declare global {
 
 	interface SnapshotInitializer {
-		author: number
+		device: number
 		created: TimestampString
 		with?: {
 			revised?: TimestampString
@@ -33,7 +33,7 @@ declare global {
 	}
 
 	interface SnapshotJSON {
-		author: number
+		device: number
 		created: TimestampString
 		revised: TimestampString
 		revision: string
@@ -54,7 +54,7 @@ export class Snapshot {
 			+ " " + this.subcaucuses.map((s) => s.debug()).join(", ")
 	}
 	created: TimestampString
-	author: number
+	device: number
 	revised: TimestampString
 	revision: string
 	name: string
@@ -63,7 +63,7 @@ export class Snapshot {
 	subcaucuses: TSMap<number, Subcaucus>
 
 	static decoder: Decoder<SnapshotJSON> = object({
-		author: number(),
+		device: number(),
 		created: string(),
 		revised: string(),
 		revision: string(),
@@ -78,7 +78,7 @@ export class Snapshot {
 	 * 
 	 * ```typescript
 	 * interface SnapshotInitializer {
-	 *   author: number
+	 *   device: number
 	 *   created: TimestampString
 	 *   with?: {
 	 * 	   revised?: TimestampString
@@ -96,7 +96,7 @@ export class Snapshot {
 	 */
 	constructor(init: SnapshotInitializer) {
 		this.created = init.created
-		this.author = init.author
+		this.device = init.device
 		this.revised = _u.now()
 		this.revision = ''
 		this.name = ''
@@ -135,7 +135,7 @@ export class Snapshot {
 			subcaucuses.set(subcaucus.id, subcaucus.recreate())
 		})
 		return new Snapshot({
-			author: this.author,
+			device: this.device,
 			created: this.created,
 			with: {
 				revised: this.revised,
@@ -154,7 +154,7 @@ export class Snapshot {
 	 */
 	toJSON = (): {
 		created: TimestampString
-		author: number
+		device: number
 		revised: TimestampString
 		revision: string
 		name: string
@@ -164,7 +164,7 @@ export class Snapshot {
 	} => {
 		return {
 			created: this.created,
-			author: this.author,
+			device: this.device,
 			revised: this.revised,
 			revision: this.revision,
 			name: this.name,
@@ -179,7 +179,7 @@ export class Snapshot {
 
 		if (decoded.ok) {
 			this.created = decoded.result.created
-			this.author = decoded.result.author
+			this.device = decoded.result.device
 			this.revised = decoded.result.revised
 			this.revision = decoded.result.revision
 			this.name = decoded.result.name
@@ -231,7 +231,7 @@ export class Snapshot {
 	 * the data in this snapshot.
 	 */
 	meetingKey = (): string => {
-		return `${this.created} ${this.author}`
+		return `${this.created} ${this.device}`
 	}
 
 	/**
@@ -239,7 +239,7 @@ export class Snapshot {
 	 * the data in this snapshot.
 	 */
 	snapshotKey = (): string => {
-		return `${this.created} ${this.author} ${this.revised}`
+		return `${this.created} ${this.device} ${this.revised}`
 	}
 
 	/**

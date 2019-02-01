@@ -144,7 +144,7 @@ export class App extends React.Component<Props, State> {
         // wants it to be happy about the constructor
         this.snapshot = new Snapshot({
             created: timestamp,
-            author: this.subcalc.author
+            device: this.subcalc.device
         })
 
         this.setStateSnapshot()

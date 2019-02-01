@@ -108,7 +108,7 @@ export class Loader extends React.Component<Props, State> {
             })
 
         return (
-            <div key={`loader-snapshot-${snapshot.revised}-${snapshot.author}`} className={`loader-snapshot`}>
+            <div key={`loader-snapshot-${snapshot.revised}-${snapshot.device}`} className={`loader-snapshot`}>
                 <div className="loader-snapshot-button button"
                     onClick={() => this.props.onLoad(snapshot)}
                 >
@@ -146,8 +146,8 @@ export class Loader extends React.Component<Props, State> {
      */
     sortBySnapshotRevision = (a: Snapshot, b: Snapshot): number => {
         let comparison = 0
-        const revA = `${a.created} ${a.author} ${a.revised}`
-        const revB = `${b.created} ${b.author} ${b.revised}`
+        const revA = `${a.created} ${a.device} ${a.revised}`
+        const revB = `${b.created} ${b.device} ${b.revised}`
         if (revA < revB) {
             comparison = 1;
         }
@@ -162,8 +162,8 @@ export class Loader extends React.Component<Props, State> {
      */
     sortBySnapshotName = (a: Snapshot, b: Snapshot): number => {
         let comparison = 0
-        const revA = `${a.name} ${a.created} ${a.author} ${a.revision}`.toUpperCase()
-        const revB = `${b.name} ${b.created} ${b.author} ${b.revision}`.toUpperCase()
+        const revA = `${a.name} ${a.created} ${a.device} ${a.revision}`.toUpperCase()
+        const revB = `${b.name} ${b.created} ${b.device} ${b.revision}`.toUpperCase()
         if (revA < revB) {
             comparison = -1;
         }

@@ -22,7 +22,7 @@ declare global {
 	 */
 	interface SubCalcJSON {
 		v: number
-		author: number
+		device: number
 		snapshot: SnapshotJSON
 	}
 
@@ -45,16 +45,16 @@ export class SubCalc {
 	version = 2
 
 	/**
-	 * This author is just a random number that will help
+	 * This device is just a random number that will help
 	 * distinguish meeting identifiers if they start to be
 	 * shared among devices. Hopefully a combination of 
-	 * author and meeting creation date won't collide.
+	 * device and meeting creation date won't collide.
 	 */
-	author: number
+	device: number
 
 	/**
 	 * This is the snapshot that is currently being
-	 * edited. The unique creator and author combo 
+	 * edited. The unique creator and device combo 
 	 * will make it part of a "meeting".
 	 * 
 	 * This snapshot will always be its own unique object,
@@ -80,7 +80,7 @@ export class SubCalc {
 	 */
 	static decoder: Decoder<SubCalcJSON> = object({
 		v: number(),
-		author: number(),
+		device: number(),
 		snapshot: Snapshot.decoder,
 	})
 
@@ -89,13 +89,13 @@ export class SubCalc {
 	 */
 	constructor() {
 
-		// no author means that subcalc has never run in this browser
+		// no device means that subcalc has never run in this browser
 		// so we gather together some basics about this instance
 
-		this.author = _u.randomSeed()
+		this.device = _u.randomSeed()
 
 		// a poorly formed snapshot to mark failure of the read
-		this.snapshot = new Snapshot({ author: 0, created: "" })
+		this.snapshot = new Snapshot({ device: 0, created: "" })
 
 		// then we look for local data
 		// if found, it will override the values above
@@ -174,7 +174,7 @@ export class SubCalc {
 
 		// first create a new snapshot and make it current
 		const snapshot = new Snapshot({
-			author: this.author,
+			device: this.device,
 			created: created
 		})
 		this.setSnapshot(snapshot)
@@ -190,7 +190,7 @@ export class SubCalc {
 	write = () => {
 		const jsonSubCalc = {
 			v: this.version,
-			author: this.author,
+			device: this.device,
 			snapshot: this.snapshot.toJSON()
 		}
 		try {
@@ -276,9 +276,9 @@ export class SubCalc {
 				if (this.version !== decoded.result.v) {
 					_u.debug(`Expected subcalc version ${this.version}, got ${decoded.result.v}`)
 				}
-				this.author = decoded.result.author
+				this.device = decoded.result.device
 				this.snapshot = new Snapshot({
-					author: decoded.result.snapshot.author,
+					device: decoded.result.snapshot.device,
 					created: decoded.result.snapshot.created,
 					json: decoded.result.snapshot
 				})
@@ -310,7 +310,7 @@ export class SubCalc {
 		if (decoded.ok) {
 			return new Snapshot({
 				created: decoded.result.created,
-				author: decoded.result.author,
+				device: decoded.result.device,
 				json: decoded.result
 			})
 		} else {
