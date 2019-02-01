@@ -1028,26 +1028,11 @@ export class App extends React.Component<Props, State> {
                             icon="pi pi-trash"
                             onClick={() => this.addCardState(CardFor.RemovingEmpties)}
                         />
-                        <Button id="recalculate-button"
-                            icon="pi pi-bell"
-                            className="p-button-warning"
-                            onClick={() => this.redistributeDelegates()}
-                        />
                     </div>
                 </div>
                 {this.renderSummary()}
             </div>
         )
-    }
-
-    /**
-     * Force the redistribution of delegates and an update.
-     * 
-     * TODO: Remove this function and the corresponding recalculate-button.
-     */
-    redistributeDelegates = () => {
-        this.subcalc.snapshot.redistributeDelegates()
-        this.forceUpdate()
     }
 
     /**
