@@ -50,17 +50,17 @@ export class SubCalcPRNG {
 	 */
 	constructor(state1: string | number, state2?: string | number) {
 
-		state1 = Math.abs(Math.floor(Number(state1)))
-		state2 = Math.abs(Math.floor(Number(state2)))
+		this.state1 = Math.abs(Math.floor(Number(state1)))
+		this.state2 = Math.abs(Math.floor(Number(state2)))
 
-		if (isNaN(state1) || state1 < 1) {
-			state1 = Number(new Date())
+		if (isNaN(this.state1) || this.state1 < 1) {
+			this.state1 = Number(new Date())
 		}
-		if (isNaN(state2) || state2 < 1) {
-			state2 = state1
+		if (isNaN(this.state2) || this.state2 < 1) {
+			this.state2 = this.state1
 		}
-		state1 = state1 % (this.mod1 - 1) + 1
-		state2 = state2 % (this.mod2 - 1) + 1
+		this.state1 = this.state1 % (this.mod1 - 1) + 1
+		this.state2 = this.state2 % (this.mod2 - 1) + 1
 	}
 
 	/**

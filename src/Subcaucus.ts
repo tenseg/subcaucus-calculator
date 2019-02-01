@@ -103,4 +103,65 @@ export class Subcaucus {
 			_u.debug(decoded.error)
 		}
 	}
+
+	/**
+	 * The viability number provided by the snapshot.
+	 * This is the `delegateViability` number.
+	 */
+	viability = 0
+
+	/**
+	 * The number of delegates based on the simple viability number,
+	 * before any remainders have been considered.
+	 */
+	baseDelegates = 0
+
+	/**
+	 * The remainder left after apportioning base delegates.
+	 */
+	remainder = 0
+
+	/**
+	 * Reported coin toss results.
+	 */
+	tosses: Array<{ won: boolean, against: Subcaucus }> = []
+
+	/**
+	 * Clear all delegate calculation-related variables
+	 * in preparation for a recalculation.
+	 */
+	clearDelegateInfo = () => {
+		this.delegates = 0
+		this.viability = 0
+		this.baseDelegates = 0
+		this.remainder = 0
+		this.tosses = []
+	}
+
+	/**
+	 * Set the internal viability number and calculate base delegates
+	 * and remainder values.
+	 */
+	setViability = (viability: number) => {
+		this.viability = viability
+		const delegateScore = this.count / this.viability
+		this.baseDelegates = Math.floor(delegateScore)
+		this.delegates = this.baseDelegates
+		this.remainder = delegateScore - this.baseDelegates
+	}
+
+	/**
+	 * Report coin tosses to the subcaucus.
+	 */
+	coinToss = (won: boolean, against: Subcaucus) => {
+		this.tosses.push({ won: won, against: against })
+	}
+
+	/**
+	 * Add a delegate due to the remainder allocations.
+	 */
+	addRemainderDelegate = () => {
+		this.delegates++
+	}
+
 }

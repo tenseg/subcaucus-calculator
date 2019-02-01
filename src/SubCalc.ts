@@ -186,6 +186,8 @@ export class SubCalc {
 
 	/**
 	 * Write the current subcalc2 item out to local storage.
+	 * 
+	 * This includes writing the current snapshot out.
 	 */
 	write = () => {
 		const jsonSubCalc = {
@@ -204,8 +206,17 @@ export class SubCalc {
 
 	/**
 	 * Write a single snapshot to local storage.
+	 * 
+	 * Defaults to writing the current snapshot.
 	 */
-	writeSnapshot = (snapshot: Snapshot) => {
+	writeSnapshot = (snapshot?: Snapshot) => {
+		if (!snapshot) {
+			snapshot = this.snapshot
+		}
+		if (snapshot === this.snapshot) {
+			this.write()
+			return
+		}
 		const storedSnapshotKey = this.storedSnapshotKey(snapshot)
 		const jsnap = snapshot.toJSON()
 		try {
@@ -216,6 +227,22 @@ export class SubCalc {
 			_u.alertUser(new Error(`Error saving ${storedSnapshotKey} to local storage`), e)
 			return
 		}
+	}
+
+	/**
+	 * Pass along a revision to the snapshot,
+	 * then write the snapshot to local storage.
+	 */
+	reviseSnapshot = (update?: {
+		name?: string,
+		allowed?: number,
+		seed?: number,
+	}, snapshot?: Snapshot) => {
+		if (!snapshot) {
+			snapshot = this.snapshot
+		}
+		snapshot.revise(update)
+		this.writeSnapshot()
 	}
 
 	/**

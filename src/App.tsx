@@ -75,18 +75,12 @@ interface Props { }
  * React state for the SubCalc App.
  */
 interface State {
-    revision: string
-    name: string
-    allowed: number
-    seed: number
     // modal interactions
     cards: Array<CardFor>
     present: Presenting
     // sorting info
     sortName: SortOrder
     sortCount: SortOrder
-    // summary info
-    summary?: SummaryInfo
 }
 
 export class App extends React.Component<Props, State> {
@@ -96,11 +90,6 @@ export class App extends React.Component<Props, State> {
      * read and write data from and to local storage.
      */
     private subcalc = new SubCalc()
-
-    /**
-     * The snapshot we are displaying.
-     */
-    private snapshot: Snapshot
 
     /**
      * To be included with component key whenever you want
@@ -136,88 +125,15 @@ export class App extends React.Component<Props, State> {
 
         _u.setAlertFunction(this.growlAlert)
 
-        const timestamp = _u.now()
+        this.subcalc.snapshot.redistributeDelegates()
 
-        // prepare a new snapshot to hold edits to come
-        // this will be immediately overwritten by the
-        // setStateSnapshot() below, but the compiler
-        // wants it to be happy about the constructor
-        this.snapshot = new Snapshot({
-            created: timestamp,
-            device: this.subcalc.device
-        })
-
-        this.setStateSnapshot()
-
-        if (false && _u.isDebugging()) {
-            // if debugging, fill the snapshot and state with peculiar information
-            this.snapshot.addSubcaucus("C", 10, 0)
-            this.snapshot.addSubcaucus("A", 0, 0)
-            this.snapshot.addSubcaucus("B", 100, 5)
-            this.snapshot.addSubcaucus("D", 1, 0)
-            this.snapshot.addSubcaucus()
-            // this.originalRevised = timestamp
-            this.state = {
-                revision: '',
-                name: 'Debugging', allowed: 10, cards: [],
-                // name: '', allowed: 0, cards: this.initialCardState,
-                present: Presenting.Calculator,
-                seed: 42,
-                // sorting info
-                sortName: SortOrder.None,
-                sortCount: SortOrder.None,
-                // summary info
-                summary: {
-                    count: 1234,
-                    delegates: 256,
-                    viability: 2.124132,
-                    revisedViability: 1.92123,
-                    minimumCountForViability: 3,
-                    nonViableCount: 3,
-                }
-            }
-        }
-
-    }
-
-    /**
-     * Synchronizes instance variables with a new snapshot
-     * and does a `setState()` to synchronize the App
-     * with the new snapshot as well.
-     * 
-     * Defaults to synchronizing with the current snapshot.
-     */
-    setStateSnapshot = () => {
-        this.snapshot = this.subcalc.snapshot
-
-        // if we get here and still have a brand new snapshot
-        // then fill it with a few empty subcaucuses so that
-        // the user has a hint of how to proceed
-        if (this.snapshot.subcaucuses.length === 0) {
-            this.snapshot.addSubcaucus()
-            this.snapshot.addSubcaucus()
-            this.snapshot.addSubcaucus()
-        }
-        this.keySuffix = String(Math.random())
-        const state = {
-            revised: this.snapshot.revised,
-            revision: this.snapshot.revision,
-            name: this.snapshot.name,
-            allowed: this.snapshot.allowed,
-            seed: this.snapshot.seed,
+        this.state = {
             // card status
-            cards: this.snapshot.allowed ? [] : this.initialCardState,
+            cards: this.subcalc.snapshot.allowed ? [] : this.initialCardState,
             present: Presenting.Calculator,
             // sorting info
             sortName: SortOrder.None,
             sortCount: SortOrder.None,
-            summary: undefined
-        }
-        // if there is no state yet, then we create it
-        if (this.state) {
-            this.setState(state)
-        } else {
-            this.state = state
         }
     }
 
@@ -228,17 +144,11 @@ export class App extends React.Component<Props, State> {
     loadSnapshot = (snapshot?: Snapshot) => {
         if (snapshot) {
             this.subcalc.setSnapshot(snapshot)
-            this.setStateSnapshot()
+            this.subcalc.snapshot.redistributeDelegates()
+            this.forceUpdate()
         } else {
             this.setState({ present: Presenting.Calculator })
         }
-    }
-
-    /**
-     * Write out to local storage via SubCalc.
-     */
-    writeToStorage = () => {
-        this.subcalc.write()
     }
 
     /**
@@ -249,31 +159,23 @@ export class App extends React.Component<Props, State> {
      */
     setStateName = (name: string) => {
         this.subcalc.renameMeeting(name)
-        this.setState({
-            name: name,
-        })
+        this.forceUpdate()
     }
 
     /**
      * Change the number of delegates allowed here and in storage.
      */
     setStateAllowed = (allowed: number) => {
-        this.snapshot.revise({ allowed: allowed })
-        this.setState({
-            allowed: allowed,
-            revision: '',
-        }, this.writeToStorage)
+        this.subcalc.reviseSnapshot({ allowed: allowed })
+        this.forceUpdate()
     }
 
     /**
      * Change the random seed (the "coin") here and in storage.
      */
     setStateSeed = (seed: number) => {
-        this.snapshot.revise({ seed: seed })
-        this.setState({
-            seed: seed,
-            revision: '',
-        }, this.writeToStorage)
+        this.subcalc.reviseSnapshot({ seed: seed })
+        this.forceUpdate()
     }
 
     /**
@@ -281,10 +183,8 @@ export class App extends React.Component<Props, State> {
      * due to changes in the subcaucuses.
      */
     setStateSubcaucuses = () => {
-        this.snapshot.revise()
-        this.setState({
-            revision: '',
-        }, this.writeToStorage)
+        this.subcalc.reviseSnapshot()
+        this.forceUpdate()
     }
 
     /**
@@ -293,7 +193,7 @@ export class App extends React.Component<Props, State> {
      */
     newMeeting = () => {
         this.subcalc.newMeetingSnapshot()
-        this.setStateSnapshot()
+        this.setState({ cards: this.initialCardState })
     }
 
     /**
@@ -302,9 +202,7 @@ export class App extends React.Component<Props, State> {
      */
     saveSnapshot = (revision: string) => {
         this.subcalc.saveSnapshot(revision)
-        this.setState({
-            revision: revision,
-        }, this.writeToStorage)
+        this.forceUpdate()
         this.growlAlert(revision, 'success', 'Snapshot Saved')
     }
 
@@ -312,14 +210,14 @@ export class App extends React.Component<Props, State> {
      * Provide a default name for this meeting, including today's date.
      */
     defaultName = (): string => {
-        return "Meeting on " + this.snapshot.created.toDate().toLocaleDateString("en-US")
+        return "Meeting on " + this.subcalc.snapshot.created.toDate().toLocaleDateString("en-US")
     }
 
     /**
      * Provide a friendly string explaining the `allowed` number.
      */
     allowedString = (): string => {
-        return `${this.state.allowed} delegates to be elected`
+        return `${this.subcalc.snapshot.allowed} delegates to be elected`
     }
 
     /**
@@ -416,7 +314,7 @@ export class App extends React.Component<Props, State> {
         _u.debug("subcaucus changed", subcaucus.id, action)
         switch (action) {
             case 'remove':
-                this.snapshot.subcaucuses.filter((subcaucus, key) => {
+                this.subcalc.snapshot.subcaucuses.filter((subcaucus, key) => {
                     return key != subcaucus.id
                 })
                 this.setStateSubcaucuses()
@@ -436,12 +334,12 @@ export class App extends React.Component<Props, State> {
      */
     removeEmpties = (subset: 'all' | 'unnamed' = 'all') => {
         if (subset == 'all') {
-            this.snapshot.subcaucuses.filter((subcaucus, key) => {
+            this.subcalc.snapshot.subcaucuses.filter((subcaucus, key) => {
                 return subcaucus.count > 0
             })
         }
         if (subset == 'unnamed') {
-            this.snapshot.subcaucuses.filter((subcaucus, k, i) => {
+            this.subcalc.snapshot.subcaucuses.filter((subcaucus, k, i) => {
                 _u.debug("remove?", subcaucus.id, subcaucus.count, subcaucus.name, subcaucus.count > 0 || subcaucus.name != '', "key", k, "index", i)
                 return subcaucus.count > 0 || subcaucus.name != ''
             })
@@ -507,7 +405,7 @@ export class App extends React.Component<Props, State> {
                         label: "Open snapshot",
                         icon: "pi pi-fw pi-folder-open",
                         command: () => {
-                            if (this.state.revision == "") {
+                            if (this.subcalc.snapshot.revision == "") {
                                 this.addCardState(CardFor.SavingSnapshotBeforeLoading)
                             } else {
                                 this.setState({ present: Presenting.Loading })
@@ -672,7 +570,7 @@ export class App extends React.Component<Props, State> {
                 title="Welcome to the Minnesota DFL Subcacus Calculator"
                 image="dfl.jpg"
                 description='Please start by specifying the name of your meeting here. Most meetings have a name, like the "Ward 4 Precinct 7 Caucus" or the "Saint Paul City Convention".'
-                value={this.state.name}
+                value={this.subcalc.snapshot.name}
                 defaultValue={this.defaultName()}
                 allowEmpty={false}
                 onSave={(value?: string) => {
@@ -696,10 +594,10 @@ export class App extends React.Component<Props, State> {
         return (
             <ValueCard key="name-value" id="name-value"
                 title="Meeting name?"
-                value={this.state.name}
+                value={this.subcalc.snapshot.name}
                 defaultValue={this.defaultName()}
                 allowEmpty={false}
-                extraButtons={this.state.name
+                extraButtons={this.subcalc.snapshot.name
                     ? <Button id="new-meeting-button"
                         label="New meeting"
                         icon="pi pi-calendar-plus"
@@ -734,7 +632,7 @@ export class App extends React.Component<Props, State> {
             <ValueCard key="snapshot-value" id="snapshot-value"
                 title="Name for the snapshot?"
                 value=""
-                defaultValue={`Revision of ${this.state.name}`}
+                defaultValue={`Revision of ${this.subcalc.snapshot.name}`}
                 allowEmpty={false}
                 extraButtons={
                     <Button id="cancel-save-snapshot-button"
@@ -752,7 +650,7 @@ export class App extends React.Component<Props, State> {
                 }}
             >
                 <p>Consider names like "First walk" or "Final result".
-                {this.state.allowed
+                {this.subcalc.snapshot.allowed
                         ? <span> If this is actually a new event, you may want to start a new meeting instead</span>
                         : <></>
                     }
@@ -773,7 +671,7 @@ export class App extends React.Component<Props, State> {
             <ValueCard key="snapshot-value" id="snapshot-value"
                 title="Save changes?"
                 value=""
-                defaultValue={`Revision of ${this.state.revision || this.state.name}`}
+                defaultValue={`Revision of ${this.subcalc.snapshot.revision || this.subcalc.snapshot.name}`}
                 allowEmpty={false}
                 extraButtons={
                     <>
@@ -819,9 +717,9 @@ export class App extends React.Component<Props, State> {
             <ValueCard key="delegate-value" id="delegate-value"
                 title="Number of delegates allowed?"
                 type="positive integer"
-                value={this.state.allowed.toString()}
+                value={this.subcalc.snapshot.allowed.toString()}
                 allowEmpty={false}
-                extraButtons={this.state.allowed
+                extraButtons={this.subcalc.snapshot.allowed
                     ? <Button id="new-meeting-button"
                         label="New meeting"
                         icon="pi pi-calendar-plus"
@@ -840,7 +738,7 @@ export class App extends React.Component<Props, State> {
                 }}
             >
                 <p>Specify the number of delegates that your meeting or caucus is allowed to send on to the next level. This is the number of delegates to be elected by your meeting.
-                {this.state.allowed
+                {this.subcalc.snapshot.allowed
                         ? <span> If this is actually a new event, you may want to start a new meeting instead</span>
                         : <></>
                     }
@@ -991,9 +889,9 @@ export class App extends React.Component<Props, State> {
             sort = this.sortBySubcaucusCounts
         }
 
-        return this.snapshot.subcaucuses.values().sort(sort).map((subcaucus): JSX.Element => {
+        return this.subcalc.snapshot.subcaucuses.values().sort(sort).map((subcaucus): JSX.Element => {
             return (
-                <SubcaucusRow key={`${subcaucus.id} ${this.keySuffix}`}
+                <SubcaucusRow key={`${this.subcalc.snapshot.snapshotKey()} ${subcaucus.id} ${this.subcalc.snapshot.changes}`}
                     subcaucus={subcaucus}
                     exchange={this.handleSubcaucusChange}
                 />
@@ -1007,9 +905,7 @@ export class App extends React.Component<Props, State> {
      * NOTE: Do not `setState()` in this method.
      */
     renderSummary = (): JSX.Element => {
-        const { summary } = this.state
-
-        return ((summary)
+        return ((this.subcalc.snapshot.room > 0)
             ? <div id="summary-container">
                 <div className="summary-row">
                     <div className="summary-label">
@@ -1017,16 +913,16 @@ export class App extends React.Component<Props, State> {
                     </div>
                     <div className="summary-count">
                         <strong>
-                            {summary.count.toCommaString()}
+                            {this.subcalc.snapshot.room.toCommaString()}
                         </strong>
                     </div>
                     <div className="summary-delegates">
-                        {summary.delegates.toCommaString()}
+                        {this.subcalc.snapshot.totalDelegates.toCommaString()}
                     </div>
                 </div>
                 <div className="summary-row">
                     <div className="summary-label">
-                        Minimum of <strong>{summary.minimumCountForViability.singularPlural("person", "people")}</strong> needed to make a subcaucus viable
+                        Minimum of <strong>{this.subcalc.snapshot.wholeViability.singularPlural("person", "people")}</strong> needed to make a subcaucus viable
                     </div>
                 </div>
                 <div className="summary-row">
@@ -1035,19 +931,19 @@ export class App extends React.Component<Props, State> {
                     </div>
                     <div className="summary-count">
                         <strong>
-                            {Math.round(summary.viability * 1000) / 1000}
+                            {Math.round(this.subcalc.snapshot.viability * 1000) / 1000}
                         </strong>
                     </div>
                 </div>
-                {summary.nonViableCount
+                {this.subcalc.snapshot.viableRoom < this.subcalc.snapshot.room
                     ? <div className="summary-row clickable"
                         onClick={() => this.growlAlert("Explain viability in more detail.", 'warn', 'TODO')}
                     >
                         <div className="summary-label">
-                            Recalculated viability number ({summary.nonViableCount.singularPlural("person", "people")} in non-viable subcaucuses)
+                            Recalculated viability number ({(this.subcalc.snapshot.room - this.subcalc.snapshot.viableRoom).singularPlural("person", "people")} in non-viable subcaucuses)
                         </div>
                         <div className="summary-count">
-                            {Math.round(summary.revisedViability * 1000) / 1000}
+                            {Math.round(this.subcalc.snapshot.delegateViability * 1000) / 1000}
                         </div>
                     </div>
                     : ''
@@ -1069,7 +965,9 @@ export class App extends React.Component<Props, State> {
      * NOTE: Do not `setState()` in this method.
      */
     renderCalculator = (): JSX.Element => {
-        const { name, revision: snapshot, sortName, sortCount } = this.state
+        const { sortName, sortCount } = this.state
+        const snapshot = this.subcalc.snapshot
+        const { name, revision } = snapshot
 
         return (
             <div id="calculator">
@@ -1079,9 +977,9 @@ export class App extends React.Component<Props, State> {
                         onClick={() => this.addCardState(CardFor.ChangingName)}
                     >
                         {name ? name : this.defaultName()}
-                        {snapshot != ''
+                        {revision != ''
                             ? <span className="snapshot">
-                                {snapshot}
+                                {revision}
                             </span>
                             : ''
                         }
@@ -1121,7 +1019,7 @@ export class App extends React.Component<Props, State> {
                             label="Add a Subcaucus"
                             icon="pi pi-plus"
                             onClick={() => {
-                                this.snapshot.addSubcaucus()
+                                snapshot.addSubcaucus()
                                 this.setStateSubcaucuses()
                             }}
                         />
@@ -1130,11 +1028,26 @@ export class App extends React.Component<Props, State> {
                             icon="pi pi-trash"
                             onClick={() => this.addCardState(CardFor.RemovingEmpties)}
                         />
+                        <Button id="recalculate-button"
+                            icon="pi pi-bell"
+                            className="p-button-warning"
+                            onClick={() => this.redistributeDelegates()}
+                        />
                     </div>
                 </div>
                 {this.renderSummary()}
             </div>
         )
+    }
+
+    /**
+     * Force the redistribution of delegates and an update.
+     * 
+     * TODO: Remove this function and the corresponding recalculate-button.
+     */
+    redistributeDelegates = () => {
+        this.subcalc.snapshot.redistributeDelegates()
+        this.forceUpdate()
     }
 
     /**
@@ -1167,13 +1080,12 @@ export class App extends React.Component<Props, State> {
                 <p>This is debugging info for <a href="https://grand.clst.org:3000/tenseg/subcalc-pr/issues" target="_repository">subcalc-pr</a> (with <a href="https://reactjs.org/docs/react-component.html" target="_react">ReactJS</a>, <a href="https://www.primefaces.org/primereact/" target="_primereact">PrimeReact</a>, <a href="https://www.primefaces.org/primeng/#/icons" target="_primeicons">PrimeIcons</a>) derrived from <a href="https://bitbucket.org/tenseg/subcalc-js/src" target="_bitbucket">subcalc-js</a>.
                         </p>
                 <div style={{ float: "right" }}>
-                    <ShowJSON name="this.storage" data={this.subcalc} />
+                    <ShowJSON name="this.subcalc" data={this.subcalc} />
                 </div>
                 <pre>{"rendered App " + (new Date()).toLocaleTimeString()}</pre>
-                <pre>{"app: " + this.snapshot.debug()}</pre>
                 <pre>{"subcalc: " + this.subcalc.debug()}</pre>
                 <ShowJSON name="this.state" data={this.state} /><br />
-                <ShowJSON name={`snapshot ${this.snapshot.debugID}`} data={this.snapshot} />
+                <ShowJSON name={`snapshot ${this.subcalc.snapshot.debugID}`} data={this.subcalc.snapshot} />
                 <p style={{ clear: "both" }}>Done.</p>
             </div>
         )
@@ -1205,7 +1117,7 @@ export class App extends React.Component<Props, State> {
      */
     render() {
 
-        _u.debug("rendering", this.snapshot)
+        _u.debug("rendering", this.subcalc.snapshot)
 
         return (
             <div id="app">
