@@ -506,7 +506,6 @@ export class App extends React.Component<Props, State> {
                     {
                         label: "Open snapshot",
                         icon: "pi pi-fw pi-folder-open",
-                        disabled: this.subcalc.meetings.length === 0,
                         command: () => {
                             if (this.state.revision == "") {
                                 this.addCardState(CardFor.SavingSnapshotBeforeLoading)
@@ -927,13 +926,13 @@ export class App extends React.Component<Props, State> {
 
         // fall back to order of entry
         let comparison = a.id - b.id
-        const nameA = a.name ? a.name.toUpperCase() : `SUBCAUCUS ${a.id}`;
-        const nameB = b.name ? b.name.toUpperCase() : `SUBCAUCUS ${b.id}`;
+        const nameA = a.name ? a.name.toUpperCase() : `SUBCAUCUS ${a.id}`
+        const nameB = b.name ? b.name.toUpperCase() : `SUBCAUCUS ${b.id}`
         if (nameA < nameB) {
-            comparison = -1;
+            comparison = -1
         }
         if (nameA > nameB) {
-            comparison = 1;
+            comparison = 1
         }
         return comparison * this.state.sortName
     }

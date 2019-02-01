@@ -235,6 +235,14 @@ export class Snapshot {
 	}
 
 	/**
+	 * Derive the appropriate snapshot key from
+	 * the data in this snapshot.
+	 */
+	snapshotKey = (): string => {
+		return `${this.created} ${this.author} ${this.revised}`
+	}
+
+	/**
 	 * The next ID in use for subcacuses in this snapshot.
 	 * 
 	 * One more than the current maximum ID.

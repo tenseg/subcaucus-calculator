@@ -477,6 +477,7 @@ body {
     
     .p-card.valuecard {
         position: absolute;
+        z-index: 10;
         top: ( 5 * $form-margin );
         left: $form-margin;
         right: $form-margin;

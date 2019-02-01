@@ -13,7 +13,6 @@ import { Decoder, object, string, number, array } from '@mojotech/json-type-vali
 
 // local to this app
 import * as _u from './Utilities'
-import { Meeting } from './Meeting'
 import { Snapshot } from './Snapshot'
 
 declare global {
@@ -37,7 +36,7 @@ export class SubCalc {
 
 	debug = (): string => {
 		return this.snapshot.debug()
-			+ "\n" + this.meetings.map((m) => m.debug()).join("\n")
+			+ "\n" + this.snapshots().map((s) => s.debug()).join("\n")
 	}
 
 	/**
@@ -66,16 +65,19 @@ export class SubCalc {
 	snapshot: Snapshot
 
 	/**
-	 * A map of meeting keys to meeting records.
+	 * A prefix to be used when creating local storage items
+	 * for each snapshot.
 	 */
-	meetings = new TSMap<string, Meeting>()
+	storedSnapshotPrefix = "sc-save"
 
 	/**
-	 * A prefix to be used when creating local storage items
-	 * for each meeting.
+	 * A prefix for snapshots in local storage trash.
 	 */
-	storedMeetingPrefix = "sc-meeting"
+	trashedSnapshotPrefix = "sc-trash"
 
+	/**
+	 * The json-type-validation decoder for this class.
+	 */
 	static decoder: Decoder<SubCalcJSON> = object({
 		v: number(),
 		author: number(),
@@ -112,19 +114,40 @@ export class SubCalc {
 	}
 
 	/**
-	 * Returns a string to be used as a key for looking up a meeting.
+	 * Returns a string to be used to retrive a snapshot from local storage.
+	 * 
+	 * Returns the key for the current shapshot by default.
 	 */
-	meetingKey = (created: TimestampString, author?: number): string => {
-		// we include the author number in the key in case meetings are shared
-		author = author || this.author
-		return `${created} ${author}`
+	storedSnapshotKey = (snapshot?: Snapshot) => {
+		if (snapshot === undefined) {
+			snapshot = this.snapshot
+		}
+		return `${this.storedSnapshotPrefix} ${snapshot.snapshotKey()}`
 	}
 
 	/**
-	 * Returns a string to be used to retrive a meeting from local storage.
+	 * Return an array of all the snapshots found in local storage.
 	 */
-	storedMeetingKey = (meetingKey: string) => {
-		return `${this.storedMeetingPrefix} ${meetingKey}`
+	snapshots = (status: 'saved' | 'trashed' = 'saved'): Array<Snapshot> => {
+		let snapshots: Array<Snapshot> = []
+
+		const length = localStorage.length
+		const prefix = status === 'saved'
+			? this.storedSnapshotPrefix
+			: this.trashedSnapshotPrefix
+
+		for (let i = 0; i < length; i++) {
+			const storedKey = localStorage.key(i)
+			if (!storedKey) break
+			if (storedKey.startsWith(prefix)) {
+				const snapshot = this.readSnapshot(storedKey)
+				if (snapshot) {
+					snapshots.push(snapshot)
+				}
+			}
+		}
+
+		return snapshots
 	}
 
 	/**
@@ -180,18 +203,17 @@ export class SubCalc {
 	}
 
 	/**
-	 * Writes a meeting to local storage.
+	 * Write a single snapshot to local storage.
 	 */
-	writeMeeting = (meeting: Meeting) => {
-		const storedMeetingKey = this.storedMeetingKey(meeting.key)
-		const jsonMeeting = meeting.toJSON()
-
+	writeSnapshot = (snapshot: Snapshot) => {
+		const storedSnapshotKey = this.storedSnapshotKey(snapshot)
+		const jsnap = snapshot.toJSON()
 		try {
-			const jsonMeetingString = JSON.stringify(jsonMeeting)
-			_u.debug(`storing ${storedMeetingKey}`, jsonMeetingString)
-			localStorage.setItem(storedMeetingKey, jsonMeetingString)
+			const jsnapString = JSON.stringify(jsnap)
+			_u.debug(`storing ${storedSnapshotKey}`, jsnapString)
+			localStorage.setItem(storedSnapshotKey, jsnapString)
 		} catch (e) {
-			_u.alertUser(new Error(`Error saving ${storedMeetingKey} to local storage`), e)
+			_u.alertUser(new Error(`Error saving ${storedSnapshotKey} to local storage`), e)
 			return
 		}
 	}
@@ -202,60 +224,25 @@ export class SubCalc {
 	saveSnapshot = (revision: string) => {
 		this.snapshot.revision = revision
 		this.write() // writes the current snapshot to local storage
-
-		const meetingKey = this.snapshot.meetingKey()
-		let meeting = this.meetings.get(meetingKey)
-
-		// if the meeting does not yet exist, then we create it
-		if (!meeting) {
-			meeting = new Meeting({
-				key: meetingKey,
-				author: this.snapshot.author,
-				with: {
-					name: this.snapshot.name,
-					created: this.snapshot.created,
-				}
-			})
-			this.meetings.set(meetingKey, meeting)
-		}
-
-		// add a clone of the current snapshot to the meeting
-		meeting.snapshots.set(this.snapshot.revised, this.snapshot.recreate())
-		this.writeMeeting(meeting) // writes the meeting to local storage
+		this.writeSnapshot(this.snapshot) // writes the saved version to local storage
 	}
 
 	/**
-	 * Uses the current snapshot to rename the meeting and
-	 * propagates that change to all the other snapshots in the meeting.
+	 * Uses the current snapshot to rename the meeting by propagating
+	 * that change to all the other snapshots in the meeting.
 	 */
 	renameMeeting = (name: string) => {
 		// rename the current snapshot
 		this.snapshot.name = name
 		this.write()
-
 		const meetingKey = this.snapshot.meetingKey()
-		let meeting = this.meetings.get(meetingKey)
-
-		if (meeting) {
-			meeting.name = name
-			meeting.snapshots.forEach((snapshot) => snapshot.name = name)
-			this.writeMeeting(meeting)
-		}
+		this.snapshots().forEach((snapshot) => {
+			if (snapshot.meetingKey() === meetingKey) {
+				snapshot.name = name
+				this.writeSnapshot(snapshot)
+			}
+		})
 	}
-
-	/**
-	 * Remove a whole meeting from local storage.
-	 */
-	deleteMeeting = (meetingKey: string) => {
-		try {
-			this.meetings.delete(meetingKey)
-			localStorage.removeItem(`${this.storedMeetingPrefix} ${meetingKey}`)
-		} catch (e) {
-			_u.alertUser(new Error(`Failed to remove ${meetingKey} from local storage`), e)
-			return
-		}
-	}
-
 
 	/**
 	 * Remove a snapshot from local storage. If this is the last
@@ -264,22 +251,8 @@ export class SubCalc {
 	 * NOTE: This method will not remove the "current" snapshot.
 	 */
 	deleteSnapshot = (snapshot: Snapshot) => {
-		const meetingKey = this.snapshot.meetingKey()
-		const meeting = this.meetings.get(meetingKey)
-
-		// can't do anything with a meeting that does not exist
-		if (!meeting) {
-			_u.alertUser(new Error(`Could not find ${meetingKey} from which to remove snapshot`))
-			return
-		}
-
-		meeting.snapshots.delete(snapshot.revised)
-
-		if (meeting.snapshots.length > 0) {
-			this.writeMeeting(meeting)
-		} else {
-			this.deleteMeeting(meetingKey)
-		}
+		const snapshotKey = snapshot.snapshotKey()
+		localStorage.removeItem(snapshotKey)
 	}
 
 	/**
@@ -313,45 +286,30 @@ export class SubCalc {
 				_u.debug(decoded.error)
 			}
 
-			const length = localStorage.length
-
-			this.meetings = new TSMap<string, Meeting>()
-
-			for (let i = 0; i < length; i++) {
-				const storedKey = localStorage.key(i)
-				if (!storedKey) break
-				if (storedKey.startsWith(this.storedMeetingPrefix)) {
-					const meeting = this.readMeeting(storedKey)
-					if (meeting) {
-						this.meetings.set(meeting.key, meeting)
-					}
-				}
-			}
-
 		} else {
 			// TODO: check for old subcalc1 data
 		}
 	}
 
 	/**
-	 * Given a meeting key, this functions looks for that meeting in
+	 * Given a snapshot key, this functions looks for that meeting in
 	 * local storage and returns a new meeting object to holding that information.
 	 */
-	readMeeting = (storedMeetingKey: string): Meeting | undefined => {
-		let json: MeetingJSON
+	readSnapshot = (storedSnapshotKey: string): Snapshot | undefined => {
+		let json: SnapshotJSON
 
 		try {
-			json = JSON.parse(localStorage.getItem(storedMeetingKey) || 'false')
+			json = JSON.parse(localStorage.getItem(storedSnapshotKey) || 'false')
 		} catch (e) {
 			_u.debug(e)
 			return undefined
 		}
 
-		const decoded = Meeting.decoder.run(json)
+		const decoded = Snapshot.decoder.run(json)
 
 		if (decoded.ok) {
-			return new Meeting({
-				key: this.meetingKey(decoded.result.created, decoded.result.author),
+			return new Snapshot({
+				created: decoded.result.created,
 				author: decoded.result.author,
 				json: decoded.result
 			})

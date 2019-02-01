@@ -123,46 +123,117 @@ export class Loader extends React.Component<Props, State> {
         )
     }
 
-    renderMeetings = (): JSX.Element => {
-        const meetings = this.props.subcalc.meetings
-        const currentMeetingKey = this.props.subcalc.snapshot.meetingKey()
+    /**
+     * A method to sort snapshots by date.
+     */
+    sortBySnapshotRevision = (a: Snapshot, b: Snapshot): number => {
+        let comparison = 0
+        const revA = `${a.created} ${a.author} ${a.revised}`
+        const revB = `${b.created} ${b.author} ${b.revised}`
+        if (revA < revB) {
+            comparison = -1;
+        }
+        if (revA > revB) {
+            comparison = 1;
+        }
+        return comparison
+    }
 
-        let indexOfCurrent = 0 // used to turn "down" the current meeting in the loader
+    /**
+     * A method to sort snapshots by name.
+     */
+    sortBySnapshotName = (a: Snapshot, b: Snapshot): number => {
+        let comparison = 0
+        const revA = `${a.name} ${a.created} ${a.author} ${a.revision}`.toUpperCase
+        const revB = `${b.name} ${a.created} ${a.author} ${b.revision}`.toUpperCase
+        if (revA < revB) {
+            comparison = -1;
+        }
+        if (revA > revB) {
+            comparison = 1;
+        }
+        return comparison
+    }
 
-        const meetingRows: Array<JSX.Element> = meetings.map((meeting, key, index) => {
+    renderMeeting = (snapshots: Array<Snapshot>): JSX.Element => {
+        const snap = snapshots[0]
+        const snapshotsJSX = snapshots.map((snapshot) => this.renderSnapshot(snapshot))
 
-            if (currentMeetingKey == key) {
-                indexOfCurrent = index || 0
-            }
+        const created = new Date(Date.parse(snap.created))
+        const createdDate = created.toLocaleString(undefined, {
+            year: 'numeric',
+            month: 'numeric',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+            second: undefined,
+        })
 
-            const created = new Date(Date.parse(meeting.created))
-            const createdDate = created.toLocaleString(undefined, {
-                year: 'numeric',
-                month: 'numeric',
-                day: 'numeric',
-                hour: 'numeric',
-                minute: '2-digit',
-                second: undefined,
-            })
-
-            return <AccordionTab key={`loader-meeting-${key}`}
+        return (
+            <AccordionTab key={`loader-meeting-${snap.meetingKey()}`}
                 headerClassName="loader-meeting-accordion-header"
                 contentClassName="loader-meeting-accordion-content"
                 header={
                     <div className="loader-meeting-header">
-                        <div className="loader-meeting-name">{meeting.name}</div>
+                        <div className="loader-meeting-name">{snap.name}</div>
                         <div className="loader-meeting-timestamp">{createdDate}</div>
                     </div>
                 }
             >
-                {this.renderSnapshots(meeting.snapshots)}
+                {snapshotsJSX}
             </AccordionTab>
+        )
+
+    }
+
+    renderMeetings = (): JSX.Element => {
+        const snapshots = this.props.subcalc.snapshots()
+
+        if (snapshots.length === 0) {
+            return (
+                <ValueCard key="nothing-to-load"
+                    title="No snapshots yet"
+                    description="You will have to save a snapshot before you can open one!"
+                    footer={
+                        <Button key="nothing-to-load-button"
+                            label="OK"
+                            icon="pi pi-check"
+                            onClick={() => this.props.onLoad()}
+                        />
+                    }
+                />
+            )
+        }
+
+        const currentMeetingKey = this.props.subcalc.snapshot.meetingKey()
+
+        // loop thought the snapshots, sorting them and splitting them
+        // into meetings and creating a JSX array to return
+        let tabs: Array<JSX.Element> = []
+        let meetingKey = ""
+        let meetingIndex = 0
+        let indexOfCurrent = 0
+        let meetingSnapshots: Array<Snapshot> = []
+        snapshots.sort(this.sortBySnapshotName).forEach((snapshot) => {
+            if (meetingKey != snapshot.meetingKey()) {
+                meetingKey = snapshot.meetingKey()
+                if (meetingKey == currentMeetingKey) {
+                    indexOfCurrent = meetingIndex
+                }
+                meetingIndex++
+                if (meetingSnapshots.length > 0) {
+                    tabs.push(this.renderMeeting(meetingSnapshots))
+                }
+                meetingSnapshots = []
+            }
+            meetingSnapshots.push(snapshot)
         })
+        tabs.push(this.renderMeeting(meetingSnapshots))
 
         return (
             <div key={`loader-meetings`} className="loader-meetings">
                 <Accordion activeIndex={indexOfCurrent}>
-                    {meetingRows}
+                    {tabs}
                 </Accordion>
             </div>
         )
@@ -174,7 +245,7 @@ export class Loader extends React.Component<Props, State> {
                 {this.renderMenu()}
                 <div id="meeting-info">
                     <div id="meeting-name" className="not-button">
-                        Pick a snapshot below to load it...
+                        Pick a snapshot below to open it...
                     </div>
                 </div>
                 <div id="loader-container">
