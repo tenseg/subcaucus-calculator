@@ -192,7 +192,7 @@ export class App extends React.Component<Props, State> {
      * set our state to reflect the new meeting.
      */
     newMeeting = () => {
-        this.subcalc.newMeetingSnapshot()
+        this.subcalc.newSnapshot()
         this.setState({ cards: this.initialCardState })
     }
 

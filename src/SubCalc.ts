@@ -108,7 +108,7 @@ export class SubCalc {
 			// since no actual snapshot was assigned
 			// we will get a real one now
 
-			this.snapshot = this.newMeetingSnapshot()
+			this.snapshot = this.newSnapshot()
 		}
 
 	}
@@ -165,11 +165,9 @@ export class SubCalc {
 	}
 
 	/**
-	 * Creates a new meeting and returns a new snapshot
-	 * associated with that meeting. Note that the new
-	 * snapshot will not be one saved to the meeting yet.
+	 * Creates a new snapshot, amounting to a new meeting.
 	 */
-	newMeetingSnapshot = (): Snapshot => {
+	newSnapshot = (): Snapshot => {
 		const created = _u.now()
 
 		// first create a new snapshot and make it current
@@ -177,6 +175,13 @@ export class SubCalc {
 			device: this.device,
 			created: created
 		})
+
+		// add three subcaucuses to give the user a clue
+		snapshot.addSubcaucus()
+		snapshot.addSubcaucus()
+		snapshot.addSubcaucus()
+
+		// make this the current snapshot
 		this.setSnapshot(snapshot)
 
 		// note, we return the copy of the snapshot we
