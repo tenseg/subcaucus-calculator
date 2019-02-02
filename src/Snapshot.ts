@@ -50,7 +50,7 @@ export class Snapshot {
 
 	debugID = ` ------ ${_u.uniqueNumber()} ------ `
 	debug = (): string => {
-		return "\nSnapshot" + this.debugID
+		return "\nSnapshot" + this.debugID + "\n"
 			+ this.name + "/" + this.revision + "/" + this.allowed
 			+ " " + this.subcaucuses.map((s) => s.debug()).join(", ")
 	}

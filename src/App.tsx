@@ -1081,14 +1081,18 @@ export class App extends React.Component<Props, State> {
         return (
             <div key={_u.randomSeed()} className="debugging">
                 <p>This is debugging info for <a href="https://grand.clst.org:3000/tenseg/subcalc-pr/issues" target="_repository">subcalc-pr</a> (with <a href="https://reactjs.org/docs/react-component.html" target="_react">ReactJS</a>, <a href="https://www.primefaces.org/primereact/" target="_primereact">PrimeReact</a>, <a href="https://www.primefaces.org/primeng/#/icons" target="_primeicons">PrimeIcons</a>) derrived from <a href="https://bitbucket.org/tenseg/subcalc-js/src" target="_bitbucket">subcalc-js</a>.
-                        </p>
-                <div style={{ float: "right" }}>
-                    <ShowJSON name="this.subcalc" data={this.subcalc} />
+                </p>
+                <div className="columns">
+                    <div className="column">
+                        <pre>{"rendered App " + (new Date()).toLocaleTimeString()}</pre>
+                        <pre>{"subcalc: " + this.subcalc.debug()}</pre>
+                        <ShowJSON name="this.state" data={this.state} /><br />
+                        <ShowJSON name={`snapshot ${this.subcalc.snapshot.debugID}`} data={this.subcalc.snapshot} />
+                    </div>
+                    <div className="column">
+                        <ShowJSON name="this.subcalc" data={this.subcalc} />
+                    </div>
                 </div>
-                <pre>{"rendered App " + (new Date()).toLocaleTimeString()}</pre>
-                <pre>{"subcalc: " + this.subcalc.debug()}</pre>
-                <ShowJSON name="this.state" data={this.state} /><br />
-                <ShowJSON name={`snapshot ${this.subcalc.snapshot.debugID}`} data={this.subcalc.snapshot} />
                 <p style={{ clear: "both" }}>Done.</p>
             </div>
         )
