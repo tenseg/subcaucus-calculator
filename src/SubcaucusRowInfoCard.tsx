@@ -50,17 +50,15 @@ export class SubcaucusRowInfoCard extends React.Component<Props, State> {
 					? <p>The <strong>{s.count.singularPlural("member", "members")}</strong> of this subcaucus may elect <strong>{s.delegates.singularPlural("delegate", "delegates")}</strong>.</p>
 					: <p>This subcaucus did not attract enough members to be viable. It may not elect any delegates. Members of this subcaucus should consider joining other subcaucuses in order to have some say in the delegates elected.</p>
 				}
-				{s.delegates > s.baseDelegates
-					? <p>It was awarded an extra delegate because it had a higher remainder ({Math.round(s.remainder * 1000) / 1000}) than some other subcaucuses.</p>
-					: ''
-				}
-				{Object.keys(tosses).map((key) => {
-					const toss: { won: boolean, against: Subcaucus } = tosses[key]
-					return (
-						<p>It {toss.won ? "won" : "lost"} a coin toss for an extra delegate against {toss.against.displayName()}, which had the same remainder.</p>
-					)
-				})}
-
+				<p>{s.remainder === 0 ? '' : <span>It had a remainder of <strong>{Math.round(s.remainder * 1000) / 1000}</strong>. </span>}
+					{s.delegates > s.baseDelegates ? <span>It was awarded an <strong>extra delegate</strong> because it had one of the higher remainders. </span> : ''}
+					{Object.keys(tosses).map((key) => {
+						const toss: { won: boolean, against: Subcaucus } = tosses[key]
+						return s.reportTosses
+							? <span>It {toss.won ? "won" : "lost"} a coin toss against {toss.against.displayName()}. </span>
+							: ''
+					})}
+				</p>
 			</ValueCard>
 		)
 	}

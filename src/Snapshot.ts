@@ -364,14 +364,48 @@ export class Snapshot {
 		})
 
 		// walk though the now-ranked subcaucuses to assign any remainders
+		// this would be much simpler, exept we want to keep track of who
+		// will really need to know details about tosses.
+		let remainder = -1
+		let reportingTo: Array<Subcaucus> = []
+		let justAddedRemainderDelegate = false
 		vSubs.forEach((s) => {
 			if (this.totalDelegates < this.allowed) {
-				s.addRemainderDelegate()
 				this.totalDelegates++
+				s.addRemainderDelegate()
+				justAddedRemainderDelegate = true
+				if (remainder != s.remainder) {
+					// this means that all of the previous
+					// remainder were assigned remainder delegates
+					// so we don't have to report coin tosses
+					reportingTo = []
+					remainder = s.remainder
+				}
+				reportingTo.push(s)
+			} else {
+				if (remainder == s.remainder) {
+					reportingTo.push(s)
+				} else {
+					if (justAddedRemainderDelegate) {
+						// since the last remainder that got
+						// a remainder delegate was not the same
+						// as this remainder, it means there was
+						// no contest between equal remainders,
+						// so we don't have to report coin tosses
+						reportingTo = []
+					}
+					remainder = -1
+				}
+				justAddedRemainderDelegate = false
 			}
 		})
+		// those subcaucuses left in the report remainder list
+		// should eventually report their coin tosses
+		reportingTo.forEach((s) => {
+			s.reportTosses = true
+		})
 
-		this.changes++
+		this.changes++ // this is used to help refresh component keys
 
 	}
 

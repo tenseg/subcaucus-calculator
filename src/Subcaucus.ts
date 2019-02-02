@@ -135,6 +135,12 @@ export class Subcaucus {
 	tosses: Array<{ won: boolean, against: Subcaucus }> = []
 
 	/**
+	 * This will flag subcaucuses which should report out
+	 * the details of their coin tosses.
+	 */
+	reportTosses = false
+
+	/**
 	 * Clear all delegate calculation-related variables
 	 * in preparation for a recalculation.
 	 */
@@ -143,6 +149,7 @@ export class Subcaucus {
 		this.viability = 0
 		this.baseDelegates = 0
 		this.remainder = 0
+		this.reportTosses = false
 		this.tosses = []
 	}
 
