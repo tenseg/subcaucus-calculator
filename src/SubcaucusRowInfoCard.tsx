@@ -30,6 +30,12 @@ export class SubcaucusRowInfoCard extends React.Component<Props, State> {
 
 		const { subcaucus: s, dismiss } = this.props
 
+		// we only want to convey the result of the last toss between two partners
+		let tosses: { [props: string]: { won: boolean, against: Subcaucus } } = {}
+		s.tosses.forEach((toss) => {
+			tosses[String(toss.against.id)] = toss
+		})
+
 		return (
 			<ValueCard
 				title={s.displayName()}
@@ -48,14 +54,11 @@ export class SubcaucusRowInfoCard extends React.Component<Props, State> {
 					? <p>It was awarded an extra delegate because it had a higher remainder ({Math.round(s.remainder * 1000) / 1000}) than some other subcaucuses.</p>
 					: ''
 				}
-				{s.tosses.map((toss) => {
-					if (toss.against.delegates != s.delegates) {
-						return (
-							<p>Is {toss.won ? "won" : "lost"} a coin toss for an extra delegate against {toss.against.displayName()}, which had the same remainder.</p>
-						)
-					} else {
-						return ''
-					}
+				{Object.keys(tosses).map((key) => {
+					const toss: { won: boolean, against: Subcaucus } = tosses[key]
+					return (
+						<p>It {toss.won ? "won" : "lost"} a coin toss for an extra delegate against {toss.against.displayName()}, which had the same remainder.</p>
+					)
 				})}
 
 			</ValueCard>
