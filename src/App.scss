@@ -183,8 +183,8 @@ body {
                 }
                 
                 #subcaucus-count-head {
-                    flex: 0 0 ($count-width + 40px);
-                    width: ($count-width + 40px);
+                    flex: 0 0 ($count-width + 50px);
+                    width: ($count-width + 50px);
                     text-align: right;
                 }
                 
@@ -217,9 +217,22 @@ body {
                 border-bottom: 1px solid $rule-color;
                 
                 textarea,
-                input[type='text'] {
+                input[type='text'],
+                input[type='number'] {
                     background-color: transparent;
                     border: none;
+                }
+                
+                // see: https://stackoverflow.com/a/22559163
+                // see: https://stackoverflow.com/q/51660812
+                input[type='number'] {
+                    -moz-appearance:textfield;
+                }
+                
+                input::-webkit-outer-spin-button,
+                input::-webkit-inner-spin-button {
+                    -webkit-appearance: none;
+                    margin: 0;
                 }
                 
                 textarea {

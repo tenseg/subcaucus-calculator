@@ -142,7 +142,7 @@ export class SubcaucusRow extends React.Component<Props, State> {
 					autoComplete="off"
 					tabIndex={this.props.index + this.props.rows}
 					keyfilter="pint"
-					type="text"
+					type="number"
 					pattern="\d*"
 					value={count ? count : ''}
 					placeholder={`—`}

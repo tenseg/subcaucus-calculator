@@ -496,7 +496,7 @@ export class App extends React.Component<Props, State> {
                 }
             >
                 <p>Originally written for <a href="http://sd64dfl.org">SD64 DFL</a>, this app assists convenors of precinct caucuses and conventions in Minnesota. The Minnesota Democratic Farmer Labor (DFL) party uses a wonderful, but bit arcane, “walking subcaucus” process that is simple enough to do, but rather difficult to tabulate.</p>
-                <p>Given the number of delegates your meeting or caucus is allowed to send forward and the number of people in each subcaucus, this calculator determines how many of those delegates each subcaucus will elect. The rules it follows appeared on page 4 of the <a href="http://www.sd64dfl.org/more/caucus2014printing/2014-Official-Call.pdf">DFL 2014 Official Call</a>, including the proper treatment of remainders. It makes the math involved in a walking subcaucus disappear.</p>
+                <p>Given the number of delegates your meeting or caucus is allowed to send forward and the count of members of each subcaucus, this calculator determines how many of those delegates each subcaucus will elect. The rules it follows appeared on page 4 of the <a href="http://www.sd64dfl.org/more/caucus2014printing/2014-Official-Call.pdf">DFL 2014 Official Call</a>, including the proper treatment of remainders. It makes the math involved in a walking subcaucus disappear.</p>
                 <p>The app could be used to facilitate a “walking subcaucus” or “<a href="https://en.wikipedia.org/wiki/Proportional_representation">proportional representation</a>” system for any group.</p>
             </ValueCard>
         )
@@ -514,7 +514,7 @@ export class App extends React.Component<Props, State> {
                 image="walking.jpg"
                 onSave={() => this.removeCardState(CardFor.ShowingInstructions)}
             >
-                <p>Now it is time to fill in the subcaucus information. Just add each subcaucus name and the count of participants. Usually a convention or cacucus will solicit the names of subcaucuses first, feel free to enter them right away without a count. Then people will be encouraged to walk around the room and congregate with the subcaucus that most closely represents their views. When each subcacus reports how many people they attracted, you can enter that as the count for that subcaucus.</p>
+                <p>Now it is time to fill in the subcaucus information. Just add each subcaucus name and the count of participants. Usually a convention or cacucus will solicit the names of subcaucuses first, feel free to enter them right away without a count. Then people will be encouraged to walk around the room and congregate with the subcaucus that most closely represents their views. When each subcacus reports how many members they attracted, you can enter that as the count for that subcaucus.</p>
                 <p>As soon as you start entering subcaucus counts, the calculator will go to work determining how many delegates each subcaucus will be assigned. You can ignore those numbers until you have finished entering and confirming all the subcaucus counts. When you are done, the delegate numbers can be reported to the chair of your convention or caucus.</p>
                 <p>Since most conventions or caucuses will go through more than one round of "walking", you can just keep reusing your subcaucus list for each round. However, you might want to consider these steps at the end of each round:</p>
                 <ul>
@@ -940,7 +940,7 @@ export class App extends React.Component<Props, State> {
                 </div>
                 <div className="summary-row">
                     <div className="summary-label">
-                        Minimum of <strong>{this.subcalc.snapshot.wholeViability.singularPlural("person", "people")}</strong> needed to make a subcaucus viable
+                        Minimum of <strong>{this.subcalc.snapshot.wholeViability.singularPlural("member", "members")}</strong> needed to make a subcaucus viable
                     </div>
                 </div>
                 <div className="summary-row">
@@ -970,7 +970,7 @@ export class App extends React.Component<Props, State> {
             : <div id="summary-container">
                 <div className="summary-row">
                     <div className="summary-label">
-                        To get a "viability number" just put the count of all the people in the room into a single subcaucus.
+                        To get an initial "viability number" just make all the people in the room members of a single subcaucus.
                     </div>
                 </div>
             </div>
@@ -1009,7 +1009,7 @@ export class App extends React.Component<Props, State> {
                 <div id="subcaucus-container">
                     <div id="subcaucus-header">
                         <Button id="subcaucus-name-head"
-                            label="Subcaucus"
+                            label="Subcaucuses"
                             icon={this.sortOrderIcon(sortName)}
                             onClick={() => this.setState({
                                 sortName: this.state.sortName ? SortOrder.None : SortOrder.Ascending,
@@ -1017,7 +1017,7 @@ export class App extends React.Component<Props, State> {
                             })}
                         />
                         <Button id="subcaucus-count-head"
-                            label="Count"
+                            label="Members"
                             iconPos="right"
                             icon={this.sortOrderIcon(sortCount)}
                             onClick={() => this.setState({
