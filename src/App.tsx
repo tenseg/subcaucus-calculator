@@ -310,7 +310,7 @@ export class App extends React.Component<Props, State> {
      * Used by the `SubcaucusRow` via a callback to update the 
      * subcaucus array here in the app. 
      */
-    handleSubcaucusChange = (subcaucus: Subcaucus, action: SubcaucusRowAction) => {
+    handleSubcaucusChange = (subcaucus: Subcaucus, action: SubcaucusRowAction, index?: number, callback?: () => void) => {
         _u.debug("subcaucus changed", subcaucus.id, action)
         switch (action) {
             case 'remove':
@@ -320,7 +320,21 @@ export class App extends React.Component<Props, State> {
                 this.setStateSubcaucuses()
                 return
             case 'enter':
-                // TODO: handle special behavior on tab/enter
+                if (index) {
+                    _u.debug("enter index", index, "length", this.subcalc.snapshot.subcaucuses.length)
+                    if (index === this.subcalc.snapshot.subcaucuses.length
+                        || index === this.subcalc.snapshot.subcaucuses.length * 2) {
+                        const next = index > this.subcalc.snapshot.subcaucuses.length
+                            ? index + 2
+                            : index + 1
+                        this.subcalc.snapshot.addSubcaucus()
+                        this.forceUpdate(callback)
+                    } else {
+                        if (callback) {
+                            callback()
+                        }
+                    }
+                }
                 return
             case 'recalc':
                 // this is a signal to recalculate
@@ -337,6 +351,7 @@ export class App extends React.Component<Props, State> {
             this.subcalc.snapshot.subcaucuses.filter((subcaucus, key) => {
                 return subcaucus.count > 0
             })
+            this.subcalc.reviseSnapshot()
         }
         if (subset == 'unnamed') {
             this.subcalc.snapshot.subcaucuses.filter((subcaucus, k, i) => {
@@ -345,6 +360,7 @@ export class App extends React.Component<Props, State> {
             })
         }
         this.removeCardState(CardFor.RemovingEmpties)
+        this.subcalc.reviseSnapshot()
     }
 
     /**
@@ -889,10 +905,12 @@ export class App extends React.Component<Props, State> {
             sort = this.sortBySubcaucusCounts
         }
 
-        return this.subcalc.snapshot.subcaucuses.values().sort(sort).map((subcaucus): JSX.Element => {
+        return this.subcalc.snapshot.subcaucuses.values().sort(sort).map((subcaucus, index, array): JSX.Element => {
             return (
                 <SubcaucusRow key={`${this.subcalc.snapshot.snapshotKey()} ${subcaucus.id} ${this.subcalc.snapshot.changes}`}
                     subcaucus={subcaucus}
+                    index={index + 1}
+                    rows={array.length}
                     exchange={this.handleSubcaucusChange}
                 />
             )

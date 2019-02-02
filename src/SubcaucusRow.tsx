@@ -11,7 +11,9 @@ export type SubcaucusRowAction = 'recalc' | 'enter' | 'remove'
 
 interface Props {
 	subcaucus: Subcaucus
-	exchange: ((subcaucus: Subcaucus, action: SubcaucusRowAction) => void)
+	index: number
+	rows: number
+	exchange: ((subcaucus: Subcaucus, action: SubcaucusRowAction, index?: number, callback?: () => void) => void)
 }
 
 interface State {
@@ -47,6 +49,11 @@ export class SubcaucusRow extends React.Component<Props, State> {
 
 	handleName = () => (event: React.FormEvent<HTMLTextAreaElement>) => {
 		var value = event.currentTarget.value
+		if (value.slice(-1) === "\n") {
+			_u.debug("index", this.props.index, "captured newline")
+			// this.props.exchange(this.props.subcaucus, 'enter', this.props.index)
+			return
+		}
 		this.props.subcaucus.name = value
 		this.setState({ name: value })
 		this.props.exchange(this.props.subcaucus, 'recalc')
@@ -68,8 +75,28 @@ export class SubcaucusRow extends React.Component<Props, State> {
 	}
 
 	handleKey = () => (event: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-		if (event.key === 'Enter' || event.key === 'Tab') {
-			this.props.exchange(this.props.subcaucus, 'enter')
+		const { rows, subcaucus } = this.props
+		const currentTabIndex = event.currentTarget.tabIndex
+		_u.debug("index", currentTabIndex, "key", event.key)
+		if (event.key === 'Enter') {
+			// enters will not normally select the next row
+			// so we have to force it with a callback that happens after the add subcaucus
+			this.props.exchange(subcaucus, 'enter', currentTabIndex, () => {
+				// if we are in the last position of the count column,
+				// then the next position after adding a subcaucus will be 2 ahead
+				const next = currentTabIndex == rows * 2 ? 2 : 1
+				// walk through all the subcaucus fields looking for the next one
+				document.querySelectorAll(".subcaucus-field").forEach((e) => {
+					const element = e as HTMLElement
+					if (element.tabIndex === currentTabIndex + next) {
+						// then force the focus to this field
+						element.focus()
+					}
+				})
+			})
+		} else if (event.key === 'Tab') {
+			// tabs will behave properly, moving to the next row even after adding a subcaucus
+			this.props.exchange(this.props.subcaucus, 'enter', currentTabIndex)
 		}
 	}
 
@@ -97,6 +124,7 @@ export class SubcaucusRow extends React.Component<Props, State> {
 				<InputTextarea id={this.idPlus("row-name")}
 					className="subcaucus-field subcaucus-name"
 					autoComplete="off"
+					tabIndex={this.props.index}
 					type="text"
 					value={name}
 					rows={1}
@@ -107,11 +135,12 @@ export class SubcaucusRow extends React.Component<Props, State> {
 					placeholder={`Subcaucus ${this.props.subcaucus.id}`}
 					// placeholder={`Subcaucus name`}
 					onChange={this.handleName()}
-					onKeyUp={this.handleKey()}
+					onKeyDown={this.handleKey()}
 				/>
 				<InputText id={this.idPlus("row-count")}
 					className="subcaucus-field subcaucus-count"
 					autoComplete="off"
+					tabIndex={this.props.index + this.props.rows}
 					keyfilter="pint"
 					type="text"
 					pattern="\d*"
@@ -122,7 +151,7 @@ export class SubcaucusRow extends React.Component<Props, State> {
 					// forcing the selction of the whole text seems to lead to problems
 					// see https://grand.clst.org:3000/tenseg/subcalc-pr/issues/3
 					// onFocus={this.focusOnWholeText()}
-					onKeyUp={this.handleKey()}
+					onKeyDown={this.handleKey()}
 				/>
 				<Button id={this.idPlus("row-delegates")}
 					className={`subcaucus-delegates-button ${delegates > 0 ? "p-button-success" : "p-button-secondary"}`}
