@@ -79,8 +79,9 @@ Number.prototype.toCommaString = function (): string {
 	return this.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-Number.prototype.singularPlural = function (singular: string, plural: string): string {
-	return `${this} ${this == 1 ? singular : plural}`
+Number.prototype.singularPlural = function (singular: string, plural: string, includeNumber?: 'no number'): string {
+	const number = includeNumber != 'no number' ? `${this} ` : ''
+	return `${number}${this == 1 ? singular : plural}`
 }
 
 Number.prototype.comparisonValue = function (): ComparisonValue {

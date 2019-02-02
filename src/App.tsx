@@ -840,8 +840,8 @@ export class App extends React.Component<Props, State> {
 
         // fall back to order of entry
         let comparison = a.id - b.id
-        const nameA = a.name ? a.name.toUpperCase() : `SUBCAUCUS ${a.id}`
-        const nameB = b.name ? b.name.toUpperCase() : `SUBCAUCUS ${b.id}`
+        const nameA = a.displayName().toUpperCase()
+        const nameB = b.displayName().toUpperCase()
         if (nameA < nameB) {
             comparison = -1
         }
@@ -1087,7 +1087,6 @@ export class App extends React.Component<Props, State> {
                         <pre>{"rendered App " + (new Date()).toLocaleTimeString()}</pre>
                         <pre>{"subcalc: " + this.subcalc.debug()}</pre>
                         <ShowJSON name="this.state" data={this.state} /><br />
-                        <ShowJSON name={`snapshot ${this.subcalc.snapshot.debugID}`} data={this.subcalc.snapshot} />
                     </div>
                     <div className="column">
                         <ShowJSON name="this.subcalc" data={this.subcalc} />

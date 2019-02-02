@@ -6,6 +6,7 @@ import { InputTextarea } from 'primereact/inputtextarea'
 // local to this app
 import * as _u from './Utilities'
 import { Subcaucus } from './Subcaucus'
+import { SubcaucusRowInfoCard } from './SubcaucusRowInfoCard'
 
 export type SubcaucusRowAction = 'recalc' | 'enter' | 'remove'
 
@@ -20,32 +21,24 @@ interface State {
 	name: string
 	count: number
 	delegates: number
+	showInfo: boolean
 }
 
+/**
+ * Component to show a single subcaucus row.
+ * Also controls subcaucus row info cards.
+ */
 export class SubcaucusRow extends React.Component<Props, State> {
 
 	constructor(props: Props) {
 		super(props)
 		this.state = {
-			name: '',
-			count: 0,
-			delegates: 0,
-		}
-		this.state = {
 			name: this.props.subcaucus.name,
 			count: this.props.subcaucus.count,
-			delegates: this.props.subcaucus.delegates
+			delegates: this.props.subcaucus.delegates,
+			showInfo: false
 		}
 	}
-
-	// static getDerivedStateFromProps(nextProps: Props, prevState: State) {
-	// 	const newState = {
-	// 		name: nextProps.subcaucus.name,
-	// 		count: nextProps.subcaucus.count,
-	// 		delegates: nextProps.subcaucus.delegates
-	// 	}
-	// 	return newState
-	// }
 
 	handleName = () => (event: React.FormEvent<HTMLTextAreaElement>) => {
 		var value = event.currentTarget.value
@@ -114,51 +107,62 @@ export class SubcaucusRow extends React.Component<Props, State> {
 	render() {
 		_u.debug("render row", this.props.subcaucus.id, this.state)
 
-		const { name, count, delegates } = this.state
+		const { name, count, delegates, showInfo } = this.state
+
+		const infoCard = showInfo
+			? <SubcaucusRowInfoCard
+				subcaucus={this.props.subcaucus}
+				dismiss={() => this.setState({ showInfo: false })}
+			/>
+			: ''
 
 		return (
-			<div id={this.idPlus("row")}
-				className={`subcaucus-row ${delegates > 0 ? "has-delegates" : (count > 0 ? "no-delegates" : "")}`}
-			>
-				{_u.isDebugging ? <div className="subcaucus-id">{this.props.subcaucus.id}</div> : ''}
-				<InputTextarea id={this.idPlus("row-name")}
-					className="subcaucus-field subcaucus-name"
-					autoComplete="off"
-					tabIndex={this.props.index}
-					type="text"
-					value={name}
-					rows={1}
-					cols={1}
-					// PrimeReact has a bug with the InputTextarea placeholder
-					// for now, it will not update this placeholder
-					// see: https://github.com/primefaces/primereact/issues/747
-					placeholder={`Subcaucus ${this.props.subcaucus.id}`}
-					// placeholder={`Subcaucus name`}
-					onChange={this.handleName()}
-					onKeyDown={this.handleKey()}
-				/>
-				<InputText id={this.idPlus("row-count")}
-					className="subcaucus-field subcaucus-count"
-					autoComplete="off"
-					tabIndex={this.props.index + this.props.rows}
-					keyfilter="pint"
-					type="number"
-					pattern="\d*"
-					value={count ? count : ''}
-					placeholder={`—`}
-					onChange={this.handleCount()}
-					onBlur={this.handleCountBlur()}
-					// forcing the selction of the whole text seems to lead to problems
-					// see https://grand.clst.org:3000/tenseg/subcalc-pr/issues/3
-					// onFocus={this.focusOnWholeText()}
-					onKeyDown={this.handleKey()}
-				/>
-				<Button id={this.idPlus("row-delegates")}
-					className={`subcaucus-delegates-button ${delegates > 0 ? "p-button-success" : "p-button-secondary"}`}
-					label={delegates ? `${delegates}` : undefined}
-					icon={delegates ? undefined : (count ? 'pi pi-ban' : 'pi')}
-				/>
-			</div>
+			<>
+				<div id={this.idPlus("row")}
+					className={`subcaucus-row ${delegates > 0 ? "has-delegates" : (count > 0 ? "no-delegates" : "")}`}
+				>
+					{_u.isDebugging ? <div className="subcaucus-id">{this.props.subcaucus.id}</div> : ''}
+					<InputTextarea id={this.idPlus("row-name")}
+						className="subcaucus-field subcaucus-name"
+						autoComplete="off"
+						tabIndex={this.props.index}
+						type="text"
+						value={name}
+						rows={1}
+						cols={1}
+						// PrimeReact has a bug with the InputTextarea placeholder
+						// for now, it will not update this placeholder
+						// see: https://github.com/primefaces/primereact/issues/747
+						placeholder={this.props.subcaucus.defaultName()}
+						onChange={this.handleName()}
+						onKeyDown={this.handleKey()}
+					/>
+					<InputText id={this.idPlus("row-count")}
+						className="subcaucus-field subcaucus-count"
+						autoComplete="off"
+						tabIndex={this.props.index + this.props.rows}
+						keyfilter="pint"
+						type="number"
+						pattern="\d*"
+						value={count ? count : ''}
+						placeholder={`—`}
+						onChange={this.handleCount()}
+						onBlur={this.handleCountBlur()}
+						// forcing the selction of the whole text seems to lead to problems
+						// see https://grand.clst.org:3000/tenseg/subcalc-pr/issues/3
+						// onFocus={this.focusOnWholeText()}
+						onKeyDown={this.handleKey()}
+					/>
+					<Button id={this.idPlus("row-delegates")}
+						className={`subcaucus-delegates-button ${delegates > 0 ? "p-button-success" : "p-button-secondary"}`}
+						label={delegates ? `${delegates}` : undefined}
+						icon={delegates ? undefined : (count ? 'pi pi-ban' : 'pi')}
+						onClick={() => this.setState({ showInfo: true })}
+						disabled={count === 0}
+					/>
+				</div>
+				{infoCard}
+			</>
 		)
 	}
 }

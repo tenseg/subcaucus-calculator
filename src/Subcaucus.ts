@@ -104,6 +104,14 @@ export class Subcaucus {
 		}
 	}
 
+	defaultName = () => {
+		return `Subcaucus ${this.id}`
+	}
+
+	displayName = () => {
+		return this.name || this.defaultName()
+	}
+
 	/**
 	 * The viability number provided by the snapshot.
 	 * This is the `delegateViability` number.

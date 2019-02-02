@@ -279,21 +279,6 @@ export class Snapshot {
 		// first clear out all the delegate information
 		subs.forEach((s) => s.clearDelegateInfo())
 
-		// for (var i = 1; i <= scNumberOfSubcaucuses; i++) {
-		// 	$("#scrow-" + i + "-delcell").html(
-		// 		SCEmptyNote(i)
-		// 	);
-		// }
-		// $(".red").removeClass("red"); // clear all the red highlights
-		// $(".green").removeClass("green"); // clear all the green highlights
-		// $("#scviabletotal").html("");
-		// SCInitializeViabilityStatement();
-
-		// // prepare local copies of global info (just to make variable names shorter)
-		// var allowed = scData["current"]["allowed"];
-		// var members = scData["current"]["members"]; // number of members in each subcaucus
-		// var names = scData["current"]["names"]; // number of members in each subcaucus
-
 		// "Step No. 1: Add up the total number of members of all the subcaucuses." (room)
 		this.room = subs.reduce((acc, sub) => {
 			return acc + sub.count
