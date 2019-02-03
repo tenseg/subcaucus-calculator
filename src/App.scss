@@ -279,6 +279,7 @@ body {
                 }
                 
                 .subcaucus-delegates-button {
+                    position: relative;
                     flex: 0 0 $delegate-width;
                     width: $delegate-width;
                     margin-right: 0;
@@ -297,6 +298,23 @@ body {
                     .pi {
                         $shift: 6%;
                         top: 50% + $shift;
+                    }
+                    
+                    .coin {
+                        position: absolute;
+                        top: calc(56% - 5px);
+                        right: 5px;
+                        height: 10px;
+                        width: 10px;
+                        border-radius: 50%;
+                        
+                        &.won {
+                            border: 1px solid lighten($success-color, 20%);
+                            background-color: lighten($success-color, 20%)
+                        }
+                        &.lost {
+                            border: 1px solid lighten($success-color, 20%);
+                        }
                     }
                     
                 }

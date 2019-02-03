@@ -105,13 +105,15 @@ export class SubcaucusRow extends React.Component<Props, State> {
 	}
 
 	render() {
-		_u.debug("render row", this.props.subcaucus.id, this.state)
+		const { subcaucus: s } = this.props
+
+		_u.debug("render row", s.id, this.state)
 
 		const { name, count, delegates, showInfo } = this.state
 
 		const infoCard = showInfo
 			? <SubcaucusRowInfoCard
-				subcaucus={this.props.subcaucus}
+				subcaucus={s}
 				dismiss={() => this.setState({ showInfo: false })}
 			/>
 			: ''
@@ -121,7 +123,7 @@ export class SubcaucusRow extends React.Component<Props, State> {
 				<div id={this.idPlus("row")}
 					className={`subcaucus-row ${delegates > 0 ? "has-delegates" : (count > 0 ? "no-delegates" : "")}`}
 				>
-					{_u.isDebugging ? <div className="subcaucus-id">{this.props.subcaucus.id}</div> : ''}
+					{_u.isDebugging ? <div className="subcaucus-id">{s.id}</div> : ''}
 					<InputTextarea id={this.idPlus("row-name")}
 						className="subcaucus-field subcaucus-name"
 						autoComplete="off"
@@ -133,7 +135,7 @@ export class SubcaucusRow extends React.Component<Props, State> {
 						// PrimeReact has a bug with the InputTextarea placeholder
 						// for now, it will not update this placeholder
 						// see: https://github.com/primefaces/primereact/issues/747
-						placeholder={this.props.subcaucus.defaultName()}
+						placeholder={s.defaultName()}
 						onChange={this.handleName()}
 						onKeyDown={this.handleKey()}
 					/>
@@ -159,7 +161,15 @@ export class SubcaucusRow extends React.Component<Props, State> {
 						icon={delegates ? undefined : (count ? 'pi pi-ban' : 'pi')}
 						onClick={() => this.setState({ showInfo: true })}
 						disabled={count === 0}
-					/>
+					>
+						<div className={
+							s.reportTosses
+								? s.delegates > s.baseDelegates
+									? "coin won"
+									: "coin lost"
+								: "coin"
+						}></div>
+					</Button>
 				</div>
 				{infoCard}
 			</>
