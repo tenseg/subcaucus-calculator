@@ -234,6 +234,8 @@ export class SubCalc {
 				_u.alertUser(new Error(`Error saving ${storedSnapshotKey} to local storage`), e)
 				return
 			}
+		} else if (snapshot != this.snapshot) {
+			_u.alertUser(new Error("Snapshot was not saved."), snapshot)
 		}
 	}
 
@@ -258,8 +260,7 @@ export class SubCalc {
 	 */
 	saveSnapshot = (revision: string) => {
 		this.snapshot.revision = revision
-		this.write() // writes the current snapshot to local storage
-		this.writeSnapshot(this.snapshot) // writes the saved version to local storage
+		this.writeSnapshot()
 	}
 
 	/**
