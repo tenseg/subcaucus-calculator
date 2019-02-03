@@ -43,7 +43,7 @@ enum CardFor {
     ChangingName,
     ChangingDelegates,
     SavingSnapshot,
-    SavingSnapshotBeforeLoading,
+    SavingSnapshotBefore,
     RemovingEmpties,
     ShowingAbout,
     ShowingBy,
@@ -77,6 +77,7 @@ interface Props { }
 interface State {
     // modal interactions
     cards: Array<CardFor>
+    afterBefore?: () => void
     present: Presenting
     // sorting info
     sortName: SortOrder
@@ -413,14 +414,22 @@ export class App extends React.Component<Props, State> {
                     {
                         label: "New meeting",
                         icon: "pi pi-fw pi-calendar-plus",
-                        command: () => this.newMeeting()
+                        command: () => {
+                            if (this.subcalc.snapshot.revision == "") {
+                                this.setState({ afterBefore: () => this.newMeeting() })
+                                this.addCardState(CardFor.SavingSnapshotBefore)
+                            } else {
+                                this.newMeeting()
+                            }
+                        }
                     },
                     {
                         label: "Open snapshot",
                         icon: "pi pi-fw pi-folder-open",
                         command: () => {
                             if (this.subcalc.snapshot.revision == "") {
-                                this.addCardState(CardFor.SavingSnapshotBeforeLoading)
+                                this.setState({ afterBefore: () => this.setState({ present: Presenting.Loading }) })
+                                this.addCardState(CardFor.SavingSnapshotBefore)
                             } else {
                                 this.setState({ present: Presenting.Loading })
                             }
@@ -680,7 +689,7 @@ export class App extends React.Component<Props, State> {
      * 
      * NOTE: Do not `setState()` in this method.
      */
-    renderSavingSnapshotBeforeLoading = (): JSX.Element => {
+    renderSavingSnapshotBefore = (): JSX.Element => {
         return (
             <ValueCard key="snapshot-value" id="snapshot-value"
                 title="Save changes?"
@@ -690,27 +699,31 @@ export class App extends React.Component<Props, State> {
                 extraButtons={
                     <>
                         <Button id="just-load-snapshot-button"
-                            label="Just open"
+                            label="Don't save"
                             icon="pi pi-folder-open"
                             className="p-button-warning"
                             onClick={() => {
-                                this.removeCardState(CardFor.SavingSnapshotBeforeLoading)
-                                this.setState({ present: Presenting.Loading })
+                                this.removeCardState(CardFor.SavingSnapshotBefore)
+                                if (this.state.afterBefore) {
+                                    this.state.afterBefore()
+                                }
                             }}
                         />
                         <Button id="cancel-save-and-load-snapshot-button"
                             label="Cancel"
                             icon="pi pi-times"
                             className="p-button-secondary"
-                            onClick={() => this.removeCardState(CardFor.SavingSnapshotBeforeLoading)}
+                            onClick={() => this.removeCardState(CardFor.SavingSnapshotBefore)}
                         />
                     </>
                 }
                 onSave={(value?: string) => {
-                    this.removeCardState(CardFor.SavingSnapshotBeforeLoading)
+                    this.removeCardState(CardFor.SavingSnapshotBefore)
                     if (value) {
                         this.saveSnapshot(value)
-                        this.setState({ present: Presenting.Loading })
+                        if (this.state.afterBefore) {
+                            this.state.afterBefore()
+                        }
                     }
                 }}
             >
@@ -718,6 +731,10 @@ export class App extends React.Component<Props, State> {
                 </p>
             </ValueCard>
         )
+    }
+
+    nextStepLoading = () => {
+        this.setState({ present: Presenting.Loading })
     }
 
     /**
@@ -817,7 +834,7 @@ export class App extends React.Component<Props, State> {
                 case CardFor.ShowingInstructions: return this.renderInstructions()
                 case CardFor.ShowingAbout: return this.renderAbout()
                 case CardFor.ShowingBy: return this.renderBy()
-                case CardFor.SavingSnapshotBeforeLoading: return this.renderSavingSnapshotBeforeLoading()
+                case CardFor.SavingSnapshotBefore: return this.renderSavingSnapshotBefore()
                 case CardFor.SavingSnapshot: return this.renderSavingSnapshot()
                 case CardFor.ChangingName: return this.renderChangingName()
                 case CardFor.ChangingDelegates: return this.renderChangingDelegates()
