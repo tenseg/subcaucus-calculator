@@ -42,6 +42,7 @@ enum CardFor {
     WelcomeAndSetName,
     ChangingName,
     ChangingDelegates,
+    ChangingCoin,
     SavingSnapshot,
     SavingSnapshotBefore,
     RemovingEmpties,
@@ -465,7 +466,7 @@ export class App extends React.Component<Props, State> {
                     {
                         label: "Change the coin",
                         icon: "pi pi-fw pi-refresh",
-                        command: () => this.growlAlert("Coin flip.", 'warn', 'TODO')
+                        command: () => this.addCardState(CardFor.ChangingCoin)
                     },
                 ]
             },
@@ -796,6 +797,67 @@ export class App extends React.Component<Props, State> {
     }
 
     /**
+     * Returns JSX for the card to change the 
+     * coin (or random seed) of a meeting.
+     * 
+     * NOTE: Do not `setState()` in this method.
+     */
+    renderChangingCoin = (): JSX.Element => {
+        return (
+            <ValueCard key="coin-value" id="coin-value"
+                title={"Change the coin"}
+                type="positive integer"
+                value={this.subcalc.snapshot.seed.toString()}
+                allowEmpty={false}
+                extraButtons={this.subcalc.snapshot.allowed
+                    ? <Button id="random-coin-button"
+                        label="Generate random coin"
+                        icon="pi pi-refresh"
+                        className="p-button-success"
+                        onClick={() => {
+                            this.subcalc.reviseSnapshot({ seed: _u.randomSeed() })
+                            this.growlAlert(`Random seed is now ${this.subcalc.snapshot.seed}.`, 'success', 'New Random Coin')
+                            this.removeCardState(CardFor.ChangingCoin)
+                        }}
+                    />
+                    : <></>
+                }
+                onSave={(value?: string) => {
+                    if (value == undefined) {
+                        this.removeCardState(CardFor.ChangingCoin)
+                    } else {
+                        const seed = Number(value)
+                        if (seed === this.subcalc.snapshot.seed) {
+                            this.growlAlert(`Random seed is still ${this.subcalc.snapshot.seed}.`, 'info', 'Coin not changed')
+                        } else {
+                            this.subcalc.reviseSnapshot({ seed: seed })
+                            this.growlAlert(`Random seed is now ${this.subcalc.snapshot.seed}.`, 'success', 'New Chosen Coin')
+                        }
+                        this.removeCardState(CardFor.ChangingCoin)
+                    }
+                }}
+            >
+                <p>
+                    Traditionally, when there are delegates remaining to be assigned and
+                    two subcaucuses are "tied" with the same size delegations, the chair
+                    of the caucus will use some method of assigning those remaining delegates
+                    at random. These methods include coin-flips or drawing lots.
+                </p>
+                <p>
+                    In this calculator we accomplish the same randomness, but we do so by
+                    in essence, flipping a coin in secret ahead of time. The "coin" is
+                    really a "random seed" that ensures fair but unpredictable results.
+                </p>
+                <p>
+                    If you change the coin, this pattern of random flips will also change.
+                    If want the same results as someone else is getting in their copy of
+                    the calculator, then you must share the same coin value.
+                </p>
+            </ValueCard>
+        )
+    }
+
+    /**
      * Returns JSX for the card that allows the user to
      * back out of removing empty subcaucuses.
      * 
@@ -855,6 +917,7 @@ export class App extends React.Component<Props, State> {
                 case CardFor.SavingSnapshot: return this.renderSavingSnapshot()
                 case CardFor.ChangingName: return this.renderChangingName()
                 case CardFor.ChangingDelegates: return this.renderChangingDelegates()
+                case CardFor.ChangingCoin: return this.renderChangingCoin()
                 case CardFor.RemovingEmpties: return this.renderRemovingEmpties()
                 case CardFor.ShowingSecurity: return this.renderSecurity()
             }
@@ -1078,6 +1141,15 @@ export class App extends React.Component<Props, State> {
                             icon="pi pi-trash"
                             onClick={() => this.addCardState(CardFor.RemovingEmpties)}
                         />
+                        <Button id="random-coin-button"
+                            icon="pi pi-refresh"
+                            className="p-button-success"
+                            onClick={() => {
+                                this.subcalc.reviseSnapshot({ seed: _u.randomSeed() })
+                                this.growlAlert(`Random seed is now ${this.subcalc.snapshot.seed}.`, 'success', 'New Random Coin')
+                                this.forceUpdate()
+                            }}
+                        />
                     </div>
                 </div>
                 {this.renderSummary()}
@@ -1114,6 +1186,7 @@ export class App extends React.Component<Props, State> {
             <div key={_u.randomSeed()} className="debugging">
                 <p>This is debugging info for <a href="https://grand.clst.org:3000/tenseg/subcalc-pr/issues" target="_repository">subcalc-pr</a> (with <a href="https://reactjs.org/docs/react-component.html" target="_react">ReactJS</a>, <a href="https://www.primefaces.org/primereact/" target="_primereact">PrimeReact</a>, <a href="https://www.primefaces.org/primeng/#/icons" target="_primeicons">PrimeIcons</a>) derrived from <a href="https://bitbucket.org/tenseg/subcalc-js/src" target="_bitbucket">subcalc-js</a>.
                 </p>
+                <pre>{this.subcalc.snapshot.asText()}</pre>
                 <div className="columns">
                     <div className="column">
                         <pre>{"rendered App " + (new Date()).toLocaleTimeString()}</pre>

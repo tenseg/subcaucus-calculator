@@ -320,6 +320,24 @@ export class Snapshot {
 
 		// seed a new random number generator so that we get consistent random results
 		const scRand = new SubCalcPRNG(this.seed)
+
+		let vSubRanks = vSubs.map((s) => s.id)
+
+		// see: https://bost.ocks.org/mike/shuffle/
+		// and: https://stackoverflow.com/a/2450976
+		let m = vSubRanks.length
+
+		// While there remain elements to shuffle…
+		while (m) {
+			// Pick a remaining element…
+			const i = scRand.randomUpTo(m--)
+
+			// And swap it with the current element.
+			const temp = vSubRanks[m]
+			vSubRanks[m] = vSubRanks[i]
+			vSubRanks[i] = temp
+		}
+
 		// sort the subcaucuses into remainder order with highest remainders first
 		vSubs.sort((a, b) => {
 			if (a.remainder > b.remainder) {
@@ -353,7 +371,7 @@ export class Snapshot {
 				assigned delegates.
 			*/
 
-			const coinFlip = scRand.randomComparison() // generate a random 1 or -1
+			const coinFlip = vSubRanks.indexOf(a.id) < vSubRanks.indexOf(b.id) ? -1 : 1
 
 			// report the coin flip to each subcaucus
 			a.coinToss(coinFlip === -1, b)
@@ -404,6 +422,8 @@ export class Snapshot {
 		reportingTo.forEach((s) => {
 			s.reportTosses = true
 		})
+
+		console.log("random summary", scRand.recordSummary())
 
 		this.changes++ // this is used to help refresh component keys
 
@@ -458,6 +478,19 @@ export class Snapshot {
 	 */
 	deleteSubcaucus = (id: number) => {
 		this.subcaucuses.delete(id)
+	}
+
+	/**
+	 * A textual representation of the state of this snapshot.
+	 */
+	asText = (): string => {
+		let text = ""
+
+		this.subcaucuses.forEach((subcaucus) => {
+			text += subcaucus.asText() + "\n\n"
+		})
+
+		return text
 	}
 
 }

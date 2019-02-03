@@ -1,3 +1,5 @@
+import { number } from "@mojotech/json-type-validation";
+
 /**
  * SubCalcPRNG.ts
  *
@@ -63,6 +65,8 @@ export class SubCalcPRNG {
 		this.state2 = this.state2 % (this.mod2 - 1) + 1
 	}
 
+	record: Array<{ limit: number, result: number }> = []
+
 	/**
 	 * This PRNG function takes 1 integer limit argument which
 	 * must be in the range 1 to 4294965886. It will return a 
@@ -73,7 +77,7 @@ export class SubCalcPRNG {
 	 * 
 	 * @param limit constrains the result between 0 and limit-1
 	 */
-	random = (limit: number): number => {
+	randomUpTo = (limit: number): number => {
 
 		limit = Math.abs(Math.floor(limit))
 
@@ -86,10 +90,21 @@ export class SubCalcPRNG {
 			&& this.state1 < this.mod1 % limit
 			&& this.state2 < this.mod2 % limit
 		) {
-			return this.random(limit)
+			return this.randomUpTo(limit)
 		}
 
-		return (this.state1 + this.state2) % limit
+		const result = (this.state1 + this.state2) % limit
+		this.record.push({ limit: limit, result: result })
+		return result
+	}
+
+	/**
+	 * Like Math.random, this returns a random number
+	 * between 0 and 1.
+	 */
+	random = (): number => {
+		const limit = 4294965885
+		return this.randomUpTo(limit) / limit
 	}
 
 	/**
@@ -98,7 +113,25 @@ export class SubCalcPRNG {
 	 * in sorting to produce a random order.
 	 */
 	randomComparison = (): -1 | 1 => {
-		return this.random(2) ? -1 : 1
+		return this.randomUpTo(2) ? -1 : 1
 	}
 
+	recordSummary = (): { [limit: string]: { [result: string]: number } } => {
+		const summary: { [limit: string]: { [result: string]: number } } = {}
+
+		this.record.forEach((r) => {
+			let limit = summary[String(r.limit)]
+			if (limit === undefined) {
+				limit = {}
+			}
+			if (limit[String(r.result)] === undefined) {
+				limit[String(r.result)] = 1
+			} else {
+				limit[String(r.result)]++
+			}
+			summary[String(r.limit)] = limit
+		})
+
+		return summary
+	}
 }

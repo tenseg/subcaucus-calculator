@@ -36,7 +36,6 @@ export class SubCalc {
 
 	debug = (): string => {
 		return this.snapshot.debug()
-			+ "\n" + this.snapshots().map((s) => s.debug()).join("\n")
 	}
 
 	/**

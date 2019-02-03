@@ -132,7 +132,7 @@ export class Subcaucus {
 	/**
 	 * Reported coin toss results.
 	 */
-	tosses: Array<{ won: boolean, against: Subcaucus }> = []
+	private _tosses: Array<{ won: boolean, against: Subcaucus }> = []
 
 	/**
 	 * This will flag subcaucuses which should report out
@@ -150,7 +150,7 @@ export class Subcaucus {
 		this.baseDelegates = 0
 		this.remainder = 0
 		this.reportTosses = false
-		this.tosses = []
+		this._tosses = []
 	}
 
 	/**
@@ -169,7 +169,29 @@ export class Subcaucus {
 	 * Report coin tosses to the subcaucus.
 	 */
 	coinToss = (won: boolean, against: Subcaucus) => {
-		this.tosses.push({ won: won, against: against })
+		this._tosses.push({ won: won, against: against })
+	}
+
+	/**
+	 * An array of the last toss exchanged with each opponent subcaucus.
+	 */
+	tosses = (): Array<{ won: boolean, against: Subcaucus }> => {
+		// return an empty array if we are not to be reporting any tosses
+		if (!this.reportTosses) return []
+
+		// we only want to convey the result of the last toss between two partners
+		let tosses: { [props: string]: { won: boolean, against: Subcaucus } } = {}
+		this._tosses.forEach((toss) => {
+			tosses[String(toss.against.id)] = toss
+		})
+		return Object.keys(tosses).map((key) => tosses[key])
+	}
+
+	/**
+	 * The reported remainder value (rounded to the thousandth place).
+	 */
+	roundedRemainder = (): number => {
+		return Math.round(this.remainder * 1000) / 1000
 	}
 
 	/**
@@ -177,6 +199,46 @@ export class Subcaucus {
 	 */
 	addRemainderDelegate = () => {
 		this.delegates++
+	}
+
+	/**
+	 * A textual representation of the subcaucus.
+	 */
+	asText = (): string => {
+		let text = ''
+
+		if (!this.name && !this.count) return text
+
+		text += this.displayName() + ": "
+
+		text += this.count.singularPlural("member", "members")
+
+		if (this.delegates === 0) {
+			text += " in a non-viable subcaucus."
+			return text
+		}
+
+		text += " may elect " + this.delegates.singularPlural("delegate", "delegates")
+
+		if (this.remainder) {
+			text += " ("
+
+			if (this.remainder) {
+				text += "remainder " + this.roundedRemainder()
+			}
+
+			this.tosses().forEach((toss) => {
+				text += ", " + (toss.won ? "won" : "lost") + " toss vs " + toss.against.displayName()
+			})
+
+			if (this.delegates > this.baseDelegates) {
+				text += ", awarded a remainder delegate"
+			}
+
+			text += ")"
+		}
+
+		return text + "."
 	}
 
 }
