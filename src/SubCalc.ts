@@ -190,6 +190,29 @@ export class SubCalc {
 	}
 
 	/**
+	 * Creates a duplicate of the current snapshot, 
+	 * giving it a new created date and new name,
+	 * amounting to a new meeting.
+	 * 
+	 * Note, it will keep the same random seed ("coin")
+	 * as the original.
+	 */
+	duplicateSnapshot = (): Snapshot => {
+		// first create a new snapshot and make it current
+		this.snapshot.created = _u.now()
+		this.snapshot.name = `Copy of ${this.snapshot.name}`
+		this.snapshot.revised = this.snapshot.created
+		this.snapshot.revision = ""
+
+		// make this the current snapshot
+		this.setSnapshot(this.snapshot)
+
+		// note, we return the copy of the snapshot we
+		// want used, which is this.snapshot, not snapshot
+		return this.snapshot
+	}
+
+	/**
 	 * Write the current subcalc2 item out to local storage.
 	 * 
 	 * This includes writing the current snapshot out.

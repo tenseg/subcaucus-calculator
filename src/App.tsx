@@ -199,6 +199,16 @@ export class App extends React.Component<Props, State> {
      * Request a new meeting from the storage manager and
      * set our state to reflect the new meeting.
      */
+    duplicateMeeting = () => {
+        this.subcalc.duplicateSnapshot()
+        this.growlAlert(this.subcalc.snapshot.name, 'success', 'Snapshot Duplicated')
+        this.forceUpdate()
+    }
+
+    /**
+     * Request a new meeting from the storage manager and
+     * set our state to reflect the new meeting.
+     */
     saveSnapshot = (revision: string) => {
         this.subcalc.saveSnapshot(revision)
         this.forceUpdate()
@@ -440,13 +450,20 @@ export class App extends React.Component<Props, State> {
                         icon: "pi pi-fw pi-clock",
                         command: () => this.addCardState(CardFor.SavingSnapshot),
                     },
-                    // {
-                    //     label: "Duplicate meeting",
-                    //     icon: "pi pi-fw pi-clone",
-                    //     command: () => this.growlAlert("Duplicate meeting.", 'warn', 'TODO')
-                    // },
                     {
-                        label: "Flip the coin",
+                        label: "Duplicate meeting",
+                        icon: "pi pi-fw pi-clone",
+                        command: () => {
+                            if (this.subcalc.snapshot.revision == "") {
+                                this.setState({ afterBefore: () => this.duplicateMeeting() })
+                                this.addCardState(CardFor.SavingSnapshotBefore)
+                            } else {
+                                this.duplicateMeeting()
+                            }
+                        }
+                    },
+                    {
+                        label: "Change the coin",
                         icon: "pi pi-fw pi-refresh",
                         command: () => this.growlAlert("Coin flip.", 'warn', 'TODO')
                     },
