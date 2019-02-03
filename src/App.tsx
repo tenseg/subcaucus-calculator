@@ -145,10 +145,8 @@ export class App extends React.Component<Props, State> {
         if (snapshot) {
             this.subcalc.setSnapshot(snapshot)
             this.subcalc.snapshot.redistributeDelegates()
-            this.forceUpdate()
-        } else {
-            this.setState({ present: Presenting.Calculator })
         }
+        this.setState({ present: Presenting.Calculator })
     }
 
     /**

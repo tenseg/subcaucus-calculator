@@ -215,22 +215,25 @@ export class SubCalc {
 	 * Defaults to writing the current snapshot.
 	 */
 	writeSnapshot = (snapshot?: Snapshot) => {
+		// default to this.snapshot and if it is this.snapshot then write the subcalc2 record
 		if (!snapshot) {
 			snapshot = this.snapshot
 		}
 		if (snapshot === this.snapshot) {
 			this.write()
-			return
 		}
-		const storedSnapshotKey = this.storedSnapshotKey(snapshot)
-		const jsnap = snapshot.toJSON()
-		try {
-			const jsnapString = JSON.stringify(jsnap)
-			_u.debug(`storing ${storedSnapshotKey}`, jsnapString)
-			localStorage.setItem(storedSnapshotKey, jsnapString)
-		} catch (e) {
-			_u.alertUser(new Error(`Error saving ${storedSnapshotKey} to local storage`), e)
-			return
+		// if the snapshot is a revision, then save it in its own place as well
+		if (snapshot.revision) {
+			const storedSnapshotKey = this.storedSnapshotKey(snapshot)
+			const jsnap = snapshot.toJSON()
+			try {
+				const jsnapString = JSON.stringify(jsnap)
+				_u.debug(`storing ${storedSnapshotKey}`, jsnapString)
+				localStorage.setItem(storedSnapshotKey, jsnapString)
+			} catch (e) {
+				_u.alertUser(new Error(`Error saving ${storedSnapshotKey} to local storage`), e)
+				return
+			}
 		}
 	}
 
