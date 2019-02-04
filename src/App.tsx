@@ -394,6 +394,19 @@ export class App extends React.Component<Props, State> {
     }
 
     /**
+     * If the snapshot has been revised, offers a chance to save
+     * the changes before proceeding with the action in the callback.
+     */
+    checkForRevisionBefore = (callback: () => void) => {
+        if (this.subcalc.snapshot.revision == "") {
+            this.setState({ afterBefore: callback })
+            this.addCardState(CardFor.SavingSnapshotBefore)
+        } else {
+            callback()
+        }
+    }
+
+    /**
      * Returns JSX for the menubar.
      * 
      * NOTE: Do not `setState()` in this method.
@@ -425,26 +438,12 @@ export class App extends React.Component<Props, State> {
                     {
                         label: "New meeting",
                         icon: "pi pi-fw pi-calendar-plus",
-                        command: () => {
-                            if (this.subcalc.snapshot.revision == "") {
-                                this.setState({ afterBefore: () => this.newMeeting() })
-                                this.addCardState(CardFor.SavingSnapshotBefore)
-                            } else {
-                                this.newMeeting()
-                            }
-                        }
+                        command: () => this.checkForRevisionBefore(this.newMeeting)
                     },
                     {
                         label: "Open snapshot",
                         icon: "pi pi-fw pi-folder-open",
-                        command: () => {
-                            if (this.subcalc.snapshot.revision == "") {
-                                this.setState({ afterBefore: () => this.setState({ present: Presenting.Loading }) })
-                                this.addCardState(CardFor.SavingSnapshotBefore)
-                            } else {
-                                this.setState({ present: Presenting.Loading })
-                            }
-                        }
+                        command: () => this.checkForRevisionBefore(() => this.setState({ present: Presenting.Loading }))
                     },
                     {
                         label: "Save snapshot",
@@ -454,14 +453,7 @@ export class App extends React.Component<Props, State> {
                     {
                         label: "Duplicate meeting",
                         icon: "pi pi-fw pi-clone",
-                        command: () => {
-                            if (this.subcalc.snapshot.revision == "") {
-                                this.setState({ afterBefore: () => this.duplicateMeeting() })
-                                this.addCardState(CardFor.SavingSnapshotBefore)
-                            } else {
-                                this.duplicateMeeting()
-                            }
-                        }
+                        command: () => this.checkForRevisionBefore(this.duplicateMeeting)
                     },
                     {
                         label: "Change the coin",
@@ -1140,6 +1132,13 @@ export class App extends React.Component<Props, State> {
                             label="Remove Empties"
                             icon="pi pi-trash"
                             onClick={() => this.addCardState(CardFor.RemovingEmpties)}
+                        />
+                        <Button id="clear-counts-button"
+                            icon="pi pi-minus-circle"
+                            onClick={() => this.checkForRevisionBefore(() => {
+                                this.subcalc.zeroSubcaucuses()
+                                this.forceUpdate()
+                            })}
                         />
                         {_u.isDebugging()
                             ? <Button id="random-coin-button"

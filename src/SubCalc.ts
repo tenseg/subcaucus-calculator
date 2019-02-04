@@ -277,6 +277,11 @@ export class SubCalc {
 		this.writeSnapshot()
 	}
 
+	zeroSubcaucuses = () => {
+		this.snapshot.clearCounts()
+		this.writeSnapshot()
+	}
+
 	/**
 	 * Saves a snapshot with the given revision name.
 	 */

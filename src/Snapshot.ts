@@ -232,6 +232,15 @@ export class Snapshot {
 		this.redistributeDelegates()
 	}
 
+	clearCounts = () => {
+		this.revised = _u.now()
+		this.revision = ""
+		this.subcaucuses.forEach((sub) => {
+			sub.count = 0
+		})
+		this.redistributeDelegates()
+	}
+
 	/**
 	 * The number of people "in the room"
 	 * (the total of subcaucus counts).
