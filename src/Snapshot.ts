@@ -486,10 +486,24 @@ export class Snapshot {
 	asText = (): string => {
 		let text = ""
 
+		text += `${this.name} ${this.revision ? `(${this.revision}) ` : ''}was allowed ${this.allowed.singularPlural("delegate", "delegates")}.\n\n`
+
 		this.subcaucuses.forEach((subcaucus) => {
-			text += subcaucus.asText() + "\n\n"
+			const sText = subcaucus.asText()
+			text += sText ? sText + "\n\n" : ''
 		})
 
+		text += `${this.room.singularPlural("person was", "people were")} in the room which made the initial viability number ${this.viability.decimalPlaces(3)}. \nAt least ${this.wholeViability.singularPlural("member was", "members were")} needed to make a subcaucus viable.\n`
+
+		if (this.room > this.viableRoom) {
+			text += `${(this.room - this.viableRoom).singularPlural("person was", "people were")} in a non-viable caucus, you may want to consider another round of walking.\n`
+			text += `The recalculated viability number for allocating delegates was ${this.delegateViability.decimalPlaces(3)}.`
+		}
+
+		text += "\n\n"
+
+		text += `Coin(random seed) was ${this.seed}.\n`
+		text += `Last revised ${(new Date(Date.parse(this.revised))).toLocaleString()}\n`
 		return text
 	}
 

@@ -188,13 +188,6 @@ export class Subcaucus {
 	}
 
 	/**
-	 * The reported remainder value (rounded to the thousandth place).
-	 */
-	roundedRemainder = (): number => {
-		return Math.round(this.remainder * 1000) / 1000
-	}
-
-	/**
 	 * Add a delegate due to the remainder allocations.
 	 */
 	addRemainderDelegate = () => {
@@ -224,11 +217,11 @@ export class Subcaucus {
 			text += " ("
 
 			if (this.remainder) {
-				text += "remainder " + this.roundedRemainder()
+				text += "remainder " + this.remainder.decimalPlaces(3)
 			}
 
 			this.tosses().forEach((toss) => {
-				text += ", " + (toss.won ? "won" : "lost") + " toss vs " + toss.against.displayName()
+				text += ", " + (toss.won ? "won" : "lost") + " vs " + toss.against.displayName()
 			})
 
 			if (this.delegates > this.baseDelegates) {

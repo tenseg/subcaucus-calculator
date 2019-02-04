@@ -1044,7 +1044,7 @@ export class App extends React.Component<Props, State> {
                     </div>
                     <div className="summary-count">
                         <strong>
-                            {Math.round(this.subcalc.snapshot.viability * 1000) / 1000}
+                            {this.subcalc.snapshot.viability.decimalPlaces(3)}
                         </strong>
                     </div>
                 </div>
@@ -1056,7 +1056,7 @@ export class App extends React.Component<Props, State> {
                             Recalculated viability number ({(this.subcalc.snapshot.room - this.subcalc.snapshot.viableRoom).singularPlural("person", "people")} in non-viable subcaucuses)
                         </div>
                         <div className="summary-count">
-                            {Math.round(this.subcalc.snapshot.delegateViability * 1000) / 1000}
+                            {this.subcalc.snapshot.delegateViability.decimalPlaces(3)}
                         </div>
                     </div>
                     : ''
@@ -1141,15 +1141,18 @@ export class App extends React.Component<Props, State> {
                             icon="pi pi-trash"
                             onClick={() => this.addCardState(CardFor.RemovingEmpties)}
                         />
-                        <Button id="random-coin-button"
-                            icon="pi pi-refresh"
-                            className="p-button-success"
-                            onClick={() => {
-                                this.subcalc.reviseSnapshot({ seed: _u.randomSeed() })
-                                this.growlAlert(`Random seed is now ${this.subcalc.snapshot.seed}.`, 'success', 'New Random Coin')
-                                this.forceUpdate()
-                            }}
-                        />
+                        {_u.isDebugging()
+                            ? <Button id="random-coin-button"
+                                icon="pi pi-refresh"
+                                className="p-button-success"
+                                onClick={() => {
+                                    this.subcalc.reviseSnapshot({ seed: _u.randomSeed() })
+                                    this.growlAlert(`Random seed is now ${this.subcalc.snapshot.seed}.`, 'success', 'New Random Coin')
+                                    this.forceUpdate()
+                                }}
+                            />
+                            : ''
+                        }
                     </div>
                 </div>
                 {this.renderSummary()}

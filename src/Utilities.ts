@@ -29,6 +29,7 @@ declare global {
 		toCommaString(): string
 		singularPlural(singular: string, plural: string): string
 		comparisonValue(): ComparisonValue
+		decimalPlaces(decimalPlaces: number): number
 	}
 
 	interface Array<T> {
@@ -88,6 +89,11 @@ Number.prototype.comparisonValue = function (): ComparisonValue {
 	if (this < 0) return -1
 	if (this > 0) return 1
 	return 0
+}
+
+Number.prototype.decimalPlaces = function (decimalPlaces: number) {
+	const multiple = Math.pow(10, decimalPlaces)
+	return Math.round(Number(this) * multiple) / multiple
 }
 
 // see: https://stackoverflow.com/a/12803141
