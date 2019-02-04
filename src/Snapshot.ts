@@ -488,22 +488,30 @@ export class Snapshot {
 
 		text += `${this.name} ${this.revision ? `(${this.revision}) ` : ''}was allowed ${this.allowed.singularPlural("delegate", "delegates")}.\n\n`
 
-		this.subcaucuses.forEach((subcaucus) => {
-			const sText = subcaucus.asText()
-			text += sText ? sText + "\n\n" : ''
-		})
+		if (this.room > 0) {
 
-		text += `${this.room.singularPlural("person was", "people were")} in the room which made the initial viability number ${this.viability.decimalPlaces(3)}. \nAt least ${this.wholeViability.singularPlural("member was", "members were")} needed to make a subcaucus viable.\n`
+			this.subcaucuses.forEach((subcaucus) => {
+				const sText = subcaucus.asText()
+				text += sText ? sText + "\n\n" : ''
+			})
 
-		if (this.room > this.viableRoom) {
-			text += `${(this.room - this.viableRoom).singularPlural("person was", "people were")} in a non-viable caucus, you may want to consider another round of walking.\n`
-			text += `The recalculated viability number for allocating delegates was ${this.delegateViability.decimalPlaces(3)}.`
+			text += `${this.room.singularPlural("person was", "people were")} participating, the initial viability number was ${this.viability.decimalPlaces(3)}. \nA subcaucus needed at least ${this.wholeViability.singularPlural("member", "members")} to be viable.\n`
+
+			if (this.room > this.viableRoom) {
+				text += `${(this.room - this.viableRoom).singularPlural("person was", "people were")} in a non-viable caucus, you may want to consider another round of walking.\n`
+				text += `The recalculated viability number for allocating delegates was ${this.delegateViability.decimalPlaces(3)}.\n`
+			}
+			text += "\n"
+
+		} else {
+			text += "Nobody was participating.\n\n"
 		}
 
-		text += "\n\n"
 
-		text += `Coin(random seed) was ${this.seed}.\n`
-		text += `Last revised ${(new Date(Date.parse(this.revised))).toLocaleString()}\n`
+		let revised = new Date(Date.parse(this.revised))
+
+		text += `The coin had a random seed of ${this.seed}.\n`
+		text += `Last revised ${revised.toLocaleString('en-US', { timeZoneName: 'short' })} \n`
 		return text
 	}
 
