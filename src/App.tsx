@@ -1183,7 +1183,7 @@ export class App extends React.Component<Props, State> {
      */
     renderDebuggingInfo = (): JSX.Element => {
 
-        if (!_u.isDebugging) return <></>
+        if (!_u.isDebugging()) return <></>
 
         return (
             <div key={_u.randomSeed()} className="debugging">
