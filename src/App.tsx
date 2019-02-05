@@ -531,7 +531,9 @@ this.keySuffix = String(_u.randomSeed())
                     {
                         label: "Download CSV",
                         icon: "pi pi-fw pi-table",
-                        command: () => this.growlAlert("Download csv.", 'warn', 'TODO')
+                        command: () => {
+                            fileDownload(this.subcalc.snapshot.asCSV(), 'subcalc.csv')
+                        }
                     },
                     {
                         label: "Download code",

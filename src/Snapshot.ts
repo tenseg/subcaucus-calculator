@@ -521,4 +521,42 @@ device: number
 		return text
 	}
 
+	/**
+	 * A CSV representation of the state of this snapshot.
+	 */
+	asCSV = (): string => {
+		let csv: Array<string> = []
+
+		csv.push("Subcaucus,Members,Delegates,Remainder,Coin Tosses,Remainder Delegates")
+
+		this.subcaucuses.forEach((subcaucus) => {
+			const row = subcaucus.asCSV()
+			if (row) {
+				csv.push(row)
+			}
+		})
+
+		csv.push('')
+
+		csv.push(`Participants,${this.room}`)
+		csv.push(`Delegates elected,,${this.totalDelegates}`)
+		csv.push(`Viability number,${this.viability}`)
+		csv.push(`Whole viability,${this.wholeViability}`)
+		csv.push(`Participants in non-viable caucuses,${this.room - this.viableRoom}`)
+		csv.push(`Revised viability number,${this.delegateViability}`)
+		csv.push(`Coin random seed,${this.seed}`)
+
+		csv.push('')
+
+		csv.push(`Meeting,${this.name.csvQuoted()}`)
+		csv.push(`Revision,${this.revision.csvQuoted()}`)
+
+		let revised = new Date(Date.parse(this.revised))
+
+		csv.push(`Revised,${revised.toLocaleString('en-US', { timeZoneName: 'short' }).csvQuoted()}`)
+
+
+		return csv.join("\r\n")
+	}
+
 }

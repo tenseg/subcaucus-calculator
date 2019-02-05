@@ -23,6 +23,7 @@ declare global {
 		trim(): string
 		hashCode(): number
 		toDate(): Date
+		csvQuoted(): string
 	}
 
 	interface Number {
@@ -73,6 +74,10 @@ String.prototype.hashCode = function (): number {
 
 String.prototype.toDate = function (): Date {
 	return new Date(String(this))
+}
+
+String.prototype.csvQuoted = function (): string {
+	return '"' + this.replace(/"/g, '""') + '"'
 }
 
 // see: https://stackoverflow.com/a/2901298

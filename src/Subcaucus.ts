@@ -234,4 +234,23 @@ interface SubcaucusInitializer {
 		return text + "."
 	}
 
+	/**
+	 * A CSV representation of the subcaucus.
+	 */
+	asCSV = (): string => {
+		let csv = this.displayName().csvQuoted()
+
+		if (!this.name && !this.count) return ''
+
+		csv += ',' + this.count
+		csv += ',' + this.delegates
+		csv += ',' + this.remainder
+		csv += ',' + this.tosses().map((toss) => {
+			(toss.won ? "won" : "lost") + " vs " + toss.against.displayName()
+		}).join(', ').csvQuoted()
+		csv += ',' + (this.delegates - this.baseDelegates)
+
+		return csv
+	}
+
 }
