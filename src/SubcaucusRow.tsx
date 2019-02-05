@@ -94,7 +94,7 @@ export class SubcaucusRow extends React.Component<Props, State> {
 		}
 	}
 
-	focusOnWholeText = () => (event: React.FormEvent<HTMLInputElement>) => {
+	focusOnWholeText = () => (event: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>) => {
 		// event properties must be copied to use async
 		const target = event.currentTarget
 		// do this async to try to make Safari behave
@@ -140,22 +140,23 @@ export class SubcaucusRow extends React.Component<Props, State> {
 						onChange={this.handleName()}
 						onKeyDown={this.handleKey()}
 						onBlur={this.handleBlur()}
+						onFocus={this.focusOnWholeText()}
 					/>
 					<InputText id={this.idPlus("row-count")}
 						className="subcaucus-field subcaucus-count"
 						autoComplete="off"
 						tabIndex={this.props.index + this.props.rows}
 						keyfilter="pint"
-						type="number"
+						type="text" // number does not support selection of the whole text on
 						pattern="\d*"
 						value={count ? count : ''}
 						placeholder={`—`}
 						onChange={this.handleCount()}
 						onKeyDown={this.handleKey()}
 						onBlur={this.handleBlur()}
-					// forcing the selction of the whole text seems to lead to problems
-					// see https://grand.clst.org:3000/tenseg/subcalc-pr/issues/3
-					// onFocus={this.focusOnWholeText()}
+						// forcing the selction of the whole text seems to lead to problems
+						// see https://grand.clst.org:3000/tenseg/subcalc-pr/issues/3
+						onFocus={this.focusOnWholeText()}
 					/>
 					<Button id={this.idPlus("row-delegates")}
 						className={`subcaucus-delegates-button ${s.delegates > 0 ? "p-button-success" : "p-button-secondary"}`}
