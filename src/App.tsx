@@ -8,6 +8,9 @@ import 'primereact/resources/primereact.min.css'
 import 'primereact/resources/themes/nova-light/theme.css'
 import 'primeicons/primeicons.css'
 
+// see https://github.com/kennethjiang/js-file-download
+import * as fileDownload from 'js-file-download'
+
 // local to this app
 import './App.scss'
 import * as _u from './Utilities'
@@ -521,7 +524,9 @@ this.keySuffix = String(_u.randomSeed())
                     {
                         label: "Download text",
                         icon: "pi pi-fw pi-align-left",
-                        command: () => this.growlAlert("Download text.", 'warn', 'TODO')
+                        command: () => {
+                            fileDownload.default(this.subcalc.snapshot.asText(), 'subcalc.txt')
+                        }
                     },
                     {
                         label: "Download CSV",
