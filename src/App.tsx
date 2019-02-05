@@ -324,29 +324,20 @@ export class App extends React.Component<Props, State> {
      * subcaucus array here in the app. 
      */
     handleSubcaucusChange = (subcaucus: Subcaucus, action: SubcaucusRowAction, index?: number, callback?: () => void) => {
-        _u.debug("subcaucus changed", subcaucus.id, action)
+        _u.debug("subcaucus changed", subcaucus.id, subcaucus.debug(), action)
         switch (action) {
-            case 'remove':
-                this.subcalc.snapshot.subcaucuses.filter((subcaucus, key) => {
-                    return key != subcaucus.id
-                })
-                this.setStateSubcaucuses()
-                return
             case 'enter':
                 if (index) {
                     _u.debug("enter index", index, "length", this.subcalc.snapshot.subcaucuses.length)
                     if (index === this.subcalc.snapshot.subcaucuses.length
                         || index === this.subcalc.snapshot.subcaucuses.length * 2) {
-                        const next = index > this.subcalc.snapshot.subcaucuses.length
-                            ? index + 2
-                            : index + 1
                         this.subcalc.snapshot.addSubcaucus()
-                        this.forceUpdate(callback)
-                    } else {
-                        if (callback) {
-                            callback()
-                        }
                     }
+                    this.setStateSubcaucuses()
+                    if (callback) {
+                        callback()
+                    }
+
                 }
                 return
             case 'recalc':
@@ -997,7 +988,7 @@ export class App extends React.Component<Props, State> {
 
         return this.subcalc.snapshot.subcaucuses.values().sort(sort).map((subcaucus, index, array): JSX.Element => {
             return (
-                <SubcaucusRow key={`${this.subcalc.snapshot.snapshotKey()} ${subcaucus.id} ${this.subcalc.snapshot.changes}`}
+                <SubcaucusRow key={`${subcaucus.id}`}
                     subcaucus={subcaucus}
                     index={index + 1}
                     rows={array.length}

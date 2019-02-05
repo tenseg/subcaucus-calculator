@@ -8,7 +8,7 @@ import * as _u from './Utilities'
 import { Subcaucus } from './Subcaucus'
 import { SubcaucusRowInfoCard } from './SubcaucusRowInfoCard'
 
-export type SubcaucusRowAction = 'recalc' | 'enter' | 'remove'
+export type SubcaucusRowAction = 'recalc' | 'enter'
 
 interface Props {
 	subcaucus: Subcaucus
@@ -41,31 +41,41 @@ export class SubcaucusRow extends React.Component<Props, State> {
 	}
 
 	handleName = () => (event: React.FormEvent<HTMLTextAreaElement>) => {
+		const currentTabIndex = event.currentTarget.tabIndex
 		var value = event.currentTarget.value
+		_u.debug("handle name index", currentTabIndex, "is", value)
 		this.setState({ name: value })
 	}
 
 	handleCount = () => (event: React.FormEvent<HTMLInputElement>) => {
+		const currentTabIndex = event.currentTarget.tabIndex
 		var num = Number(event.currentTarget.value)
+		_u.debug("handle count index", currentTabIndex, "is", num)
 		if (num < 0) {
 			num = 0
 		}
 		this.setState({ count: num })
 	}
 
-	handleCountBlur = () => (event: React.FormEvent<HTMLInputElement>) => {
-		if (this.props.subcaucus.count != this.state.count) {
-			this.props.subcaucus.count = this.state.count
-			this.props.exchange(this.props.subcaucus, 'recalc')
+	handleBlur = () => (event: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+		const { subcaucus } = this.props
+		const currentTabIndex = event.currentTarget.tabIndex
+		_u.debug("handle blur index", currentTabIndex)
+		if (subcaucus.name !== this.state.name || subcaucus.count !== this.state.count) {
+			subcaucus.name = this.state.name
+			subcaucus.count = this.state.count
+			this.props.exchange(subcaucus, 'recalc')
 		}
 	}
 
 	handleKey = () => (event: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
 		const { rows, subcaucus } = this.props
 		const currentTabIndex = event.currentTarget.tabIndex
-		_u.debug("index", currentTabIndex, "key", event.key)
-		if (event.key === 'Enter') {
+		_u.debug("handle key index", currentTabIndex, "got", event.key, "for", subcaucus.id, subcaucus.debug())
+		if (event.key === 'Enter' || event.key === 'Tab') {
 			event.preventDefault()
+			subcaucus.name = this.state.name
+			subcaucus.count = this.state.count
 			// enters will not normally select the next row
 			// so we have to force it with a callback that happens after the add subcaucus
 			this.props.exchange(subcaucus, 'enter', currentTabIndex, () => {
@@ -81,9 +91,6 @@ export class SubcaucusRow extends React.Component<Props, State> {
 					}
 				})
 			})
-		} else if (event.key === 'Tab') {
-			// tabs will behave properly, moving to the next row even after adding a subcaucus
-			this.props.exchange(this.props.subcaucus, 'enter', currentTabIndex)
 		}
 	}
 
@@ -103,7 +110,7 @@ export class SubcaucusRow extends React.Component<Props, State> {
 
 		_u.debug("render row", s.id, this.state)
 
-		const { name, count, delegates, showInfo } = this.state
+		const { name, count, showInfo } = this.state
 
 		const infoCard = showInfo
 			? <SubcaucusRowInfoCard
@@ -115,7 +122,7 @@ export class SubcaucusRow extends React.Component<Props, State> {
 		return (
 			<>
 				<div id={this.idPlus("row")}
-					className={`subcaucus-row ${delegates > 0 ? "has-delegates" : (count > 0 ? "no-delegates" : "")}`}
+					className={`subcaucus-row ${s.delegates > 0 ? "has-delegates" : (count > 0 ? "no-delegates" : "")}`}
 				>
 					{_u.isDebugging ? <div className="subcaucus-id">{s.id}</div> : ''}
 					<InputTextarea id={this.idPlus("row-name")}
@@ -132,6 +139,7 @@ export class SubcaucusRow extends React.Component<Props, State> {
 						placeholder={s.defaultName()}
 						onChange={this.handleName()}
 						onKeyDown={this.handleKey()}
+						onBlur={this.handleBlur()}
 					/>
 					<InputText id={this.idPlus("row-count")}
 						className="subcaucus-field subcaucus-count"
@@ -143,16 +151,16 @@ export class SubcaucusRow extends React.Component<Props, State> {
 						value={count ? count : ''}
 						placeholder={`—`}
 						onChange={this.handleCount()}
-						onBlur={this.handleCountBlur()}
-						// forcing the selction of the whole text seems to lead to problems
-						// see https://grand.clst.org:3000/tenseg/subcalc-pr/issues/3
-						// onFocus={this.focusOnWholeText()}
 						onKeyDown={this.handleKey()}
+						onBlur={this.handleBlur()}
+					// forcing the selction of the whole text seems to lead to problems
+					// see https://grand.clst.org:3000/tenseg/subcalc-pr/issues/3
+					// onFocus={this.focusOnWholeText()}
 					/>
 					<Button id={this.idPlus("row-delegates")}
-						className={`subcaucus-delegates-button ${delegates > 0 ? "p-button-success" : "p-button-secondary"}`}
-						label={delegates ? `${delegates}` : undefined}
-						icon={delegates ? undefined : (count ? 'pi pi-ban' : 'pi')}
+						className={`subcaucus-delegates-button ${s.delegates > 0 ? "p-button-success" : "p-button-secondary"}`}
+						label={s.delegates ? `${s.delegates}` : undefined}
+						icon={s.delegates ? undefined : (count ? 'pi pi-ban' : 'pi')}
 						onClick={() => this.setState({ showInfo: true })}
 						disabled={count === 0}
 					>
