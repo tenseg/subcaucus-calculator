@@ -346,8 +346,10 @@ body {
             }
             
             #subcaucus-footer {
+                margin-top: $form-margin;
+                
                 .p-button {
-                    margin: $form-margin 0 $form-margin $form-margin;
+                    margin: 0 0 $form-margin $form-margin;
                 }
                 
                 #add-subcaucus-button {
