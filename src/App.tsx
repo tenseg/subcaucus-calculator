@@ -538,7 +538,10 @@ this.keySuffix = String(_u.randomSeed())
                     {
                         label: "Download code",
                         icon: "pi pi-fw pi-save",
-                        command: () => this.growlAlert("Download code.", 'warn', 'TODO')
+                        command: () => {
+                            const jsnap = this.subcalc.snapshot.toJSON()
+                            fileDownload(JSON.stringify(jsnap, null, 2), 'subcalc.json')
+                        }
                     },
                 ]
             },
