@@ -359,7 +359,25 @@ body {
                     }
                 }
                 
+                #add-meeting-button {
+                    background-color: $header-color;
+                    border-color: $header-color;
+                    
+                    &:hover {
+                        background-color: lighten($header-color, 25%)
+                    }
+                }
+                
                 #remove-empty-subcaucuses-button {
+                    background-color: $body-color;
+                    border-color: $body-color;
+                    
+                    &:hover {
+                        background-color: lighten($body-color, 25%)
+                    }
+                }
+
+                #empty-trash-button {
                     background-color: $body-color;
                     border-color: $body-color;
                     
@@ -459,11 +477,42 @@ body {
                         border-bottom: 1px solid $rule-color !important;
                         border-radius: 0 !important;
                     }
-                
+                                    
                     .p-accordion-content {
                         padding: 0;
                         border: none !important;
                         border-radius: 0 !important;
+                    }
+                }
+                
+                .p-accordion-header:not(.p-disabled).p-highlight.trashed a {
+                    background-color: lighten($body-color, 50%);
+                    color: black;
+                }
+                
+                .p-accordion-header:not(.p-disabled).p-highlight.saved a {
+                    background-color: lighten($header-color, 50%);
+                    color: black;
+                }
+                
+                .p-accordion-header:not(.p-disabled).p-highlight {
+                    
+                    &.saved,
+                    &.trashed {
+                        
+                        color: black;
+
+                         a .p-accordion-toggle-icon {
+                            color: black;
+                         }
+                    }
+                    
+                    &.saved a {
+                        background-color: lighten($header-color, 50%);
+                    }
+                    
+                    &.trashed a {
+                        background-color: lighten($body-color, 50%);
                     }
                 }
                 

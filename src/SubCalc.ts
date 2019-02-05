@@ -313,10 +313,27 @@ export class SubCalc {
 	 * 
 	 * NOTE: This method will not remove the "current" snapshot.
 	 */
-	deleteSnapshot = (snapshot: Snapshot) => {
+	trashSnapshot = (snapshot: Snapshot) => {
 		const snapshotKey = snapshot.snapshotKey()
-		localStorage.removeItem(snapshotKey)
+		const keyContent = localStorage.getItem(`${this.storedSnapshotPrefix} ${snapshotKey}`)
+		if (keyContent) {
+			localStorage.removeItem(`${this.storedSnapshotPrefix} ${snapshotKey}`)
+			localStorage.setItem(`${this.trashedSnapshotPrefix} ${snapshotKey}`, keyContent)
+		} else {
+			_u.alertUser(new Error(`Could not find ${this.storedSnapshotPrefix} ${snapshotKey}`))
+		}
 	}
+
+	/**
+	 * Delete all the trashed snapshots from local storage.
+	 */
+	emptyTrash = () => {
+		this.snapshots("trashed").forEach((snapshot) => {
+			const snapshotKey = snapshot.snapshotKey()
+			localStorage.removeItem(`${this.trashedSnapshotPrefix} ${snapshotKey}`)
+		})
+	}
+
 
 	/**
 	 * Try to populate this instance with subcalc2 data from local storage.

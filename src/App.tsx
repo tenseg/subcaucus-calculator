@@ -132,7 +132,7 @@ export class App extends React.Component<Props, State> {
         this.state = {
             // card status
             cards: this.subcalc.snapshot.allowed ? [] : this.initialCardState,
-            present: Presenting.Calculator,
+            present: Presenting.Loading,
             // sorting info
             sortName: SortOrder.None,
             sortCount: SortOrder.None,
@@ -193,7 +193,10 @@ export class App extends React.Component<Props, State> {
      */
     newMeeting = () => {
         this.subcalc.newSnapshot()
-        this.setState({ cards: this.initialCardState })
+        this.setState({
+            present: Presenting.Calculator,
+            cards: this.initialCardState
+        })
     }
 
     /**

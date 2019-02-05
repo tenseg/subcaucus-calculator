@@ -27,6 +27,7 @@ interface Props {
 }
 interface State {
     sortBy: 'name' | 'date'
+    showing: 'saved' | 'trashed'
 }
 
 export class Loader extends React.Component<Props, State> {
@@ -34,7 +35,8 @@ export class Loader extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props)
         this.state = {
-            sortBy: "date"
+            sortBy: "date",
+            showing: "saved"
         }
     }
 
@@ -75,8 +77,8 @@ export class Loader extends React.Component<Props, State> {
     }
 
     deleteSnapshot = (snapshot: Snapshot) => {
-        this.props.subcalc.deleteSnapshot(snapshot)
-        this.forceUpdate
+        this.props.subcalc.trashSnapshot(snapshot)
+        this.forceUpdate()
     }
 
     renderSnapshot = (snapshot: Snapshot): JSX.Element => {
@@ -120,13 +122,17 @@ export class Loader extends React.Component<Props, State> {
                         {snapshot.revision}
                     </div>
                 </div>
-                <div className="loader-snapshot-actions">
-                    <Button
-                        icon="pi pi-trash"
-                        className="p-button-danger"
-                        onClick={() => this.deleteSnapshot(snapshot)}
-                    />
-                </div>
+                {this.state.showing === "saved"
+                    ? <div className="loader-snapshot-actions">
+                        <Button
+                            icon="pi pi-trash"
+                            className="p-button-danger"
+                            onClick={() => this.deleteSnapshot(snapshot)}
+                        />
+
+                    </div>
+                    : ''
+                }
             </div>
         )
     }
@@ -188,11 +194,11 @@ export class Loader extends React.Component<Props, State> {
         })
 
         return (
-            <AccordionTab key={`loader-meeting-${snap.meetingKey()} ${this.state.sortBy}`}
-                headerClassName="loader-meeting-accordion-header"
+            <AccordionTab key={`loader-meeting-${snap.meetingKey()} ${this.state.sortBy} ${this.state.showing}`}
+                headerClassName={`loader-meeting-accordion-header ${this.state.showing}`}
                 contentClassName="loader-meeting-accordion-content"
                 header={
-                    <div className="loader-meeting-header">
+                    <div className={`loader-meeting-header`}>
                         <div className="loader-meeting-name">{snap.name}</div>
                         <div className="loader-meeting-timestamp">{createdDate}</div>
                     </div>
@@ -205,11 +211,11 @@ export class Loader extends React.Component<Props, State> {
     }
 
     renderMeetings = (): JSX.Element => {
-        const snapshots = this.props.subcalc.snapshots()
+        const snapshots = this.props.subcalc.snapshots(this.state.showing)
 
         if (snapshots.length === 0) {
-            return (
-                <ValueCard key="nothing-to-load"
+            return this.state.showing === "saved"
+                ? <ValueCard key="nothing-to-load"
                     title="No snapshots yet"
                     description="You will have to save a snapshot before you can open one!"
                     footer={
@@ -220,7 +226,17 @@ export class Loader extends React.Component<Props, State> {
                         />
                     }
                 />
-            )
+                : <ValueCard key="nothing-to-load"
+                    title="Nothing in the trash"
+                    description="The trash is empty."
+                    footer={
+                        <Button key="nothing-to-load-button"
+                            label="OK"
+                            icon="pi pi-check"
+                            onClick={() => this.setState({ showing: "saved" })}
+                        />
+                    }
+                />
         }
 
         const currentMeetingKey = this.props.subcalc.snapshot.meetingKey()
@@ -289,11 +305,35 @@ export class Loader extends React.Component<Props, State> {
                     </div>
                     {this.renderMeetings()}
                     <div id="subcaucus-footer">
-                        <Button id="add-loader-button"
-                            label="Add new meeting"
-                            icon="pi pi-calendar-plus"
-                            onClick={() => this.props.onNew()}
-                        />
+                        {this.state.showing === 'saved'
+                            ? <Button id="add-meeting-button"
+                                label="Add new meeting"
+                                icon="pi pi-calendar-plus"
+                                onClick={() => this.props.onNew()}
+                            />
+                            : <Button id="empty-trash-button"
+                                label="Empty trash"
+                                icon="pi pi-trash"
+                                onClick={() => {
+                                    this.props.subcalc.emptyTrash()
+                                    this.setState({ showing: "saved" })
+                                }}
+                            />
+                        }
+                        {this.state.showing === 'saved'
+                            ? <Button id="show-trashed-button"
+                                label="Show trash"
+                                icon="pi pi-trash"
+                                className="p-button-secondary"
+                                onClick={() => this.setState({ showing: "trashed" })}
+                            />
+                            : <Button id="show-saved-button"
+                                label="Show saved"
+                                icon="pi pi-calendar"
+                                className="p-button-secondary"
+                                onClick={() => this.setState({ showing: "saved" })}
+                            />
+                        }
                         <Button id="cancel-loader-button"
                             label="Cancel"
                             icon="pi pi-times"
