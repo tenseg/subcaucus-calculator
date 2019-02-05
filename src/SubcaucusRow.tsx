@@ -42,14 +42,7 @@ export class SubcaucusRow extends React.Component<Props, State> {
 
 	handleName = () => (event: React.FormEvent<HTMLTextAreaElement>) => {
 		var value = event.currentTarget.value
-		if (value.slice(-1) === "\n") {
-			_u.debug("index", this.props.index, "captured newline")
-			// this.props.exchange(this.props.subcaucus, 'enter', this.props.index)
-			return
-		}
-		this.props.subcaucus.name = value
 		this.setState({ name: value })
-		this.props.exchange(this.props.subcaucus, 'recalc')
 	}
 
 	handleCount = () => (event: React.FormEvent<HTMLInputElement>) => {
@@ -72,6 +65,7 @@ export class SubcaucusRow extends React.Component<Props, State> {
 		const currentTabIndex = event.currentTarget.tabIndex
 		_u.debug("index", currentTabIndex, "key", event.key)
 		if (event.key === 'Enter') {
+			event.preventDefault()
 			// enters will not normally select the next row
 			// so we have to force it with a callback that happens after the add subcaucus
 			this.props.exchange(subcaucus, 'enter', currentTabIndex, () => {
