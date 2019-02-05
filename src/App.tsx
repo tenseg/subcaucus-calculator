@@ -9,7 +9,7 @@ import 'primereact/resources/themes/nova-light/theme.css'
 import 'primeicons/primeicons.css'
 
 // see https://github.com/kennethjiang/js-file-download
-import * as fileDownload from 'js-file-download'
+import fileDownload from 'js-file-download'
 
 // local to this app
 import './App.scss'
@@ -525,7 +525,7 @@ this.keySuffix = String(_u.randomSeed())
                         label: "Download text",
                         icon: "pi pi-fw pi-align-left",
                         command: () => {
-                            fileDownload.default(this.subcalc.snapshot.asText(), 'subcalc.txt')
+                            fileDownload(this.subcalc.snapshot.asText(), 'subcalc.txt')
                         }
                     },
                     {
