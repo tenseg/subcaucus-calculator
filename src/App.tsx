@@ -132,7 +132,7 @@ export class App extends React.Component<Props, State> {
         this.state = {
             // card status
             cards: this.subcalc.snapshot.allowed ? [] : this.initialCardState,
-            present: Presenting.Loading,
+            present: Presenting.Calculator,
             // sorting info
             sortName: SortOrder.None,
             sortCount: SortOrder.None,
