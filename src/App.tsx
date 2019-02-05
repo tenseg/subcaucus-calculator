@@ -253,6 +253,24 @@ this.keySuffix = String(_u.randomSeed())
         this.removeCardState(remove)
     }
 
+    emailSnapshot = () => {
+        const snapshot = this.subcalc.snapshot
+
+        const url = `${location.protocol}//${location.host}${location.pathname}` + "?caucus=" + encodeURIComponent(JSON.stringify(snapshot.toJSON()))
+
+        let body = snapshot.asText()
+
+        body += "\nOpen this snapshot yourself by clicking on this very long and ugly link:\n\n" + url + "\n"
+
+        let subject = "Subcaucus Report for ";
+        subject += snapshot.name
+        subject += snapshot.revision ? ` (${snapshot.revision})` : ''
+
+        const mailto = "mailto:?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body)
+
+        location.href = mailto
+    }
+
     /**
      * Provide a default name for this meeting, including today's date.
      */
@@ -498,7 +516,7 @@ this.keySuffix = String(_u.randomSeed())
                     {
                         label: "Email report",
                         icon: "pi pi-fw pi-envelope",
-                        command: () => this.growlAlert("Email report.", 'warn', 'TODO')
+                        command: this.emailSnapshot
                     },
                     {
                         label: "Download text",
@@ -519,10 +537,6 @@ this.keySuffix = String(_u.randomSeed())
             },
         ]
         return <Menubar key="calculator-menu" model={items} id="app-main-menu" />
-    }
-
-    nextStepLoading = () => {
-        this.setState({ present: Presenting.Loading })
     }
 
     /**
