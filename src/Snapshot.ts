@@ -62,7 +62,6 @@ export class Snapshot {
 	allowed: number
 	seed: number
 	subcaucuses: TSMap<number, Subcaucus>
-	changes = 0
 
 	static decoder: Decoder<SnapshotJSON> = object({
 		device: number(),
@@ -78,21 +77,21 @@ export class Snapshot {
 	/**
 	 * Creates a new snapshot instance.
 	 * 
-	 * ```typescript
-	 * interface SnapshotInitializer {
-	 *   device: number
-	 *   created: TimestampString
-	 *   with?: {
-	 * 	   revised?: TimestampString
-	 * 	   revision?: string
-	 * 	   name?: string
-	 * 	   allowed?: number
-	 * 	   seed?: number
-	 * 	   subcaucuses?: TSMap<number, Subcaucus>
-	 *   }
-	 *   json?: SnapshotJSON
-	 * }
-	 * ```
+```typescript
+interface SnapshotInitializer {
+device: number
+	created: TimestampString
+	with?: {
+		revised?: TimestampString
+		revision?: string
+		name?: string
+		allowed?: number
+		seed?: number
+		subcaucuses?: TSMap<number, Subcaucus>
+	}
+	json?: SnapshotJSON
+}
+```
 	 * 
 	 * @param {SnapshotInitializer} init
 	 */
@@ -433,8 +432,6 @@ export class Snapshot {
 		})
 
 		console.log("random summary", scRand.recordSummary())
-
-		this.changes++ // this is used to help refresh component keys
 
 	}
 

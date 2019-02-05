@@ -43,17 +43,17 @@ export class Subcaucus {
 	/**
 	 * Creates a new subcacucus instance.
 	 * 
-	 * ```typescript
-	 * interface SubcaucusInitializer {
-	 *   id: number
-	 *   with?: {
-	 *     name?: string
-	 *     count?: number
-	 * 	   delegates?: number
-	 *   }
-	 *   json?: SubcaucusJSON
-	 * }
-	 * ```
+```typescript
+interface SubcaucusInitializer {
+	id: number
+	with?: {
+		name?: string
+		count?: number
+			delegates?: number
+	}
+	json?: SubcaucusJSON
+}
+```
 	 * @param {SubcaucusInitializer} init
 	 */
 	constructor(init: SubcaucusInitializer) {

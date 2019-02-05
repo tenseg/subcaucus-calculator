@@ -19,6 +19,19 @@ import { ValueCard } from './ValueCard'
 import { Loader } from './Loader'
 import { ShowJSON } from './ShowJSON'
 
+// cards
+import { RemovingEmptiesCard } from './Cards/RemovingEmptiesCard';
+import { ChangingCoinCard } from './Cards/ChangingCoinCard';
+import { ChangingDelegatesAllowedCard } from './Cards/ChangingDelegatesAllowedCard';
+import { ChangingNameCard } from './Cards/ChangingNameCard';
+import { SavingSnapshotCard } from './Cards/SavingSnapshotCard';
+import { SavingSnapshotBeforeCard } from './Cards/SavingSnapshotBeforeCard';
+import { WelcomeAndSetNameCard } from './Cards/WelcomeAndSetNameCard';
+import { InstructionsCard } from './Cards/InstructionsCard';
+import { AboutCard } from './Cards/AboutCard';
+import { CreditCard } from './Cards/CreditCard';
+import { SecurityCard } from './Cards/SecurityCard';
+
 /**
  * Facilitates sorting up or down (or not at all), as needed.
  */
@@ -39,6 +52,7 @@ enum SortOrder {
  * ever be seen.
  */
 enum CardFor {
+    Nothing = 0,
     WelcomeAndSetName,
     ChangingName,
     ChangingDelegates,
@@ -97,8 +111,15 @@ export class App extends React.Component<Props, State> {
      * To be included with component key whenever you want
      * to be sure that component will _not_ be reused
      * when the App refreshes with a new snapshot.
+     * 
+     * Change this value whenever you need to force
+     * the subcaucus lines to reset:
+     * 
+```typescript
+this.keySuffix = String(_u.randomSeed())
+```
      */
-    private keySuffix = String(Math.random())
+    private keySuffix = String(_u.randomSeed())
 
     /**
      * This set of cards is to be presented whenever
@@ -118,6 +139,15 @@ export class App extends React.Component<Props, State> {
      * is set during the `render()` stage.
      */
     growl: Growl | null = null
+
+    /**
+     * Default settings for our tooltips.
+     */
+    tooltipOptions = {
+        showDelay: 1500, // 1.5 seconds
+        hideDelay: 333, // 1/3 second
+        position: 'top',
+    }
 
     /**
      * Creates the new SubCalc App.
@@ -193,6 +223,7 @@ export class App extends React.Component<Props, State> {
      */
     newMeeting = () => {
         this.subcalc.newSnapshot()
+        this.keySuffix = String(_u.randomSeed())
         this.setState({
             present: Presenting.Calculator,
             cards: this.initialCardState
@@ -206,6 +237,7 @@ export class App extends React.Component<Props, State> {
     duplicateMeeting = () => {
         this.subcalc.duplicateSnapshot()
         this.growlAlert(this.subcalc.snapshot.name, 'success', 'Snapshot Duplicated')
+        this.keySuffix = String(_u.randomSeed())
         this.forceUpdate()
     }
 
@@ -213,10 +245,12 @@ export class App extends React.Component<Props, State> {
      * Request a new meeting from the storage manager and
      * set our state to reflect the new meeting.
      */
-    saveSnapshot = (revision: string) => {
-        this.subcalc.saveSnapshot(revision)
-        this.forceUpdate()
-        this.growlAlert(revision, 'success', 'Snapshot Saved')
+    saveSnapshot = (revision?: string, remove: CardFor = CardFor.SavingSnapshot) => {
+        if (revision) {
+            this.subcalc.saveSnapshot(revision)
+            this.growlAlert(revision, 'success', 'Snapshot Saved')
+        }
+        this.removeCardState(remove)
     }
 
     /**
@@ -268,6 +302,7 @@ export class App extends React.Component<Props, State> {
      * Removes a card from the cards state.
      */
     removeCardState = (cardFor: CardFor) => {
+        if (cardFor === CardFor.Nothing) return
         this.setState({ cards: this.removeCard(cardFor) })
     }
 
@@ -486,399 +521,8 @@ export class App extends React.Component<Props, State> {
         return <Menubar key="calculator-menu" model={items} id="app-main-menu" />
     }
 
-    /**
-     * Returns JSX for the about card.
-     * 
-     * NOTE: Do not `setState()` in this method.
-     */
-    renderAbout = (): JSX.Element => {
-        return (
-            <ValueCard key="about-card" id="about-card"
-                title="Minnesota DFL Subcaucus Calculator"
-                image="dfl.jpg"
-                onSave={() => this.removeCardState(CardFor.ShowingAbout)}
-                extraButtons={
-                    <Button id="show-credits-button"
-                        label="Credits"
-                        icon="pi pi-user"
-                        className="p-button-secondary"
-                        onClick={() => this.switchCardState(CardFor.ShowingAbout, CardFor.ShowingBy)}
-                    />
-                }
-            >
-                <p>Originally written for <a href="http://sd64dfl.org">SD64 DFL</a>, this app assists convenors of precinct caucuses and conventions in Minnesota. The Minnesota Democratic Farmer Labor (DFL) party uses a wonderful, but bit arcane, “walking subcaucus” process that is simple enough to do, but rather difficult to tabulate.</p>
-                <p>Given the number of delegates your meeting or caucus is allowed to send forward and the count of members of each subcaucus, this calculator determines how many of those delegates each subcaucus will elect. The rules it follows appeared on page 4 of the <a href="http://www.sd64dfl.org/more/caucus2014printing/2014-Official-Call.pdf">DFL 2014 Official Call</a>, including the proper treatment of remainders. It makes the math involved in a walking subcaucus disappear.</p>
-                <p>The app could be used to facilitate a “walking subcaucus” or “<a href="https://en.wikipedia.org/wiki/Proportional_representation">proportional representation</a>” system for any group.</p>
-            </ValueCard>
-        )
-    }
-
-    /**
-     * Returns JSX for the instructions card.
-     * 
-     * NOTE: Do not `setState()` in this method.
-     */
-    renderInstructions = (): JSX.Element => {
-        return (
-            <ValueCard key="instructions-card" id="instructions-card"
-                title="Fill in the subcaucuses"
-                image="walking.jpg"
-                onSave={() => this.removeCardState(CardFor.ShowingInstructions)}
-            >
-                <p>Now it is time to fill in the subcaucus information. Just add each subcaucus name and the count of participants. Usually a convention or cacucus will solicit the names of subcaucuses first, feel free to enter them right away without a count. Then people will be encouraged to walk around the room and congregate with the subcaucus that most closely represents their views. When each subcacus reports how many members they attracted, you can enter that as the count for that subcaucus.</p>
-                <p>As soon as you start entering subcaucus counts, the calculator will go to work determining how many delegates each subcaucus will be assigned. You can ignore those numbers until you have finished entering and confirming all the subcaucus counts. When you are done, the delegate numbers can be reported to the chair of your convention or caucus.</p>
-                <p>Since most conventions or caucuses will go through more than one round of "walking", you can just keep reusing your subcaucus list for each round. However, you might want to consider these steps at the end of each round:</p>
-                <ul>
-                    <li>Use the "Meetings" menu at the top to save a snapshot after each round of caucusing. This will give you a good record of the whole process.</li>
-                    <li>Use the "Share" menu to email a report about each round to the chair of the meeting just so they also have a clear record of the process.</li>
-                </ul>
-                <p>You can always get these instructions back under the "About" menu at the top. Have fun!</p>
-            </ValueCard>
-        )
-    }
-
-    /**
-     * Returns JSX for the security card.
-     * 
-     * NOTE: Do not `setState()` in this method.
-     */
-    renderSecurity = (): JSX.Element => {
-        return (
-            <ValueCard key="security-card" id="security-card"
-                title="Data security"
-                image="security.jpg"
-                extraButtons={
-                    <Button id="clear-data -button"
-                        label="Clear All Data"
-                        icon="pi pi-exclamation-triangle"
-                        className="p-button-danger"
-                        onClick={() => this.growlAlert("Clear data.", 'warn', 'TODO')}
-                    />
-                }
-                onSave={() => this.removeCardState(CardFor.ShowingSecurity)}
-            >
-                <p>The subcaucus calculator stores all of the data you enter on your own device. It uses a feature of web browsers called "local storage" to save all your meeting information within your web browser. None of your data gets off your device unless you choose to share it.</p>
-                <p>Do note that this app is running on a web server, though, and that server will keep all the logs typical of web servers. This includes logs of your IP address and the documents you retrieve from the server. None of these logs will include your specific meeting information.</p>
-                <p>One thing to be aware of is that anyone using this same browser on this same device will be able to see your meeting information, including saved snapshots and past meetings, when they come to this web site. If this is a public device and you want to clear out all the data the calculator has stored, click the "Clear All Data" button.</p>
-                <p>Since the data is stored with your browser on this device, also be aware that you will not be able to see your meeting information from any other browser. This means that even you won't be able to get at this data unless you use the sharing features.</p> {/* TODO: create a transfer data feature */}
-                <p>You can use the "Share" menu to get data off your device when you need to do so. Once you share your meeting information this calculator is no longer in control of that data. Make good choices about sharing.</p>
-                <p>The good news is that there really isn't any private information in the calculator in the first place. Most meetings that use the walking subcacus process are public meetings and the data you store in this calculator is not sensitive. Still, we thought you'd like to know we treat it as <em>your</em> data and do not share it unless you ask us to.</p>
-            </ValueCard>
-        )
-    }
-
-    /**
-     * Returns JSX for the byline credit card.
-     * 
-     * NOTE: Do not `setState()` in this method.
-     */
-    renderBy = (): JSX.Element => {
-        return (
-            <ValueCard key="by-card" id="by-card"
-                title="Brought to you by Tenseg LLC"
-                image="tenseg.jpg"
-                onSave={() => this.removeCardState(CardFor.ShowingBy)}
-            >
-                <p>We love the walking subcaucus process and it makes us a bit sad that the squirrelly math required to calculate who gets how many delegate discourages meetings and caucuses from using the process. We hope this calculator makes it easier for you to get to know your neighbors as you work together to change the world!</p>
-                <p>Please check us out at <a href="https://tenseg.net">tenseg.net</a> if you need help building a website or making appropriate use of technology.</p>
-            </ValueCard>
-        )
-    }
-
-    /**
-     * Returns JSX for the welcome card, which is a special version
-     * of the card to enter a name for the meeting.
-     * 
-     * NOTE: Do not `setState()` in this method.
-     */
-    renderWelcomeAndSetName = (): JSX.Element => {
-        return (
-            <ValueCard key="welcome-card" id="welcome-card"
-                title="Welcome to the Minnesota DFL Subcacus Calculator"
-                image="dfl.jpg"
-                description='Please start by specifying the name of your meeting here. Most meetings have a name, like the "Ward 4 Precinct 7 Caucus" or the "Saint Paul City Convention".'
-                value={this.subcalc.snapshot.name}
-                defaultValue={this.defaultName()}
-                allowEmpty={false}
-                onSave={(value?: string) => {
-                    if (value == undefined) {
-                        this.removeCardState(CardFor.WelcomeAndSetName)
-                    } else {
-                        this.setState({ cards: this.removeCard(CardFor.WelcomeAndSetName) })
-                        this.setStateName(value)
-                    }
-                }}
-            />
-        )
-    }
-
-    /**
-     * Returns JSX for the card to change a meeting's name.
-     * 
-     * NOTE: Do not `setState()` in this method.
-     */
-    renderChangingName = (): JSX.Element => {
-        return (
-            <ValueCard key="name-value" id="name-value"
-                title="Meeting name?"
-                value={this.subcalc.snapshot.name}
-                defaultValue={this.defaultName()}
-                allowEmpty={false}
-                extraButtons={this.subcalc.snapshot.name
-                    ? <Button id="new-meeting-button"
-                        label="New meeting"
-                        icon="pi pi-calendar-plus"
-                        className="p-button-secondary"
-                        onClick={() => this.growlAlert("New meeting.", 'warn', 'TODO')}
-                    />
-                    : <></>
-                }
-                onSave={(value?: string) => {
-                    if (value == undefined) {
-                        this.removeCardState(CardFor.ChangingName)
-                    } else {
-                        this.setState({ cards: this.removeCard(CardFor.ChangingName) })
-                        this.setStateName(value)
-                    }
-                }}
-            >
-                <p>You can save a new name for this meeting or, if this is really a new event, you may want to start a new meeting altogether.</p>
-            </ValueCard>
-        )
-    }
-
-    /**
-     * Returns JSX for the card to save a 
-     * snapshot of the current state of the
-     * calculator.
-     * 
-     * NOTE: Do not `setState()` in this method.
-     */
-    renderSavingSnapshot = (): JSX.Element => {
-        return (
-            <ValueCard key="snapshot-value" id="snapshot-value"
-                title="Name for the snapshot?"
-                value=""
-                defaultValue={`Revision of ${this.subcalc.snapshot.name}`}
-                allowEmpty={false}
-                extraButtons={
-                    <Button id="cancel-save-snapshot-button"
-                        label="Cancel"
-                        icon="pi pi-times"
-                        className="p-button-secondary"
-                        onClick={() => this.removeCardState(CardFor.SavingSnapshot)}
-                    />
-                }
-                onSave={(value?: string) => {
-                    this.removeCardState(CardFor.SavingSnapshot)
-                    if (value) {
-                        this.saveSnapshot(value)
-                    }
-                }}
-            >
-                <p>Consider names like "First walk" or "Final result".
-                {this.subcalc.snapshot.allowed
-                        ? <span> If this is actually a new event, you may want to start a new meeting instead</span>
-                        : <></>
-                    }
-                </p>
-            </ValueCard>
-        )
-    }
-
-    /**
-     * Returns JSX for the card to save a 
-     * snapshot of the current state of the
-     * calculator before loading another snapshot.
-     * 
-     * NOTE: Do not `setState()` in this method.
-     */
-    renderSavingSnapshotBefore = (): JSX.Element => {
-        return (
-            <ValueCard key="snapshot-value" id="snapshot-value"
-                title="Save changes?"
-                value=""
-                defaultValue={`Revision of ${this.subcalc.snapshot.revision || this.subcalc.snapshot.name}`}
-                allowEmpty={false}
-                extraButtons={
-                    <>
-                        <Button id="just-load-snapshot-button"
-                            label="Don't save"
-                            icon="pi pi-folder-open"
-                            className="p-button-warning"
-                            onClick={() => {
-                                this.removeCardState(CardFor.SavingSnapshotBefore)
-                                if (this.state.afterBefore) {
-                                    this.state.afterBefore()
-                                }
-                            }}
-                        />
-                        <Button id="cancel-save-and-load-snapshot-button"
-                            label="Cancel"
-                            icon="pi pi-times"
-                            className="p-button-secondary"
-                            onClick={() => this.removeCardState(CardFor.SavingSnapshotBefore)}
-                        />
-                    </>
-                }
-                onSave={(value?: string) => {
-                    this.removeCardState(CardFor.SavingSnapshotBefore)
-                    if (value) {
-                        this.saveSnapshot(value)
-                        if (this.state.afterBefore) {
-                            this.state.afterBefore()
-                        }
-                    }
-                }}
-            >
-                <p>It looks like you have changed something. Do you want to save a snapshot? If so, provide a name like "First walk" or "Final result". If you don't save a snapshot your changes may be lost when you open a past snapshot.
-                </p>
-            </ValueCard>
-        )
-    }
-
     nextStepLoading = () => {
         this.setState({ present: Presenting.Loading })
-    }
-
-    /**
-     * Returns JSX for the card to change the 
-     * number of delegates allowed from a meeting.
-     * 
-     * NOTE: Do not `setState()` in this method.
-     */
-    renderChangingDelegates = (): JSX.Element => {
-        return (
-            <ValueCard key="delegate-value" id="delegate-value"
-                title="Number of delegates allowed?"
-                type="positive integer"
-                value={this.subcalc.snapshot.allowed.toString()}
-                allowEmpty={false}
-                extraButtons={this.subcalc.snapshot.allowed
-                    ? <Button id="new-meeting-button"
-                        label="New meeting"
-                        icon="pi pi-calendar-plus"
-                        className="p-button-secondary"
-                        onClick={() => this.growlAlert("New meeting.", 'warn', 'TODO')}
-                    />
-                    : <></>
-                }
-                onSave={(value?: string) => {
-                    if (value == undefined) {
-                        this.removeCardState(CardFor.ChangingDelegates)
-                    } else {
-                        this.setState({ cards: this.removeCard(CardFor.ChangingDelegates) })
-                        this.setStateAllowed(Number(value))
-                    }
-                }}
-            >
-                <p>Specify the number of delegates that your meeting or caucus is allowed to send on to the next level. This is the number of delegates to be elected by your meeting.
-                {this.subcalc.snapshot.allowed
-                        ? <span> If this is actually a new event, you may want to start a new meeting instead</span>
-                        : <></>
-                    }
-                </p>
-            </ValueCard>
-        )
-    }
-
-    /**
-     * Returns JSX for the card to change the 
-     * coin (or random seed) of a meeting.
-     * 
-     * NOTE: Do not `setState()` in this method.
-     */
-    renderChangingCoin = (): JSX.Element => {
-        return (
-            <ValueCard key="coin-value" id="coin-value"
-                title={"Change the coin"}
-                type="positive integer"
-                value={this.subcalc.snapshot.seed.toString()}
-                allowEmpty={false}
-                extraButtons={this.subcalc.snapshot.allowed
-                    ? <Button id="random-coin-button"
-                        label="Generate random coin"
-                        icon="pi pi-refresh"
-                        className="p-button-success"
-                        onClick={() => {
-                            this.subcalc.reviseSnapshot({ seed: _u.randomSeed() })
-                            this.growlAlert(`Random seed is now ${this.subcalc.snapshot.seed}.`, 'success', 'New Random Coin')
-                            this.removeCardState(CardFor.ChangingCoin)
-                        }}
-                    />
-                    : <></>
-                }
-                onSave={(value?: string) => {
-                    if (value == undefined) {
-                        this.removeCardState(CardFor.ChangingCoin)
-                    } else {
-                        const seed = Number(value)
-                        if (seed === this.subcalc.snapshot.seed) {
-                            this.growlAlert(`Random seed is still ${this.subcalc.snapshot.seed}.`, 'info', 'Coin not changed')
-                        } else {
-                            this.subcalc.reviseSnapshot({ seed: seed })
-                            this.growlAlert(`Random seed is now ${this.subcalc.snapshot.seed}.`, 'success', 'New Chosen Coin')
-                        }
-                        this.removeCardState(CardFor.ChangingCoin)
-                    }
-                }}
-            >
-                <p>
-                    Traditionally, when there are delegates remaining to be assigned and
-                    two subcaucuses are "tied" with the same size delegations, the chair
-                    of the caucus will use some method of assigning those remaining delegates
-                    at random. These methods include coin-flips or drawing lots.
-                </p>
-                <p>
-                    In this calculator we accomplish the same randomness, but we do so by
-                    in essence, flipping a coin in secret ahead of time. The "coin" is
-                    really a "random seed" that ensures fair but unpredictable results.
-                </p>
-                <p>
-                    If you change the coin, this pattern of random flips will also change.
-                    If want the same results as someone else is getting in their copy of
-                    the calculator, then you must share the same coin value.
-                </p>
-            </ValueCard>
-        )
-    }
-
-    /**
-     * Returns JSX for the card that allows the user to
-     * back out of removing empty subcaucuses.
-     * 
-     * NOTE: Do not `setState()` in this method.
-     */
-    renderRemovingEmpties = (): JSX.Element => {
-        return (
-            <ValueCard key="remove-empties-card" id="remove-empties-card"
-                title="Remove empty subcaucuses"
-                footer={
-                    <>
-                        <Button id="remove-all-empties-button"
-                            label="Remove All Empties"
-                            icon="pi pi-trash"
-                            onClick={() => this.removeEmpties()}
-                        />
-                        <Button id="remove-some-empties-button"
-                            label="Remove Only Unnamed"
-                            icon="pi pi-trash"
-                            className="p-button-warning"
-                            onClick={() => this.removeEmpties('unnamed')}
-                        />
-                        <Button id="cancel-remove-button"
-                            label="Cancel"
-                            icon="pi pi-times"
-                            className="p-button-secondary"
-                            onClick={() => this.removeCardState(CardFor.RemovingEmpties)}
-                        />
-                    </>
-                }
-            >
-                <p>An "empty" subcaucus is one with no participants &mdash; a zero count.</p>
-                <p>You can choose to remove all empty subcaucuses, or only those which also have no names.</p>
-            </ValueCard>
-        )
     }
 
     /**
@@ -895,20 +539,122 @@ export class App extends React.Component<Props, State> {
         return this.state.cards.sort((a, b) => b - a).reduce((accumulator: JSX.Element, cardFor: CardFor): JSX.Element => {
             _u.debug("filtering cards", accumulator, cardFor)
             switch (cardFor) {
-                case CardFor.WelcomeAndSetName: return this.renderWelcomeAndSetName()
-                case CardFor.ShowingInstructions: return this.renderInstructions()
-                case CardFor.ShowingAbout: return this.renderAbout()
-                case CardFor.ShowingBy: return this.renderBy()
-                case CardFor.SavingSnapshotBefore: return this.renderSavingSnapshotBefore()
-                case CardFor.SavingSnapshot: return this.renderSavingSnapshot()
-                case CardFor.ChangingName: return this.renderChangingName()
-                case CardFor.ChangingDelegates: return this.renderChangingDelegates()
-                case CardFor.ChangingCoin: return this.renderChangingCoin()
-                case CardFor.RemovingEmpties: return this.renderRemovingEmpties()
-                case CardFor.ShowingSecurity: return this.renderSecurity()
+                case CardFor.WelcomeAndSetName: return <WelcomeAndSetNameCard
+                    name={this.subcalc.snapshot.name}
+                    defaultName={this.defaultName()}
+                    save={this.saveName}
+                />
+                case CardFor.ShowingInstructions: return <InstructionsCard
+                    save={() => this.removeCardState(CardFor.ShowingInstructions)}
+                />
+                case CardFor.ShowingAbout: return <AboutCard
+                    save={() => this.removeCardState(CardFor.ShowingAbout)}
+                    showCredits={() => this.switchCardState(CardFor.ShowingAbout, CardFor.ShowingBy)}
+                />
+                case CardFor.ShowingBy: return <CreditCard
+                    save={() => this.removeCardState(CardFor.ShowingBy)}
+                />
+                case CardFor.SavingSnapshotBefore: return <SavingSnapshotBeforeCard
+                    name={this.subcalc.snapshot.name}
+                    save={this.saveSnapshotBefore}
+                />
+                case CardFor.SavingSnapshot: return <SavingSnapshotCard
+                    name={this.subcalc.snapshot.name}
+                    save={this.saveSnapshot}
+                />
+                case CardFor.ChangingName: return <ChangingNameCard
+                    name={this.subcalc.snapshot.name}
+                    defaultName={this.defaultName()}
+                    save={this.saveName}
+                    newMeeting={this.newMeeting}
+                />
+                case CardFor.ChangingDelegates: return <ChangingDelegatesAllowedCard
+                    allowed={this.subcalc.snapshot.allowed}
+                    save={this.saveDelegatesAllowed}
+                    newMeeting={this.newMeeting}
+                />
+                case CardFor.ChangingCoin: return <ChangingCoinCard
+                    value={this.subcalc.snapshot.seed.toString()}
+                    allowed={this.subcalc.snapshot.allowed}
+                    save={this.saveRandomSeed}
+                    generate={this.generateRandomSeed}
+                />
+                case CardFor.RemovingEmpties: return <RemovingEmptiesCard
+                    removeEmpties={this.removeEmpties}
+                    cancel={() => this.removeCardState(CardFor.RemovingEmpties)}
+                />
+                case CardFor.ShowingSecurity: return <SecurityCard
+                    save={() => this.removeCardState(CardFor.ShowingSecurity)}
+                    clearData={() => this.growlAlert("Clear data.", 'warn', 'TODO')}
+                />
             }
             return accumulator
         }, <></>)
+    }
+
+    /**
+     * Callback for the card that allows for a snapshot to be saved before doing something else.
+     */
+    saveSnapshotBefore = (value?: string) => {
+        _u.debug("sSnapBefore", this.state.cards)
+        this.removeCardState(CardFor.SavingSnapshotBefore)
+        if (value !== undefined) {
+            this.saveSnapshot(value, CardFor.Nothing)
+            if (this.state.afterBefore) {
+                this.state.afterBefore()
+            }
+        }
+    }
+
+    /**
+     * Callback for the changing name card to shave a new meeting name.
+     */
+    saveName = (value?: string) => {
+        if (value == undefined) {
+            this.removeCardState(CardFor.ChangingName)
+        } else {
+            this.setState({ cards: this.removeCard(CardFor.WelcomeAndSetName, this.removeCard(CardFor.ChangingName)) })
+            this.setStateName(value)
+        }
+    }
+
+    /**
+     * Callback for the delegates allowed card to shave a new number of delegates.
+     */
+    saveDelegatesAllowed = (value?: string) => {
+        if (value == undefined) {
+            this.removeCardState(CardFor.ChangingDelegates)
+        } else {
+            this.setState({ cards: this.removeCard(CardFor.ChangingDelegates) })
+            this.setStateAllowed(Number(value))
+        }
+    }
+
+    /**
+     * Callback for the changing coin card to generate a new random seed.
+     */
+    generateRandomSeed = () => {
+        this.subcalc.reviseSnapshot({ seed: _u.randomSeed() })
+        this.growlAlert(`Random seed is now ${this.subcalc.snapshot.seed}.`, 'success', 'New Random Coin')
+        this.removeCardState(CardFor.ChangingCoin)
+    }
+
+    /**
+     * Callback for the changing coin card to save a specified random seed.
+     */
+    saveRandomSeed = (value?: string) => {
+        if (value == undefined) {
+            this.removeCardState(CardFor.ChangingCoin)
+        } else {
+            const seed = Number(value)
+            if (seed === this.subcalc.snapshot.seed) {
+                this.growlAlert(`Random seed is still ${this.subcalc.snapshot.seed}.`, 'info', 'Coin not changed')
+            } else {
+                this.subcalc.reviseSnapshot({ seed: seed })
+                this.growlAlert(`Random seed is now ${this.subcalc.snapshot.seed}.`, 'success', 'New Chosen Coin')
+            }
+            this.removeCardState(CardFor.ChangingCoin)
+        }
     }
 
     /**
@@ -988,7 +734,7 @@ export class App extends React.Component<Props, State> {
 
         return this.subcalc.snapshot.subcaucuses.values().sort(sort).map((subcaucus, index, array): JSX.Element => {
             return (
-                <SubcaucusRow key={`${subcaucus.id}`}
+                <SubcaucusRow key={`${subcaucus.id} ${this.keySuffix}`}
                     subcaucus={subcaucus}
                     index={index + 1}
                     rows={array.length}
@@ -1039,7 +785,7 @@ export class App extends React.Component<Props, State> {
                         onClick={() => this.growlAlert("Explain viability in more detail.", 'warn', 'TODO')}
                     >
                         <div className="summary-label">
-                            Recalculated viability number ({(this.subcalc.snapshot.room - this.subcalc.snapshot.viableRoom).singularPlural("person", "people")} in non-viable subcaucuses)
+                            Recalculated viability number ({(this.subcalc.snapshot.room - this.subcalc.snapshot.viableRoom).singularPlural("person", "people")} in non-viable subcaucuses, you may want to consider another round of walking)
                         </div>
                         <div className="summary-count">
                             {this.subcalc.snapshot.delegateViability.decimalPlaces(3)}
@@ -1125,12 +871,17 @@ export class App extends React.Component<Props, State> {
                         <Button id="remove-empty-subcaucuses-button"
                             label="Remove Empties"
                             icon="pi pi-trash"
+                            tooltip="Remove subcaucuses that have no members"
+                            tooltipOptions={this.tooltipOptions}
                             onClick={() => this.addCardState(CardFor.RemovingEmpties)}
                         />
                         <Button id="clear-counts-button"
                             icon="pi pi-minus-circle"
+                            tooltip="Zero out the members of each subcaucus"
+                            tooltipOptions={this.tooltipOptions}
                             onClick={() => this.checkForRevisionBefore(() => {
                                 this.subcalc.zeroSubcaucuses()
+                                this.keySuffix = String(_u.randomSeed())
                                 this.forceUpdate()
                             })}
                         />
@@ -1138,9 +889,12 @@ export class App extends React.Component<Props, State> {
                             ? <Button id="random-coin-button"
                                 icon="pi pi-refresh"
                                 className="p-button-success"
+                                tooltip="Get new random seed for the coin"
+                                tooltipOptions={this.tooltipOptions}
                                 onClick={() => {
                                     this.subcalc.reviseSnapshot({ seed: _u.randomSeed() })
                                     this.growlAlert(`Random seed is now ${this.subcalc.snapshot.seed}.`, 'success', 'New Random Coin')
+                                    this.keySuffix = String(_u.randomSeed())
                                     this.forceUpdate()
                                 }}
                             />
