@@ -4,9 +4,6 @@
  * Manages retrieval of old subcalc v. 1 data from storage.
  */
 
-// see https://github.com/ClickSimply/typescript-map
-import { TSMap } from 'typescript-map'
-
 // see: https://github.com/mojotech/json-type-validation
 import { Decoder, object, string, number, array, dict } from '@mojotech/json-type-validation'
 
@@ -94,10 +91,25 @@ export class SubCalcOne {
 	}
 
 	/**
+	 * An awful synchronous sleep function. Only used to delay for initial migration.
+	 */
+	sleep = (ms: number) => {
+		// see: https://stackoverflow.com/a/17936490/383737
+		var now = new Date().getTime();
+		while (new Date().getTime() < now + ms) { /* do nothing */ }
+	}
+
+	/**
 	 * Try to populate this instance with subcalc v. 1 data from local storage.
 	 */
 	read = () => {
 		let json: SubCalcOneJSON
+
+		// if we are running in the phone app, wait a few seconds
+		// for the app to get a chance to stuff subcalc data into local storage
+		if (_u.isApp()) {
+			this.sleep(2000) // hack hack hack... very flimsy
+		}
 
 		try {
 			json = JSON.parse(localStorage.getItem("subcalc") || 'false')
@@ -114,6 +126,8 @@ export class SubCalcOne {
 			if (decoded.ok) {
 				// since the JSON looks good, we can use it to create our current snapshot
 				this.snapshot = this.snapshotFromCaucus(decoded.result.current)
+				this.snapshot.revision = "Latest"
+				this.saved.push(this.snapshot)
 
 				// we also create an array of modern snapshots that can later be written to local storage
 				Object.keys(decoded.result.saved).forEach((key) => {
@@ -145,7 +159,7 @@ export class SubCalcOne {
 			device: this.device,
 			created: new Date(caucus.seed).toTimestampString(),
 			with: {
-				name: "Imported from older calculator",
+				name: "Imported from " + (new Date(caucus.seed)).toLocaleDateString(),
 				allowed: caucus.allowed,
 				revised: revised,
 				revision: caucus.precinct
