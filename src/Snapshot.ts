@@ -79,7 +79,7 @@ export class Snapshot {
 	 * 
 ```typescript
 interface SnapshotInitializer {
-device: number
+	device: number
 	created: TimestampString
 	with?: {
 		revised?: TimestampString

@@ -14,6 +14,7 @@ import { Decoder, object, string, number, array } from '@mojotech/json-type-vali
 // local to this app
 import * as _u from './Utilities'
 import { Snapshot } from './Snapshot'
+import { SubCalcOne } from './SubCalcOne';
 
 declare global {
 
@@ -367,7 +368,14 @@ export class SubCalc {
 			}
 
 		} else {
-			// TODO: check for old subcalc1 data
+			const subcalcOne = new SubCalcOne(this.device)
+			if (subcalcOne.snapshot) {
+				this.snapshot = subcalcOne.snapshot
+				this.write()
+				subcalcOne.saved.forEach((snapshot) => {
+					this.writeSnapshot(snapshot)
+				})
+			}
 		}
 	}
 
