@@ -95,6 +95,7 @@ interface Props { }
 interface State {
     // modal interactions
     cards: Array<CardFor>
+    before?: string
     afterBefore?: () => void
     present: Presenting
     // sorting info
@@ -162,10 +163,25 @@ this.keySuffix = String(_u.randomSeed())
 
         this.subcalc.snapshot.redistributeDelegates()
 
+        let cards: Array<CardFor> = this.subcalc.snapshot.allowed ? [] : this.initialCardState
+        let before: string | undefined = undefined
+        let afterBefore: (() => void) | undefined = undefined
+
+        if (this.subcalc.incoming.length > 0) {
+            if (this.subcalc.snapshot.revision === '') {
+                cards = [CardFor.SavingSnapshotBefore]
+                afterBefore = this.completeIncoming
+            } else {
+                this.completeIncoming()
+            }
+        }
+
         this.state = {
             // card status
-            cards: this.subcalc.snapshot.allowed ? [] : this.initialCardState,
+            cards: cards,
             present: Presenting.Calculator,
+            before: before,
+            afterBefore: afterBefore,
             // sorting info
             sortName: SortOrder.None,
             sortCount: SortOrder.None,
@@ -218,6 +234,16 @@ this.keySuffix = String(_u.randomSeed())
     setStateSubcaucuses = () => {
         this.subcalc.reviseSnapshot()
         this.forceUpdate()
+    }
+
+    /**
+     * Request the storage manager to finish importing from the query parameters.
+     */
+    completeIncoming = () => {
+        this.subcalc.completeIncoming()
+        if (this.state) {
+            this.forceUpdate()
+        }
     }
 
     /**
@@ -446,10 +472,11 @@ this.keySuffix = String(_u.randomSeed())
     /**
      * If the snapshot has been revised, offers a chance to save
      * the changes before proceeding with the action in the callback.
+     * The title will be used on the card that suggests saving.
      */
-    checkForRevisionBefore = (callback: () => void) => {
+    checkForRevisionBefore = (callback: () => void, title?: string) => {
         if (this.subcalc.snapshot.revision == "") {
-            this.setState({ afterBefore: callback })
+            this.setState({ afterBefore: callback, before: title })
             this.addCardState(CardFor.SavingSnapshotBefore)
         } else {
             callback()
@@ -488,12 +515,12 @@ this.keySuffix = String(_u.randomSeed())
                     {
                         label: "New meeting",
                         icon: "pi pi-fw pi-calendar-plus",
-                        command: () => this.checkForRevisionBefore(this.newMeeting)
+                        command: () => this.checkForRevisionBefore(this.newMeeting, "Before creating a new meeting...")
                     },
                     {
                         label: "Open snapshot",
                         icon: "pi pi-fw pi-folder-open",
-                        command: () => this.checkForRevisionBefore(() => this.setState({ present: Presenting.Loading }))
+                        command: () => this.checkForRevisionBefore(() => this.setState({ present: Presenting.Loading }), "Before opening a snapshot...")
                     },
                     {
                         label: "Save snapshot",
@@ -503,7 +530,7 @@ this.keySuffix = String(_u.randomSeed())
                     {
                         label: "Duplicate meeting",
                         icon: "pi pi-fw pi-clone",
-                        command: () => this.checkForRevisionBefore(this.duplicateMeeting)
+                        command: () => this.checkForRevisionBefore(this.duplicateMeeting, "Before duplicating the meeting...")
                     },
                     {
                         label: "Change the coin",
@@ -581,6 +608,7 @@ this.keySuffix = String(_u.randomSeed())
                 case CardFor.SavingSnapshotBefore: return <SavingSnapshotBeforeCard
                     name={this.subcalc.snapshot.name}
                     save={this.saveSnapshotBefore}
+                    title={this.state.before}
                 />
                 case CardFor.SavingSnapshot: return <SavingSnapshotCard
                     name={this.subcalc.snapshot.name}
@@ -885,7 +913,7 @@ this.keySuffix = String(_u.randomSeed())
                     </div>
                     <div id="subcaucus-footer">
                         <Button id="add-subcaucus-button"
-                            label="Add a Subcaucus"
+                            label="Add Subcaucus"
                             icon="pi pi-plus"
                             onClick={() => {
                                 snapshot.addSubcaucus()
@@ -893,7 +921,7 @@ this.keySuffix = String(_u.randomSeed())
                             }}
                         />
                         <Button id="remove-empty-subcaucuses-button"
-                            label="Remove Empties"
+                            label="Empties"
                             icon="pi pi-trash"
                             tooltip="Remove subcaucuses that have no members"
                             tooltipOptions={this.tooltipOptions}
@@ -907,7 +935,7 @@ this.keySuffix = String(_u.randomSeed())
                                 this.subcalc.zeroSubcaucuses()
                                 this.keySuffix = String(_u.randomSeed())
                                 this.forceUpdate()
-                            })}
+                            }, "Before zeroing out the subcaucuses...")}
                         />
                         {_u.isDebugging()
                             ? <Button id="random-coin-button"

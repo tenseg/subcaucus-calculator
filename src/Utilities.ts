@@ -157,8 +157,22 @@ export function isDebugging(): boolean {
 	return !process.env.NODE_ENV || process.env.NODE_ENV === "development" || getQueryVariable("debug") === "yes"
 }
 
+let _tg_app = ''
+let _tg_version = ''
+let _tg_build = ''
+
+export function setApp(app: string, version?: string, build?: string) {
+	_tg_app = app
+	_tg_version = version || ''
+	_tg_build = build || ''
+}
+
+export function getApp(): { app: string, version: string, build: string } {
+	return { app: _tg_app, version: _tg_version, build: _tg_build }
+}
+
 export function isApp(): boolean {
-	return getQueryVariable("app") === "yes"
+	return Boolean(_tg_app)
 }
 
 export function getQueryVariable(variable: string) {

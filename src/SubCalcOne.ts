@@ -82,11 +82,11 @@ export class SubCalcOne {
 	/**
 	 * Create an instance of a storage object to manage local storage.
 	 */
-	constructor(device: number) {
+	constructor(device: number, storageKey = "subcalc") {
 
 		this.device = device
 
-		this.read()
+		this.read(storageKey)
 
 	}
 
@@ -102,7 +102,7 @@ export class SubCalcOne {
 	/**
 	 * Try to populate this instance with subcalc v. 1 data from local storage.
 	 */
-	read = () => {
+	read = (storageKey: string) => {
 		let json: SubCalcOneJSON
 
 		// if we are running in the phone app, wait a few seconds
@@ -112,7 +112,7 @@ export class SubCalcOne {
 		}
 
 		try {
-			json = JSON.parse(localStorage.getItem("subcalc") || 'false')
+			json = JSON.parse(localStorage.getItem(storageKey) || 'false')
 		} catch (e) {
 			_u.debug(e)
 			return

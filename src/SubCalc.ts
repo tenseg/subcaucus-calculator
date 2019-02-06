@@ -5,16 +5,14 @@
  * Handles conversion to and from JSON.
  */
 
-// see https://github.com/ClickSimply/typescript-map
-import { TSMap } from 'typescript-map'
-
 // see: https://github.com/mojotech/json-type-validation
-import { Decoder, object, string, number, array } from '@mojotech/json-type-validation'
+import { Decoder, object, number } from '@mojotech/json-type-validation'
 
 // local to this app
 import * as _u from './Utilities'
 import { Snapshot } from './Snapshot'
 import { SubCalcOne } from './SubCalcOne';
+import { isArray } from 'util';
 
 declare global {
 
@@ -65,6 +63,15 @@ export class SubCalc {
 	snapshot: Snapshot
 
 	/**
+	 * This is where we save snapshots awaiting import.
+	 * 
+	 * If there is more than one in the array, then the 
+	 * first would be come the current snapshot and the
+	 * remainder would be saved.
+	 */
+	incoming: Array<Snapshot> = []
+
+	/**
 	 * A prefix to be used when creating local storage items
 	 * for each snapshot.
 	 */
@@ -97,7 +104,10 @@ export class SubCalc {
 		// a poorly formed snapshot to mark failure of the read
 		this.snapshot = new Snapshot({ device: 0, created: "" })
 
-		// then we look for local data
+		// store any incoming query items into the incoming variable
+		this.query()
+
+		// look for local data
 		// if found, it will override the values above
 
 		this.read()
@@ -368,6 +378,7 @@ export class SubCalc {
 			}
 
 		} else {
+			// try to populate this instance with subcalc1 data
 			const subcalcOne = new SubCalcOne(this.device)
 			if (subcalcOne.snapshot) {
 				this.snapshot = subcalcOne.snapshot
@@ -376,18 +387,32 @@ export class SubCalc {
 					this.writeSnapshot(snapshot)
 				})
 			}
+
+			// still nothing, look for incoming query data
+			if (!this.snapshot && this.incoming.length > 0) {
+				this.completeIncoming()
+			}
 		}
 	}
 
 	/**
-	 * Given a snapshot key, this functions looks for that meeting in
+	 * Given a snapshot key, this method looks for that meeting in
 	 * local storage and returns a new meeting object to holding that information.
 	 */
 	readSnapshot = (storedSnapshotKey: string): Snapshot | undefined => {
+
+		return this.decodeSnapshot(localStorage.getItem(storedSnapshotKey) || 'false')
+
+	}
+
+	/**
+	 * Given a jsonString, this method tries to decode it into a Snapshot.
+	 */
+	decodeSnapshot = (jsonString: string): Snapshot | undefined => {
 		let json: SnapshotJSON
 
 		try {
-			json = JSON.parse(localStorage.getItem(storedSnapshotKey) || 'false')
+			json = JSON.parse(jsonString)
 		} catch (e) {
 			_u.debug(e)
 			return undefined
@@ -406,7 +431,150 @@ export class SubCalc {
 		}
 
 		return undefined
+	}
 
+	/**
+	 * Given a jsonString, this method tries to decode it into an array of Snapshots.
+	 */
+	decodeSnapshots = (jsonString: string): Array<Snapshot> => {
+		const result: Array<Snapshot> = []
+
+		let json: any
+
+		try {
+			json = JSON.parse(jsonString)
+		} catch (e) {
+			_u.debug(e)
+		}
+
+		if (isArray(json)) {
+			json.forEach((jsnap) => {
+				const decoded = Snapshot.decoder.run(jsnap)
+
+				if (decoded.ok) {
+					result.push(new Snapshot({
+						created: decoded.result.created,
+						device: decoded.result.device,
+						json: decoded.result
+					}))
+				} else {
+					_u.debug(decoded.error)
+				}
+			})
+		}
+
+		return result
+	}
+
+	/**
+	 * Given a jsonString, this method tries to decode it into a Snapshot.
+	 */
+	decodeCaucus = (jsonString: string): Snapshot | undefined => {
+		let json: SnapshotJSON
+
+		try {
+			json = JSON.parse(jsonString)
+		} catch (e) {
+			_u.debug(e)
+			return undefined
+		}
+
+		const decoded = SubCalcOne.caucusDecoder.run(json)
+
+		if (decoded.ok) {
+			const created = new Date(decoded.result.seed)
+			const snapshot = new Snapshot({
+				device: this.device,
+				created: created.toTimestampString(),
+				with: {
+					name: "Imported from " + created.toLocaleDateString(),
+					allowed: decoded.result.allowed,
+					revised: created.toTimestampString(),
+					revision: decoded.result.precinct || "via link"
+				}
+			})
+
+			Object.keys(decoded.result.members).forEach((key) => {
+				snapshot.addSubcaucus(decoded.result.names[key], decoded.result.members[key])
+			})
+
+			return snapshot
+
+		} else {
+			_u.debug(decoded.error)
+		}
+
+		return undefined
+	}
+
+	/**
+	 * Finish importing from the query parameters.
+	 */
+	completeIncoming = () => {
+		this.snapshot = this.incoming[0]
+		this.write()
+		this.incoming.forEach((snapshot) => {
+			this.writeSnapshot(snapshot)
+		})
+		this.incoming = []
+	}
+
+	/**
+	 * Check the query for snapshots to import.
+	 * 
+	 * The query was already moved from the URL to local storage,
+	 * this function will use the local storage version and then
+	 * remove the query from local storage.
+	 */
+	query = () => {
+		const query = localStorage.getItem("query")
+
+		if (!query) return
+
+		_u.debug("found query")
+
+		const params = new URLSearchParams(query)
+
+		const caucus = decodeURIComponent(params.get("caucus") || '')
+		const subcalc1 = decodeURIComponent(params.get("subcalc1") || '')
+		const snap = decodeURIComponent(params.get("snapshot") || '')
+		const subcalc2 = decodeURIComponent(params.get("subcalc2") || '')
+
+		const app = decodeURIComponent(params.get("app") || '')
+		const version = decodeURIComponent(params.get("version") || '')
+		const build = decodeURIComponent(params.get("build") || '')
+
+		if (subcalc2) {
+			_u.debug("query subcalc2", subcalc2)
+			const snapshots = this.decodeSnapshots(subcalc2)
+			this.incoming.push(...snapshots)
+		}
+
+		if (snap) {
+			_u.debug("query snapshot", snap)
+			const snapshot = this.decodeSnapshot(snap)
+			if (snapshot) this.incoming.push(snapshot)
+		}
+
+		if (subcalc1) {
+			_u.debug("query subcalc1", subcalc1)
+			localStorage.setItem("incoming", subcalc1)
+			const incoming = new SubCalcOne(this.device, "incoming")
+			localStorage.removeItem("incoming")
+			this.incoming.push(...incoming.saved)
+		}
+
+		if (caucus) {
+			_u.debug("query caucus", caucus)
+			const snapshot = this.decodeCaucus(caucus)
+			if (snapshot) this.incoming.push(snapshot)
+		}
+
+		if (app) {
+			_u.setApp(app, version, build)
+		}
+
+		localStorage.removeItem("query")
 	}
 
 }

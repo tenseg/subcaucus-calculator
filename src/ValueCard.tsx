@@ -163,13 +163,13 @@ export class ValueCard extends React.Component<Props, State> {
                                 alt={`${this.props.alt}`}
                                 src={`${this.props.image}`}
                             />
-                            {this.props.onSave
-                                ? <></>
-                                : <Button
+                            {this.props.onSave && this.props.value == undefined
+                                ? <Button
                                     id={this.idPlus("picture-close-button")}
                                     icon="pi pi-times"
                                     onClick={this.save()}
                                 />
+                                : <></>
                             }
                         </div>
                         : undefined

@@ -28,6 +28,7 @@ interface State {
 export class CreditCard extends React.Component<Props, State> {
 
 	render() {
+		const app = _u.getApp()
 		return (
 			<ValueCard key="by-card" id="by-card"
 				title="Brought to you by Tenseg LLC"
@@ -36,6 +37,10 @@ export class CreditCard extends React.Component<Props, State> {
 			>
 				<p>We love the walking subcaucus process and it makes us a bit sad that the squirrelly math required to calculate who gets how many delegate discourages meetings and caucuses from using the process. We hope this calculator makes it easier for you to get to know your neighbors as you work together to change the world!</p>
 				<p>Please check us out at <a href="https://tenseg.net">tenseg.net</a> if you need help building a website or making appropriate use of technology.</p>
+				{_u.isApp()
+					? <p>Version {app.version}, build {app.build}.</p>
+					: ''
+				}
 			</ValueCard>
 		)
 	}
