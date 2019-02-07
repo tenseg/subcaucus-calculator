@@ -552,14 +552,22 @@ this.keySuffix = String(_u.randomSeed())
                         label: "Download text",
                         icon: "pi pi-fw pi-align-left",
                         command: () => {
-                            fileDownload(this.subcalc.snapshot.asText(), 'subcalc.txt')
+                            if (_u.isApp()) {
+                                location.href = "subcalc://share-text/" + encodeURIComponent(this.subcalc.snapshot.asText())
+                            } else {
+                                fileDownload(this.subcalc.snapshot.asText(), 'subcalc.txt')
+                            }
                         }
                     },
                     {
                         label: "Download CSV",
                         icon: "pi pi-fw pi-table",
                         command: () => {
-                            fileDownload(this.subcalc.snapshot.asCSV(), 'subcalc.csv')
+                            if (_u.isApp()) {
+                                location.href = "subcalc://share-csv/" + encodeURIComponent(this.subcalc.snapshot.asCSV()) + "?filename=subcalc"
+                            } else {
+                                fileDownload(this.subcalc.snapshot.asCSV(), 'subcalc.csv')
+                            }
                         }
                     },
                     {
@@ -567,7 +575,11 @@ this.keySuffix = String(_u.randomSeed())
                         icon: "pi pi-fw pi-save",
                         command: () => {
                             const jsnap = this.subcalc.snapshot.toJSON()
-                            fileDownload(JSON.stringify(jsnap, null, 2), 'subcalc.json')
+                            if (_u.isApp()) {
+                                location.href = "subcalc://share-text/" + encodeURIComponent(JSON.stringify(jsnap, null, 2))
+                            } else {
+                                fileDownload(JSON.stringify(jsnap, null, 2), 'subcalc.json')
+                            }
                         }
                     },
                 ]
