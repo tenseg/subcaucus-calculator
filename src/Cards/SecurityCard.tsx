@@ -46,7 +46,7 @@ export class SecurityCard extends React.Component<Props, State> {
 				{_u.isApp()
 					? <>
 						<p>SubCalc stores all of the data you enter on your device. None of your data is shared with other apps or sent off your device unless you choose to share it.</p>
-						<p>One thing to be aware of is that anyone who can unlock this device will be able to use this app see your meeting information, including saved snapshots and past meetings. While your device is locked the data is protected with your passcode. If you want to erase all data the calculator has stored tap the “Clear All Data” button. This action is unreversable.</p>
+						<p>One thing to be aware of is that anyone who can unlock this device will be able to use this app to see your meeting information, including saved snapshots and past meetings. While your device is locked the data is protected with your passcode. If you want to erase all data the calculator has stored tap the “Clear All Data” button. This action is unreversable.</p>
 						<p>Since the data is stored on your device, also be aware that you will not be able to see your meeting information from any other device or on the web version of this calculator. This means that you won't be able to get at this data from other devices or browsers unless you use the sharing features.</p>
 					</>
 					: <>

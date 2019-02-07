@@ -639,6 +639,8 @@ this.keySuffix = String(_u.randomSeed())
                     save={() => this.removeCardState(CardFor.ShowingSecurity)}
                     clearData={() => {
                         localStorage.clear()
+                        this.keySuffix = String(_u.randomSeed())
+                        this.forceUpdate()
                         this.growlAlert("Starting again from scratch!", 'warn', 'Storage Cleared')
                     }}
                 />
