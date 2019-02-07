@@ -520,6 +520,15 @@ export class SubCalc {
 	}
 
 	/**
+	 * Clear local storage and our own copies.
+	 */
+	clear = () => {
+		localStorage.clear()
+		this.newSnapshot()
+		this.write()
+	}
+
+	/**
 	 * Check the query for snapshots to import.
 	 * 
 	 * The query was already moved from the URL to local storage,
