@@ -235,9 +235,9 @@ export function randomSeed(): number {
 /**
  * Provides a uniqueNumber, simply counting up each time a number is provided.
  */
-let _tg_counter = 0
 export function uniqueNumber(): number {
-	return _tg_counter++
+	window['_tg_counter'] = window['_tg_counter'] || 1
+	return window['_tg_counter']++
 }
 
 /**
