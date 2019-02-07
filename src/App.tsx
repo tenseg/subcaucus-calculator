@@ -992,6 +992,7 @@ this.keySuffix = String(_u.randomSeed())
                 <div className="columns">
                     <div className="column">
                         <pre>{"rendered App " + (new Date()).toLocaleTimeString()}</pre>
+                        <pre>{"app: " + JSON.stringify(_u.getApp())}</pre>
                         <pre>{"subcalc: " + this.subcalc.debug()}</pre>
                         <ShowJSON name="this.state" data={this.state} /><br />
                     </div>

@@ -4,13 +4,20 @@ import { App } from './App';
 import registerServiceWorker from './registerServiceWorker';
 import './index.css';
 
+// if a query is found, only store it and restart
+// this will allow the query to be pulled and deleted
+// from local storage by our components
 if (window.location.search) {
+
     localStorage.setItem("query", window.location.search)
     window.location.search = ""
-}
 
-ReactDOM.render(
-    <App />,
-    document.getElementById('root') as HTMLElement
-);
-registerServiceWorker();
+} else {
+
+    ReactDOM.render(
+        <App />,
+        document.getElementById('root') as HTMLElement
+    );
+    registerServiceWorker();
+
+}
