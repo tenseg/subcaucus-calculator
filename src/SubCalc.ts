@@ -552,6 +552,7 @@ export class SubCalc {
 		const app = decodeURIComponent(params.get("app") || '')
 		const version = decodeURIComponent(params.get("version") || '')
 		const build = decodeURIComponent(params.get("build") || '')
+		const debug = decodeURIComponent(params.get("debug") || '')
 
 		if (subcalc2) {
 			_u.debug("query subcalc2", subcalc2)
@@ -581,6 +582,10 @@ export class SubCalc {
 
 		if (app) {
 			_u.setApp(app, version, build)
+		}
+
+		if (debug) {
+			window['_tg_debug'] = true
 		}
 
 		localStorage.removeItem("query")
