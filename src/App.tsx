@@ -637,7 +637,10 @@ this.keySuffix = String(_u.randomSeed())
                 />
                 case CardFor.ShowingSecurity: return <SecurityCard
                     save={() => this.removeCardState(CardFor.ShowingSecurity)}
-                    clearData={() => this.growlAlert("Clear data.", 'warn', 'TODO')}
+                    clearData={() => {
+                        localStorage.clear()
+                        this.growlAlert("Starting again from scratch!", 'warn', 'Storage Cleared')
+                    }}
                 />
             }
             return accumulator

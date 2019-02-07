@@ -86,7 +86,7 @@ export class ValueCard extends React.Component<Props, State> {
         return empty
     }
 
-    save = (value?: string) => (event: React.MouseEvent<HTMLButtonElement>) => {
+    save = (value?: string) => (event: React.MouseEvent<HTMLButtonElement | HTMLDivElement>) => {
         if (this.props.onSave) {
             if (value === undefined) {
                 this.props.onSave()
@@ -150,7 +150,9 @@ export class ValueCard extends React.Component<Props, State> {
 
         return (
             <div className="valuecard-wrapper">
-                <div className="background-blocker">
+                <div className="background-blocker"
+                    onClick={this.save()}
+                >
                 </div>
                 <Card id={this.idPlus("valuecard")}
                     className={`valuecard ${this.idPlus("valuecard")}`}
