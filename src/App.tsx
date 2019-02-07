@@ -640,7 +640,7 @@ this.keySuffix = String(_u.randomSeed())
                     clearData={() => {
                         this.subcalc.clear()
                         this.keySuffix = String(_u.randomSeed())
-                        this.forceUpdate()
+                        this.setState({ cards: this.initialCardState })
                         this.growlAlert("Starting again from scratch!", 'warn', 'Storage Cleared')
                     }}
                 />
