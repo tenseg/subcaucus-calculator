@@ -244,7 +244,7 @@ interface SnapshotInitializer {
 	 * The number of people "in the room"
 	 * (the total of subcaucus counts).
 	 */
-	room = 0
+	participants = 0
 
 	/**
 	 * The total number of delegates allocated.
@@ -254,23 +254,23 @@ interface SnapshotInitializer {
 	/**
 	 * The number of people in the room divided by the number of delegates allowed.
 	 */
-	viability = 0
+	participantsPerDelegate = 0
 
 	/**
 	 * The number of members a subcaucus must have to be viable.
 	 */
-	wholeViability = 0
+	viabilityNumber = 0
 
 	/**
 	 * The number of people who are members of viable subcaucuses
 	 */
-	viableRoom = 0
+	viableParticipants = 0
 
 	/**
 	 * The total number of people who are members of viable subcaucuses
 	 * divided by the number of delegates allowed.
 	 */
-	delegateViability = 0
+	delegateDivisor = 0
 
 	/**
 	 * Recalculate the delegate numbers for this snapshot.
@@ -287,37 +287,37 @@ interface SnapshotInitializer {
 		// first clear out all the delegate information
 		subs.forEach((s) => s.clearDelegateInfo())
 
-		// "Step No. 1: Add up the total number of members of all the subcaucuses." (room)
-		this.room = subs.reduce((acc, sub) => {
+		// "Step No. 1: Add up the total number of members of all the subcaucuses." (participants)
+		this.participants = subs.reduce((acc, sub) => {
 			return acc + sub.count
 		}, 0)
 
-		if (!this.room) return
+		if (!this.participants) return
 
-		// "Step No. 2: Divide the result of Step No. 1" (room)
+		// "Step No. 2: Divide the result of Step No. 1" (participants)
 		// "by the total number of delegates to be elected," (allowed)
-		// "round the result up to the next whole number." (wholeViability)
+		// "round the result up to the next whole number." (viabilityNumber)
 		// "This is the viability number." 
 		// (this contradicts the example, which uses viability rather than wholeViability)
 
-		this.viability = this.room / this.allowed
-		this.wholeViability = Math.ceil(this.viability)
+		this.participantsPerDelegate = this.participants / this.allowed
+		this.viabilityNumber = Math.ceil(this.participantsPerDelegate)
 
 		// determine which subcaucuses are viable (viabilityScore >= 1)
-		// and calculate the total number viable people in the room (viableRoom)
+		// and calculate the total number viable people in the room (viableParticipants)
 
-		const vSubs = subs.filter((s) => s.count >= this.wholeViability)
-		this.viableRoom = vSubs.reduce((acc, sub) => {
+		const vSubs = subs.filter((s) => s.count >= this.viabilityNumber)
+		this.viableParticipants = vSubs.reduce((acc, sub) => {
 			return acc + sub.count
 		}, 0)
 
-		if (!this.viableRoom) return
+		if (!this.viableParticipants) return
 
 		// recalculate the viability number for the delegate allocation process
-		this.delegateViability = this.viableRoom / this.allowed;
+		this.delegateDivisor = this.viableParticipants / this.allowed;
 
 		// calculate how many delegates each viable subcaucus gets
-		vSubs.forEach((s) => s.setViability(this.delegateViability))
+		vSubs.forEach((s) => s.setViability(this.delegateDivisor))
 
 		// and add up the number of delegates assigned
 		this.totalDelegates = vSubs.reduce((acc, sub) => {
@@ -494,18 +494,18 @@ interface SnapshotInitializer {
 
 		text += `${this.name} ${this.revision ? `(${this.revision}) ` : ''}was allowed ${this.allowed.singularPlural("delegate", "delegates")}.\n\n`
 
-		if (this.room > 0) {
+		if (this.participants > 0) {
 
 			this.subcaucuses.forEach((subcaucus) => {
 				const sText = subcaucus.asText()
 				text += sText ? sText + "\n\n" : ''
 			})
 
-			text += `${this.room.singularPlural("person was", "people were")} participating, the initial viability number was ${this.viability.decimalPlaces(3)}. \nA subcaucus needed at least ${this.wholeViability.singularPlural("member", "members")} to be viable.\n`
+			text += `${this.participants.singularPlural("person was", "people were")} participating, the initial viability number was ${this.participantsPerDelegate.decimalPlaces(3)}. \nA subcaucus needed at least ${this.viabilityNumber.singularPlural("member", "members")} to be viable.\n`
 
-			if (this.room > this.viableRoom) {
-				text += `${(this.room - this.viableRoom).singularPlural("person was", "people were")} in a non-viable caucus, you may want to consider another round of walking.\n`
-				text += `The recalculated viability number for allocating delegates was ${this.delegateViability.decimalPlaces(3)}.\n`
+			if (this.participants > this.viableParticipants) {
+				text += `${(this.participants - this.viableParticipants).singularPlural("person was", "people were")} in a non-viable caucus, you may want to consider another round of walking.\n`
+				text += `The recalculated viability number for allocating delegates was ${this.delegateDivisor.decimalPlaces(3)}.\n`
 			}
 			text += "\n"
 
@@ -538,12 +538,12 @@ interface SnapshotInitializer {
 
 		csv.push('')
 
-		csv.push(`Participants,${this.room}`)
+		csv.push(`Participants,${this.participants}`)
 		csv.push(`Delegates elected,,${this.totalDelegates}`)
-		csv.push(`Viability number,${this.viability}`)
-		csv.push(`Whole viability,${this.wholeViability}`)
-		csv.push(`Participants in non-viable caucuses,${this.room - this.viableRoom}`)
-		csv.push(`Revised viability number,${this.delegateViability}`)
+		csv.push(`Viability number,${this.participantsPerDelegate}`)
+		csv.push(`Whole viability,${this.viabilityNumber}`)
+		csv.push(`Participants in non-viable caucuses,${this.participants - this.viableParticipants}`)
+		csv.push(`Revised viability number,${this.delegateDivisor}`)
 		csv.push(`Coin random seed,${this.seed}`)
 
 		csv.push('')

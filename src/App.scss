@@ -402,7 +402,12 @@ body {
         
         #summary-container {
             background-color: $summary-color;
-
+            cursor: pointer;
+                
+            &:hover {
+                background-color: lighten($summary-color, 5%)
+            }
+            
             .summary-row {
                 position: relative;
                 display: flex;
@@ -415,13 +420,6 @@ body {
                     font-weight: 900;
                 }
 
-                &.clickable {
-                    cursor: pointer;
-                    
-                    &:hover {
-                        background-color: lighten($summary-color, 5%)
-                    }
-                }
                 .summary-label {
                     flex: 1 0 5em;
                     margin-top: 0;

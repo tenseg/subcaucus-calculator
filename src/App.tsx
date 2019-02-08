@@ -825,15 +825,17 @@ this.keySuffix = String(_u.randomSeed())
      * NOTE: Do not `setState()` in this method.
      */
     renderSummary = (): JSX.Element => {
-        return ((this.subcalc.snapshot.room > 0)
-            ? <div id="summary-container">
+        return ((this.subcalc.snapshot.participants > 0)
+            ? <div id="summary-container"
+                onClick={() => this.addCardState(CardFor.Viability)}
+            >
                 <div className="summary-row">
                     <div className="summary-label">
                         Total participants and delegates elected
                     </div>
                     <div className="summary-count">
                         <strong>
-                            {this.subcalc.snapshot.room.toCommaString()}
+                            {this.subcalc.snapshot.participants.toCommaString()}
                         </strong>
                     </div>
                     <div className="summary-delegates">
@@ -842,33 +844,32 @@ this.keySuffix = String(_u.randomSeed())
                 </div>
                 <div className="summary-row">
                     <div className="summary-label">
-                        Minimum of <strong>{this.subcalc.snapshot.wholeViability.singularPlural("member", "members")}</strong> needed to make a subcaucus viable
+                        <strong>Viability number</strong><br />(members needed for viable subcaucus)
+                    </div>
+                    <div className="summary-count">
+                        <strong>
+                            {this.subcalc.snapshot.viabilityNumber}
+                        </strong>
                     </div>
                 </div>
                 <div className="summary-row">
                     <div className="summary-label">
-                        Viability number
+                        Delegate divisor<br />(members needed for each delegate)
                     </div>
                     <div className="summary-count">
-                        <strong>
-                            {this.subcalc.snapshot.viability.decimalPlaces(3)}
-                        </strong>
+                        {this.subcalc.snapshot.delegateDivisor.decimalPlaces(3)}
                     </div>
                 </div>
-                {this.subcalc.snapshot.viableRoom < this.subcalc.snapshot.room
-                    ? <div className="summary-row clickable"
-                        onClick={() => this.addCardState(CardFor.Viability)}
-                    >
-                        <div className="summary-label">
-                            Recalculated viability number ({(this.subcalc.snapshot.room - this.subcalc.snapshot.viableRoom).singularPlural("person", "people")} in non-viable subcaucuses, you may want to consider another round of walking)
+                {
+                    this.subcalc.snapshot.viableParticipants < this.subcalc.snapshot.participants
+                        ? <div className="summary-row">
+                            <div className="summary-label">
+                                {(this.subcalc.snapshot.participants - this.subcalc.snapshot.viableParticipants).singularPlural("person", "people")} in non-viable subcaucuses, you may want to consider another round of walking
+                            </div>
                         </div>
-                        <div className="summary-count">
-                            {this.subcalc.snapshot.delegateViability.decimalPlaces(3)}
-                        </div>
-                    </div>
-                    : ''
+                        : ''
                 }
-            </div>
+            </div >
             : <div id="summary-container">
                 <div className="summary-row">
                     <div className="summary-label">
