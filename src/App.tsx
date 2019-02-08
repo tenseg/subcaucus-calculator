@@ -244,6 +244,7 @@ this.keySuffix = String(_u.randomSeed())
     completeIncoming = () => {
         this.subcalc.completeIncoming()
         if (this.state) {
+            this.keySuffix = String(_u.randomSeed())
             this.forceUpdate()
         }
     }
@@ -287,7 +288,7 @@ this.keySuffix = String(_u.randomSeed())
     emailSnapshot = () => {
         const snapshot = this.subcalc.snapshot
 
-        const url = `${location.protocol}//${location.host}${location.pathname}` + "?caucus=" + encodeURIComponent(JSON.stringify(snapshot.toJSON()))
+        const url = snapshot.asURL()
 
         let body = snapshot.asText()
 
@@ -581,6 +582,18 @@ this.keySuffix = String(_u.randomSeed())
                                 location.href = "subcalc://share-text/" + encodeURIComponent(JSON.stringify(jsnap, null, 2))
                             } else {
                                 _u.download(JSON.stringify(jsnap, null, 2), 'subcalc.json', 'application/json')
+                            }
+                        }
+                    },
+                    {
+                        label: "Copy link",
+                        icon: "pi pi-fw pi-external-link",
+                        command: () => {
+                            const success = _u.copyToClipboard(this.subcalc.snapshot.asURL())
+                            if (success) {
+                                this.growlAlert(`A very long URL is now ready to be pasted.`, 'success', 'URL Copied')
+                            } else {
+                                this.growlAlert(`Failed to get a copy.`, 'error', 'Not copied!')
                             }
                         }
                     },

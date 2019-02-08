@@ -517,6 +517,7 @@ export class SubCalc {
 			this.writeSnapshot(snapshot)
 		})
 		this.incoming = []
+		this.snapshot.redistributeDelegates()
 	}
 
 	/**

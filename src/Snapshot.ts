@@ -559,4 +559,12 @@ interface SnapshotInitializer {
 		return csv.join("\r\n")
 	}
 
+	/**
+	 * Return a URL that will render this snapshot.
+	 * 
+	 * TODO: replace host info with our magic URL.
+	 */
+	asURL = () => {
+		return `${location.protocol}//${location.host}${location.pathname}` + "?snapshot=" + encodeURIComponent(JSON.stringify(this.toJSON()))
+	}
 }
