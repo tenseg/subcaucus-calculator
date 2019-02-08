@@ -293,6 +293,7 @@ export function copyToClipboard(data: string): boolean {
 	// is visible whilst the popup box asking the user for permission for
 	// the web page to copy to the clipboard.
 	//
+	// see: https://stackoverflow.com/a/30810322/383737
 
 	// Place in top-left corner of screen regardless of scroll position.
 	textArea.style.position = 'fixed';
@@ -320,10 +321,25 @@ export function copyToClipboard(data: string): boolean {
 
 	document.body.appendChild(textArea);
 	textArea.focus();
-	textArea.select();
+
+	// textArea.select();
+	// do this async to try to make Safari behave
+	// see: https://stackoverflow.com/a/34046084
+	textArea.contentEditable = 'true'
+	textArea.readOnly = false
+
+	const range = document.createRange()
+	range.selectNodeContents(textArea)
+
+	const selection = window.getSelection()
+	selection.removeAllRanges()
+	selection.addRange(range)
+
+	textArea.setSelectionRange(0, 99999)
 
 	const success = document.execCommand("copy")
 
 	document.body.removeChild(textArea)
+
 	return success
 }
