@@ -34,6 +34,7 @@ import { InstructionsCard } from './Cards/InstructionsCard';
 import { AboutCard } from './Cards/AboutCard';
 import { CreditCard } from './Cards/CreditCard';
 import { SecurityCard } from './Cards/SecurityCard';
+import { ViabilityCard } from './Cards/ViabilityCard';
 
 /**
  * Facilitates sorting up or down (or not at all), as needed.
@@ -67,6 +68,7 @@ enum CardFor {
     ShowingBy,
     ShowingInstructions,
     ShowingSecurity,
+    Viability,
 }
 
 enum Presenting {
@@ -656,6 +658,10 @@ this.keySuffix = String(_u.randomSeed())
                         this.growlAlert("Starting again from scratch!", 'warn', 'Storage Cleared')
                     }}
                 />
+                case CardFor.Viability: return <ViabilityCard
+                    save={() => this.removeCardState(CardFor.Viability)}
+                    snapshot={this.subcalc.snapshot}
+                />
             }
             return accumulator
         }, <></>)
@@ -851,7 +857,7 @@ this.keySuffix = String(_u.randomSeed())
                 </div>
                 {this.subcalc.snapshot.viableRoom < this.subcalc.snapshot.room
                     ? <div className="summary-row clickable"
-                        onClick={() => this.growlAlert("Explain viability in more detail.", 'warn', 'TODO')}
+                        onClick={() => this.addCardState(CardFor.Viability)}
                     >
                         <div className="summary-label">
                             Recalculated viability number ({(this.subcalc.snapshot.room - this.subcalc.snapshot.viableRoom).singularPlural("person", "people")} in non-viable subcaucuses, you may want to consider another round of walking)
