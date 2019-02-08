@@ -246,7 +246,7 @@ interface SubcaucusInitializer {
 		csv += ',' + this.delegates
 		csv += ',' + this.remainder
 		csv += ',' + this.tosses().map((toss) => {
-			(toss.won ? "won" : "lost") + " vs " + toss.against.displayName()
+			return (toss.won ? "won" : "lost") + " vs " + toss.against.displayName()
 		}).join(', ').csvQuoted()
 		csv += ',' + (this.delegates - this.baseDelegates)
 

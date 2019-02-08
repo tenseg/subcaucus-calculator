@@ -246,3 +246,29 @@ export function uniqueNumber(): number {
 export function now(): TimestampString {
 	return (new Date()).toTimestampString()
 }
+
+/**
+ * Create a file download link, click it, and remove it.
+ * 
+ * NOTE: Will have to rethink this for non-string formats.
+ */
+export function download(data: string, filename: string, mime = 'text/plain') {
+
+	if (typeof window.navigator.msSaveBlob !== 'undefined') {
+		// IE workaround for "HTML7007: One or more blob URLs were 
+		// revoked by closing the blob for which they were created. 
+		// These URLs will no longer resolve as the data backing 
+		// the URL has been freed."
+		const blob = new Blob([data], { type: mime || 'application/octet-stream' });
+		window.navigator.msSaveBlob(blob, filename);
+	}
+	else {
+		const element = document.createElement('a')
+		element.setAttribute('href', `data:${mime};charset=utf-8,` + encodeURIComponent(data))
+		element.setAttribute('download', filename)
+		element.style.display = 'none'
+		document.body.appendChild(element)
+		element.click()
+		document.body.removeChild(element)
+	}
+}

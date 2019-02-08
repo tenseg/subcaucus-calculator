@@ -557,7 +557,7 @@ this.keySuffix = String(_u.randomSeed())
                             if (_u.isApp()) {
                                 location.href = "subcalc://share-text/" + encodeURIComponent(this.subcalc.snapshot.asText())
                             } else {
-                                fileDownload(this.subcalc.snapshot.asText(), 'subcalc.txt')
+                                _u.download(this.subcalc.snapshot.asText(), 'subcalc.txt')
                             }
                         }
                     },
@@ -568,7 +568,7 @@ this.keySuffix = String(_u.randomSeed())
                             if (_u.isApp()) {
                                 location.href = "subcalc://share-csv/" + encodeURIComponent(this.subcalc.snapshot.asCSV()) + "?filename=subcalc"
                             } else {
-                                fileDownload(this.subcalc.snapshot.asCSV(), 'subcalc.csv')
+                                _u.download(this.subcalc.snapshot.asCSV(), 'subcalc.csv', 'text/csv')
                             }
                         }
                     },
@@ -580,7 +580,7 @@ this.keySuffix = String(_u.randomSeed())
                             if (_u.isApp()) {
                                 location.href = "subcalc://share-text/" + encodeURIComponent(JSON.stringify(jsnap, null, 2))
                             } else {
-                                fileDownload(JSON.stringify(jsnap, null, 2), 'subcalc.json')
+                                _u.download(JSON.stringify(jsnap, null, 2), 'subcalc.json', 'application/json')
                             }
                         }
                     },

@@ -501,11 +501,11 @@ interface SnapshotInitializer {
 				text += sText ? sText + "\n\n" : ''
 			})
 
-			text += `${this.participants.singularPlural("person was", "people were")} participating, the initial viability number was ${this.participantsPerDelegate.decimalPlaces(3)}. \nA subcaucus needed at least ${this.viabilityNumber.singularPlural("member", "members")} to be viable.\n`
+			text += `${this.participants.singularPlural("person was", "people were")} participating, the initial viability number was ${this.viabilityNumber} (${this.participantsPerDelegate.decimalPlaces(3)} participants per delegate).\n`
 
 			if (this.participants > this.viableParticipants) {
 				text += `${(this.participants - this.viableParticipants).singularPlural("person was", "people were")} in a non-viable caucus, you may want to consider another round of walking.\n`
-				text += `The recalculated viability number for allocating delegates was ${this.delegateDivisor.decimalPlaces(3)}.\n`
+				text += `The delegate divisor (number of members needed to allocate each delegate) was ${this.delegateDivisor.decimalPlaces(3)}.\n`
 			}
 			text += "\n"
 
@@ -540,10 +540,10 @@ interface SnapshotInitializer {
 
 		csv.push(`Participants,${this.participants}`)
 		csv.push(`Delegates elected,,${this.totalDelegates}`)
-		csv.push(`Viability number,${this.participantsPerDelegate}`)
-		csv.push(`Whole viability,${this.viabilityNumber}`)
+		csv.push(`Participants per delegate,${this.participantsPerDelegate}`)
+		csv.push(`Viability number,${this.viabilityNumber}`)
 		csv.push(`Participants in non-viable caucuses,${this.participants - this.viableParticipants}`)
-		csv.push(`Revised viability number,${this.delegateDivisor}`)
+		csv.push(`Delegate divisor,${this.delegateDivisor}`)
 		csv.push(`Coin random seed,${this.seed}`)
 
 		csv.push('')
