@@ -611,6 +611,13 @@ body {
             }
         }
         
+        .fineprint {
+            position: absolute;
+            bottom: $form-margin;
+            right: $form-margin;
+            font-size: 75%
+        }
+        
     }
     
     .success-color {
