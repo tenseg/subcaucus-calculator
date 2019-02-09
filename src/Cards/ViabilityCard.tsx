@@ -36,7 +36,7 @@ export class ViabilityCard extends React.Component<Props, State> {
 				title="Explaining the numbers"
 				onSave={this.props.save}
 			>
-				<p><em>The text below comes from page 4 of the <a href="https://www.dfl.org/wp-content/uploads/2018/04/2017-12-14-Call-Amended-2-December-2017-Final2c-Rev-B.pdf">2018-2019 Official Call of the DFL</a>. The numbers are from the current calculator values.</em></p>
+				<p><em>The numbers are from the current calculator values. The current "coin" has a random seed of <strong>{s.seed}</strong>. The text below comes from page 4 of the <a href="https://www.dfl.org/wp-content/uploads/2018/04/2017-12-14-Call-Amended-2-December-2017-Final2c-Rev-B.pdf">2018-2019 Official Call of the DFL</a>.</em></p>
 
 				<p>The threshold for subcaucus viability is the number of persons needed to elect one delegate. Viability is determined in the following manner:</p>
 

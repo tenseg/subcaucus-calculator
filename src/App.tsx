@@ -861,7 +861,7 @@ this.keySuffix = String(_u.randomSeed())
                 </div>
                 <div className="summary-row">
                     <div className="summary-label">
-                        <strong>Viability number</strong><br />(members needed for viable subcaucus)
+                        <strong>Viability number</strong> (members needed for viable subcaucus)
                     </div>
                     <div className="summary-count">
                         <strong>
@@ -873,7 +873,7 @@ this.keySuffix = String(_u.randomSeed())
                     this.subcalc.snapshot.viableParticipants < this.subcalc.snapshot.participants
                         ? <div className="summary-row">
                             <div className="summary-label">
-                                Viable participants
+                                Total members of viable subcaucuses
                     </div>
                             <div className="summary-count">
                                 {this.subcalc.snapshot.viableParticipants.toCommaString()}
@@ -886,7 +886,7 @@ this.keySuffix = String(_u.randomSeed())
                 }
                 <div className="summary-row">
                     <div className="summary-label">
-                        Delegate divisor<br />(members needed for each delegate)
+                        Delegate divisor (members needed for each delegate)
                     </div>
                     <div className="summary-count">
                         {this.subcalc.snapshot.delegateDivisor.decimalPlaces(3)}

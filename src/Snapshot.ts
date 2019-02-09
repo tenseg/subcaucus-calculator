@@ -498,16 +498,16 @@ interface SnapshotInitializer {
 
 			this.subcaucuses.forEach((subcaucus) => {
 				const sText = subcaucus.asText()
-				text += sText ? sText + "\n\n" : ''
+				text += sText ? `- ${sText}\n\n` : ''
 			})
 
-			text += `${this.participants.singularPlural("person was", "people were")} participating, the initial viability number was ${this.viabilityNumber} (${this.participantsPerDelegate.decimalPlaces(3)} participants per delegate).\n`
+			text += `${this.participants.singularPlural("person was", "people were")} participating, the initial viability number was ${this.viabilityNumber} (${this.participantsPerDelegate.decimalPlaces(3)} participants per delegate).\n\n`
 
 			if (this.participants > this.viableParticipants) {
-				text += `${(this.participants - this.viableParticipants).singularPlural("person was", "people were")} in a non-viable caucus, you may want to consider another round of walking.\n`
-				text += `The delegate divisor (number of members needed to allocate each delegate) was ${this.delegateDivisor.decimalPlaces(3)}.\n`
+				text += `${this.viableParticipants.singularPlural("member was", "members were")} in a viable subcaucuses. `
+				text += `The delegate divisor (number of members needed to allocate each delegate) was ${this.delegateDivisor.decimalPlaces(3)}.\n\n`
+				text += `${(this.participants - this.viableParticipants).singularPlural("person was", "people were")} in a non-viable caucus, you may want to consider another round of walking.\n\n`
 			}
-			text += "\n"
 
 		} else {
 			text += "Nobody was participating.\n\n"
@@ -536,24 +536,25 @@ interface SnapshotInitializer {
 			}
 		})
 
-		csv.push('')
+		csv.push('"",""')
 
 		csv.push(`Participants,${this.participants}`)
 		csv.push(`Delegates elected,,${this.totalDelegates}`)
 		csv.push(`Participants per delegate,${this.participantsPerDelegate}`)
 		csv.push(`Viability number,${this.viabilityNumber}`)
-		csv.push(`Participants in non-viable caucuses,${this.participants - this.viableParticipants}`)
+		csv.push(`Members in viable subcaucuses,${this.viableParticipants}`)
+		csv.push(`Members in non-viable subcaucuses,${this.participants - this.viableParticipants}`)
 		csv.push(`Delegate divisor,${this.delegateDivisor}`)
+
+		csv.push('"",""')
+
 		csv.push(`Coin random seed,${this.seed}`)
-
-		csv.push('')
-
-		csv.push(`Meeting,${this.name.csvQuoted()}`)
-		csv.push(`Revision,${this.revision.csvQuoted()}`)
-
 		let revised = new Date(Date.parse(this.revised))
 
 		csv.push(`Revised,${revised.toLocaleString('en-US', { timeZoneName: 'short' }).csvQuoted()}`)
+		csv.push(`Revision,${this.revision.csvQuoted()}`)
+		csv.push(`Meeting,${this.name.csvQuoted()}`)
+
 
 
 		return csv.join("\r\n")
