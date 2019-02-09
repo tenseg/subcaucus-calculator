@@ -589,11 +589,15 @@ this.keySuffix = String(_u.randomSeed())
                         label: "Copy link",
                         icon: "pi pi-fw pi-external-link",
                         command: () => {
-                            const success = _u.copyToClipboard(this.subcalc.snapshot.asURL())
-                            if (success) {
-                                this.growlAlert(`A very long URL is now ready to be pasted.`, 'success', 'Link Copied')
+                            if (_u.isApp()) {
+                                location.href = "subcalc://share-text/" + encodeURIComponent(this.subcalc.snapshot.asURL())
                             } else {
-                                this.growlAlert(`Failed to get a copy.`, 'error', 'Not copied!')
+                                const success = _u.copyToClipboard(this.subcalc.snapshot.asURL())
+                                if (success) {
+                                    this.growlAlert(`A very long URL is now ready to be pasted.`, 'success', 'Link Copied')
+                                } else {
+                                    this.growlAlert(`Failed to get a copy.`, 'error', 'Not copied!')
+                                }
                             }
                         }
                     },
