@@ -565,6 +565,6 @@ interface SnapshotInitializer {
 	 * TODO: replace host info with our magic URL.
 	 */
 	asURL = () => {
-		return `${location.protocol}//${location.host}${location.pathname}` + "?snapshot=" + encodeURIComponent(JSON.stringify(this.toJSON()))
+		return `https://scimport.tenseg.net` + "?snapshot=" + encodeURIComponent(JSON.stringify(this.toJSON()))
 	}
 }
