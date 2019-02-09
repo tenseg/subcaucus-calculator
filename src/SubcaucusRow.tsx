@@ -165,12 +165,23 @@ export class SubcaucusRow extends React.Component<Props, State> {
 						onClick={() => this.setState({ showInfo: true })}
 						disabled={count === 0}
 					>
+						<div className="shape">{
+							s.reportTosses
+								? s.delegates > s.baseDelegates
+									? <div className="coin won"></div>
+									: <div className="coin lost"></div>
+								: s.delegates > s.baseDelegates
+									? <div className="plus"></div>
+									: ''
+						}</div>
 						<div className={
 							s.reportTosses
 								? s.delegates > s.baseDelegates
 									? "coin won"
 									: "coin lost"
-								: "coin"
+								: s.delegates > s.baseDelegates
+									? "plus"
+									: ""
 						}></div>
 					</Button>
 				</div>

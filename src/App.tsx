@@ -552,7 +552,7 @@ this.keySuffix = String(_u.randomSeed())
                         command: this.emailSnapshot
                     },
                     {
-                        label: "Download text",
+                        label: "Text download",
                         icon: "pi pi-fw pi-align-left",
                         command: () => {
                             if (_u.isApp()) {
@@ -563,7 +563,7 @@ this.keySuffix = String(_u.randomSeed())
                         }
                     },
                     {
-                        label: "Download CSV",
+                        label: "CSV download",
                         icon: "pi pi-fw pi-table",
                         command: () => {
                             if (_u.isApp()) {
@@ -574,7 +574,7 @@ this.keySuffix = String(_u.randomSeed())
                         }
                     },
                     {
-                        label: "Download code",
+                        label: "JSON download",
                         icon: "pi pi-fw pi-save",
                         command: () => {
                             const jsnap = this.subcalc.snapshot.toJSON()
@@ -591,7 +591,7 @@ this.keySuffix = String(_u.randomSeed())
                         command: () => {
                             const success = _u.copyToClipboard(this.subcalc.snapshot.asURL())
                             if (success) {
-                                this.growlAlert(`A very long URL is now ready to be pasted.`, 'success', 'URL Copied')
+                                this.growlAlert(`A very long URL is now ready to be pasted.`, 'success', 'Link Copied')
                             } else {
                                 this.growlAlert(`Failed to get a copy.`, 'error', 'Not copied!')
                             }
@@ -865,6 +865,21 @@ this.keySuffix = String(_u.randomSeed())
                         </strong>
                     </div>
                 </div>
+                {
+                    this.subcalc.snapshot.viableParticipants < this.subcalc.snapshot.participants
+                        ? <div className="summary-row">
+                            <div className="summary-label">
+                                Viable participants
+                    </div>
+                            <div className="summary-count">
+                                {this.subcalc.snapshot.viableParticipants.toCommaString()}
+                            </div>
+                            <div className="summary-delegates">
+                                &nbsp;
+                    </div>
+                        </div>
+                        : ''
+                }
                 <div className="summary-row">
                     <div className="summary-label">
                         Delegate divisor<br />(members needed for each delegate)
@@ -875,7 +890,7 @@ this.keySuffix = String(_u.randomSeed())
                 </div>
                 {
                     this.subcalc.snapshot.viableParticipants < this.subcalc.snapshot.participants
-                        ? <div className="summary-row">
+                        ? <div className="summary-row danger">
                             <div className="summary-label">
                                 {(this.subcalc.snapshot.participants - this.subcalc.snapshot.viableParticipants).singularPlural("person", "people")} in a non-viable subcaucus, you may want to consider another round of walking
                             </div>
