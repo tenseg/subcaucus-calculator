@@ -1,5 +1,5 @@
 import * as React from 'react'
-import packageJson from '../../package.json'
+import { version } from '../../package.json'
 
 // see https://www.primefaces.org/primereact
 import { Button } from 'primereact/button'
@@ -43,7 +43,7 @@ export class CreditCard extends React.Component<Props, State> {
 				<p>It makes use of <a href="https://reactjs.org/">ReactJS</a>, <a href="https://www.typescriptlang.org/">TypeScript</a>, <a href="https://www.primefaces.org/primereact">PrimeReact</a>, <a href="https://www.primefaces.org/primeng/#/icons">PrimeIcons</a>, <a href="https://github.com/mojotech/json-type-validation">JSON Type Validation</a>, <a href="https://github.com/ClickSimply/typescript-map">typescript-map</a>, and many other open source projects.
 				</p>
 				<div className="fineprint">
-					<>v {packageJson.version}</>
+					<>v {version}</>
 					{_u.isApp()
 						? <> a {app.version}</>
 						: ''

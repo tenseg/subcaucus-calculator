@@ -8,11 +8,10 @@ import 'primereact/resources/primereact.min.css'
 import 'primereact/resources/themes/nova-light/theme.css'
 import 'primeicons/primeicons.css'
 
-// see https://github.com/kennethjiang/js-file-download
-import fileDownload from 'js-file-download'
 
 // local to this app
 import './App.scss'
+import { version } from '../package.json'
 import * as _u from './Utilities'
 import { SubCalc } from './SubCalc'
 import { Snapshot } from './Snapshot'
@@ -303,6 +302,20 @@ this.keySuffix = String(_u.randomSeed())
         location.href = mailto
     }
 
+    emailFeedback = () => {
+        const snapshot = this.subcalc.snapshot
+
+        const url = snapshot.asURL()
+
+        let body = "\n\n\n\nInclude this  this very long and ugly link if you want Eric to be able to reproduce the current meeting:\n\n" + url + "\n"
+
+        let subject = `SubCalc Feedback (${version})`;
+
+        const mailto = "mailto:subcalc@tenseg.net?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body)
+
+        location.href = mailto
+    }
+
     /**
      * Provide a default name for this meeting, including today's date.
      */
@@ -508,6 +521,10 @@ this.keySuffix = String(_u.randomSeed())
                     {
                         label: "Data Security",
                         command: () => this.addCardState(CardFor.ShowingSecurity),
+                    },
+                    {
+                        label: "Feedback",
+                        command: this.emailFeedback
                     },
                 ]
             },
