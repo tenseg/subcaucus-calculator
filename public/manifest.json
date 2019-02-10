@@ -1,0 +1,21 @@
+{
+	"short_name": "SubCalc",
+	"name": "Minnesota DFL Subcaucus Calculator",
+	"icons": [
+		{
+			"src": "/icon_192.png",
+			"type": "image/png",
+			"sizes": "192x192"
+		},
+		{
+			"src": "/icon_512.png",
+			"type": "image/png",
+			"sizes": "512x512"
+		}
+	],
+	"start_url": "/",
+	"background_color": "#8f1731",
+	"display": "standalone",
+	"scope": "/",
+	"theme_color": "#8f1731"
+}

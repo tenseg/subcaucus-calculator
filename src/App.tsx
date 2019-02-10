@@ -569,7 +569,7 @@ this.keySuffix = String(_u.randomSeed())
                         command: this.emailSnapshot
                     },
                     {
-                        label: "Text download",
+                        label: "Text document",
                         icon: "pi pi-fw pi-align-left",
                         command: () => {
                             if (_u.isApp()) {
@@ -580,7 +580,7 @@ this.keySuffix = String(_u.randomSeed())
                         }
                     },
                     {
-                        label: "CSV download",
+                        label: "CSV spreadsheet",
                         icon: "pi pi-fw pi-table",
                         command: () => {
                             if (_u.isApp()) {
@@ -591,7 +591,7 @@ this.keySuffix = String(_u.randomSeed())
                         }
                     },
                     {
-                        label: "JSON download",
+                        label: "JSON code",
                         icon: "pi pi-fw pi-save",
                         command: () => {
                             const jsnap = this.subcalc.snapshot.toJSON()
@@ -603,7 +603,7 @@ this.keySuffix = String(_u.randomSeed())
                         }
                     },
                     {
-                        label: "Copy link",
+                        label: "Link",
                         icon: "pi pi-fw pi-external-link",
                         command: () => {
                             if (_u.isApp()) {
