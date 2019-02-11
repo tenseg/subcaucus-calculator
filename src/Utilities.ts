@@ -165,14 +165,14 @@ export function setApp(app: string, version?: string, build?: string) {
 
 export function getApp(): { app: string, version: string, build: string } {
 	return {
-		app: window['_tg_app'] || '',
-		version: window['_tg_version'] || '',
-		build: window['_tg_build'] || ''
+		app: process.env.REACT_APP_IOS_VERSION ? 'ios' : '',
+		version: process.env.REACT_APP_IOS_VERSION || '',
+		build: process.env.REACT_APP_IOS_BUILD || ''
 	}
 }
 
 export function isApp(): boolean {
-	return Boolean(window['_tg_app'])
+	return Boolean(process.env.REACT_APP_IOS_VERSION)
 }
 
 export function getQueryVariable(variable: string) {

@@ -11,7 +11,6 @@ import 'primeicons/primeicons.css'
 
 // local to this app
 import './App.scss'
-import { version } from '../package.json'
 import * as _u from './Utilities'
 import { SubCalc } from './SubCalc'
 import { Snapshot } from './Snapshot'
@@ -309,7 +308,7 @@ this.keySuffix = String(_u.randomSeed())
 
         let body = "\n\n\n\nInclude this  this very long and ugly link if you want Eric to be able to reproduce the current meeting:\n\n" + url + "\n"
 
-        let subject = `SubCalc Feedback (${version})`;
+        let subject = `SubCalc Feedback (${process.env.REACT_APP_VERSION})`;
 
         const mailto = "mailto:subcalc@tenseg.net?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body)
 
