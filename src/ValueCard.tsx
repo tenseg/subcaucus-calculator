@@ -42,6 +42,14 @@ export class ValueCard extends React.Component<Props, State> {
         }
     }
 
+    componentDidMount = () => {
+        // force the browser to load the image before the render
+        if (this.props.image) {
+            const image = new Image()
+            image.src = this.props.image
+        }
+    }
+
     originalValue = (): string => {
         return _u.unwrapString(this.props.value)
     }

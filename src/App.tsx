@@ -1072,6 +1072,7 @@ this.keySuffix = String(_u.randomSeed())
                         <ShowJSON name="this.subcalc" data={this.subcalc} />
                     </div>
                 </div>
+                <pre>{JSON.stringify(process.env, null, 2)}</pre>
                 <p style={{ clear: "both" }}>Done.</p>
             </div>
         )
