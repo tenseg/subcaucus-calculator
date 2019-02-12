@@ -12,6 +12,7 @@ export type SubcaucusRowAction = 'recalc' | 'enter'
 
 interface Props {
 	subcaucus: Subcaucus
+	hideDelegates: boolean
 	index: number
 	rows: number
 	exchange: ((subcaucus: Subcaucus, action: SubcaucusRowAction, index?: number, callback?: () => void) => void)
@@ -106,7 +107,7 @@ export class SubcaucusRow extends React.Component<Props, State> {
 	}
 
 	render() {
-		const { subcaucus: s } = this.props
+		const { subcaucus: s, hideDelegates } = this.props
 
 		_u.debug("render row", s.id, this.state)
 
@@ -122,7 +123,7 @@ export class SubcaucusRow extends React.Component<Props, State> {
 		return (
 			<>
 				<div id={this.idPlus("row")}
-					className={`subcaucus-row ${s.delegates > 0 ? "has-delegates" : (count > 0 ? "no-delegates" : "")}`}
+					className={`subcaucus-row ${hideDelegates ? '' : s.delegates > 0 ? "has-delegates" : (count > 0 ? "no-delegates" : "")}`}
 				>
 					{_u.isDebugging() ? <div className="subcaucus-id">{s.id}</div> : ''}
 					<InputTextarea id={this.idPlus("row-name")}
@@ -159,31 +160,34 @@ export class SubcaucusRow extends React.Component<Props, State> {
 						onFocus={this.focusOnWholeText()}
 					/>
 					<Button id={this.idPlus("row-delegates")}
-						className={`subcaucus-delegates-button ${s.delegates > 0 ? "p-button-success" : "p-button-secondary"}`}
-						label={s.delegates ? `${s.delegates}` : undefined}
-						icon={s.delegates ? undefined : (count ? 'pi pi-ban' : 'pi')}
+						className={`subcaucus-delegates-button ${s.delegates > 0 && !hideDelegates ? "p-button-success" : "p-button-secondary"} ${hideDelegates ? "hide-delegates" : ""}`}
+						label={s.delegates && !hideDelegates ? `${s.delegates}` : undefined}
+						icon={s.delegates && !hideDelegates ? undefined : (count && !hideDelegates ? 'pi pi-ban' : 'pi')}
 						onClick={() => this.setState({ showInfo: true })}
-						disabled={count === 0}
-					>
-						<div className="shape">{
-							s.reportTosses
-								? s.delegates > s.baseDelegates
-									? <div className="coin won"></div>
-									: <div className="coin lost"></div>
-								: s.delegates > s.baseDelegates
-									? <div className="plus"></div>
-									: ''
-						}</div>
-						<div className={
-							s.reportTosses
-								? s.delegates > s.baseDelegates
-									? "coin won"
-									: "coin lost"
-								: s.delegates > s.baseDelegates
-									? "plus"
-									: ""
-						}></div>
-					</Button>
+						disabled={count === 0 || hideDelegates}
+					>{hideDelegates
+						? <></>
+						: <>
+							<div className="shape">{
+								s.reportTosses
+									? s.delegates > s.baseDelegates
+										? <div className="coin won"></div>
+										: <div className="coin lost"></div>
+									: s.delegates > s.baseDelegates
+										? <div className="plus"></div>
+										: ''
+							}</div>
+							<div className={
+								s.reportTosses
+									? s.delegates > s.baseDelegates
+										? "coin won"
+										: "coin lost"
+									: s.delegates > s.baseDelegates
+										? "plus"
+										: ""
+							}></div>
+						</>
+						}</Button>
 				</div>
 				{infoCard}
 			</>

@@ -101,6 +101,7 @@ interface State {
     // sorting info
     sortName: SortOrder
     sortCount: SortOrder
+    hideDelegates: boolean
 }
 
 export class App extends React.Component<Props, State> {
@@ -185,6 +186,7 @@ this.keySuffix = String(_u.randomSeed())
             // sorting info
             sortName: SortOrder.None,
             sortCount: SortOrder.None,
+            hideDelegates: false,
         }
     }
 
@@ -839,6 +841,7 @@ this.keySuffix = String(_u.randomSeed())
             return (
                 <SubcaucusRow key={`${subcaucus.id} ${this.keySuffix}`}
                     subcaucus={subcaucus}
+                    hideDelegates={this.state.hideDelegates}
                     index={index + 1}
                     rows={array.length}
                     exchange={this.handleSubcaucusChange}
@@ -929,7 +932,7 @@ this.keySuffix = String(_u.randomSeed())
      * NOTE: Do not `setState()` in this method.
      */
     renderCalculator = (): JSX.Element => {
-        const { sortName, sortCount } = this.state
+        const { sortName, sortCount, hideDelegates } = this.state
         const snapshot = this.subcalc.snapshot
         const { name, revision } = snapshot
 
@@ -973,6 +976,9 @@ this.keySuffix = String(_u.randomSeed())
                         />
                         <Button id="subcaucus-delegate-head"
                             label="Dels"
+                            iconPos="right"
+                            icon={hideDelegates ? "pi pi-eye-slash" : "pi pi-eye"}
+                            onClick={() => this.setState({ hideDelegates: !hideDelegates })}
                         />
                     </div>
                     <div id="subcaucus-list">
