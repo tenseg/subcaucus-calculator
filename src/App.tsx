@@ -921,7 +921,7 @@ this.keySuffix = String(_u.randomSeed())
             : <div id="summary-container">
                 <div className="summary-row">
                     <div className="summary-label">
-                        To get an initial "viability number" just make all the people in the room members of a single subcaucus.
+                        To calculate an initial "viability number," put a count all participants into a single subcaucus.
                     </div>
                 </div>
             </div>

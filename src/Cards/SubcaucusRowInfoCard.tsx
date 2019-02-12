@@ -4,9 +4,9 @@ import * as React from 'react'
 import { Button } from 'primereact/button'
 
 // local to this app
-import * as _u from './Utilities'
-import { Subcaucus } from './Subcaucus'
-import { ValueCard } from './ValueCard'
+import * as _u from '../Utilities'
+import { Subcaucus } from '../Subcaucus'
+import { ValueCard } from '../ValueCard'
 
 interface Props {
 	subcaucus: Subcaucus
@@ -33,12 +33,7 @@ export class SubcaucusRowInfoCard extends React.Component<Props, State> {
 		return (
 			<ValueCard
 				title={s.displayName()}
-				footer={
-					<Button
-						label="OK"
-						onClick={dismiss}
-					/>
-				}
+				onSave={dismiss}
 			>
 				{s.delegates
 					? <p>The <strong>{s.count.singularPlural("member", "members")}</strong> of this subcaucus may elect <strong>{s.delegates.singularPlural("delegate", "delegates")}</strong>.</p>

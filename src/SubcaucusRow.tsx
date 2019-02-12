@@ -6,7 +6,7 @@ import { InputTextarea } from 'primereact/inputtextarea'
 // local to this app
 import * as _u from './Utilities'
 import { Subcaucus } from './Subcaucus'
-import { SubcaucusRowInfoCard } from './SubcaucusRowInfoCard'
+import { SubcaucusRowInfoCard } from './Cards/SubcaucusRowInfoCard'
 
 export type SubcaucusRowAction = 'recalc' | 'enter'
 
