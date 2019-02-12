@@ -552,7 +552,7 @@ this.keySuffix = String(_u.randomSeed())
                         command: () => this.checkForRevisionBefore(this.duplicateMeeting, "Before duplicating the meeting...")
                     },
                     {
-                        label: "Change the coin",
+                        label: "Coin settings",
                         icon: "pi pi-fw pi-refresh",
                         command: () => this.addCardState(CardFor.ChangingCoin)
                     },

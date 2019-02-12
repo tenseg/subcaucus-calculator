@@ -33,7 +33,7 @@ export class ChangingCoinCard extends React.Component<Props, State> {
 	render() {
 		return (
 			<ValueCard key="coin-value" id="coin-value"
-				title={"Change the coin"}
+				title={"Coin settings"}
 				type="positive integer"
 				value={this.props.value}
 				allowEmpty={false}
