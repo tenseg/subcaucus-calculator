@@ -717,9 +717,7 @@ this.keySuffix = String(_u.randomSeed())
                     save={() => this.removeCardState(CardFor.ShowingSecurity)}
                     clearData={() => {
                         this.subcalc.clear()
-                        this.keySuffix = String(_u.randomSeed())
-                        this.setState({ cards: this.initialCardState })
-                        this.growlAlert("Starting again from scratch!", 'warn', 'Storage Cleared')
+                        location.href = "/"
                     }}
                 />
                 case CardFor.Viability: return <ViabilityCard

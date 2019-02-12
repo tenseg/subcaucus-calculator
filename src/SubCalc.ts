@@ -228,7 +228,7 @@ export class SubCalc {
 				"device": this.device,
 				"revised": new Date(time - 60000).toTimestampString(),
 				"revision": "First Count",
-				"name": "DFL Call Example",
+				"name": "Example",
 				"allowed": 6,
 				"seed": 99938,
 				"subcaucuses": {
@@ -256,7 +256,7 @@ export class SubCalc {
 				"device": this.device,
 				"revised": new Date(time).toTimestampString(),
 				"revision": "Second Count",
-				"name": "DFL Call Example",
+				"name": "Example",
 				"allowed": 6,
 				"seed": 99938,
 				"subcaucuses": {
@@ -610,8 +610,6 @@ export class SubCalc {
 	 */
 	clear = () => {
 		localStorage.clear()
-		this.newSnapshot()
-		this.write()
 	}
 
 	/**
