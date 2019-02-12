@@ -11,7 +11,8 @@ import { ValueCard } from '../ValueCard'
  * React props for the card.
  */
 interface Props {
-	name: string
+	meetingName: string
+	revisionName?: string
 	save: (value?: string) => void
 }
 
@@ -33,8 +34,8 @@ export class SavingSnapshotCard extends React.Component<Props, State> {
 		return (
 			<ValueCard key="snapshot-value" id="snapshot-value"
 				title="Name for the snapshot?"
-				value=""
-				defaultValue={`Snapshot of ${this.props.name}`}
+				value={this.props.revisionName || ''}
+				defaultValue={`Snapshot of ${this.props.meetingName}`}
 				allowEmpty={false}
 				extraButtons={
 					<Button id="cancel-save-snapshot-button"
@@ -45,9 +46,10 @@ export class SavingSnapshotCard extends React.Component<Props, State> {
 					/>
 				}
 				onSave={this.props.save}
-			>
-				<p>Consider simple names like "First walk" or "Final result". Note that the date and time of this snapshot will be stored with the snapshot, so you don't really need to include that information in the name.</p>
-			</ValueCard>
+			>{this.props.revisionName
+				? <p>You have already saved this snapshot. By saving it again you are simply renaming it.</p>
+				: <p>Consider simple names like "First walk" or "Final result". Note that the date and time of this snapshot will be stored with the snapshot, so you don't really need to include that information in the name.</p>
+				}</ValueCard>
 		)
 	}
 

@@ -542,7 +542,7 @@ this.keySuffix = String(_u.randomSeed())
                         command: () => this.checkForRevisionBefore(() => this.setState({ present: Presenting.Loading }), "Before opening a snapshot...")
                     },
                     {
-                        label: "Save snapshot",
+                        label: this.subcalc.snapshot.revision ? "Rename snapshot" : "Save snapshot",
                         icon: "pi pi-fw pi-clock",
                         command: () => this.addCardState(CardFor.SavingSnapshot),
                     },
@@ -653,12 +653,14 @@ this.keySuffix = String(_u.randomSeed())
                     save={() => this.removeCardState(CardFor.ShowingBy)}
                 />
                 case CardFor.SavingSnapshotBefore: return <SavingSnapshotBeforeCard
-                    name={this.subcalc.snapshot.name}
+                    meetingName={this.subcalc.snapshot.name}
+                    revisionName={this.subcalc.snapshot.revision}
                     save={this.saveSnapshotBefore}
                     title={this.state.before}
                 />
                 case CardFor.SavingSnapshot: return <SavingSnapshotCard
-                    name={this.subcalc.snapshot.name}
+                    meetingName={this.subcalc.snapshot.name}
+                    revisionName={this.subcalc.snapshot.revision}
                     save={this.saveSnapshot}
                 />
                 case CardFor.ChangingName: return <ChangingNameCard
