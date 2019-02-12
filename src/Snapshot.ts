@@ -506,7 +506,7 @@ interface SnapshotInitializer {
 			if (this.participants > this.viableParticipants) {
 				text += `${this.viableParticipants.singularPlural("member was", "members were")} in a viable subcaucuses. `
 				text += `The delegate divisor (number of members needed to allocate each delegate) was ${this.delegateDivisor.decimalPlaces(3)}.\n\n`
-				text += `${(this.participants - this.viableParticipants).singularPlural("person was", "people were")} in a non-viable caucus, you may want to consider another round of walking.\n\n`
+				text += `${(this.participants - this.viableParticipants).singularPlural("person was", "people were")} in a non-viable caucus.\n\n`
 			}
 
 		} else {
