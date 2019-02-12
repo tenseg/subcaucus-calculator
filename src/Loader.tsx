@@ -1,10 +1,22 @@
+/**
+ * Loader.tsx
+ *
+ * A ReactJS component that presents the snapshot loader.
+ *
+ * Copyright 2019 by Tenseg LLC
+ * Made available under the MIT License
+ */
+
 import * as React from 'react'
+
 // see https://github.com/ClickSimply/typescript-map
 import { TSMap } from 'typescript-map'
+
 // see https://www.primefaces.org/primereact
 import { Button } from 'primereact/button'
 import { Menubar } from 'primereact/menubar'
 import { Accordion, AccordionTab } from 'primereact/accordion';
+
 // local to this app
 import * as _u from './Utilities'
 import { SubCalc } from './SubCalc'
@@ -20,16 +32,26 @@ enum SortOrder {
     Ascending = 1,
 }
 
+/**
+ * Properties for the snapshot loader.
+ */
 interface Props {
     subcalc: SubCalc
     onLoad: ((snapshot?: Snapshot) => void)
     onNew: (() => void)
 }
+
+/**
+ * State for the snapshot loader.
+ */
 interface State {
     sortBy: 'name' | 'date'
     showing: 'saved' | 'trashed'
 }
 
+/**
+ * A ReactJS component that presents the snapshot loader.
+ */
 export class Loader extends React.Component<Props, State> {
 
     constructor(props: Props) {
@@ -68,6 +90,9 @@ export class Loader extends React.Component<Props, State> {
                 : "pi pi-chevron-circle-off"
     }
 
+    /**
+     * Toggle between name and date sorting.
+     */
     toggleSortOrder = () => {
         this.setState({
             sortBy: this.state.sortBy === "name"
@@ -76,11 +101,17 @@ export class Loader extends React.Component<Props, State> {
         })
     }
 
+    /**
+     * Move a snapshot to the trash.
+     */
     deleteSnapshot = (snapshot: Snapshot) => {
         this.props.subcalc.trashSnapshot(snapshot)
         this.forceUpdate()
     }
 
+    /**
+     * Render JSX for a single snapshot.
+     */
     renderSnapshot = (snapshot: Snapshot): JSX.Element => {
         const created = new Date(Date.parse(snapshot.created))
         const createdDate = created.toLocaleString(undefined, {
@@ -137,6 +168,9 @@ export class Loader extends React.Component<Props, State> {
         )
     }
 
+    /**
+     * Render JSX for a TSMap of snapshots.
+     */
     renderSnapshots = (snapshots: TSMap<string, Snapshot>): JSX.Element => {
         return (
             <>
@@ -172,6 +206,9 @@ export class Loader extends React.Component<Props, State> {
         return revA.localeCompare(revB, undefined, { sensitivity: 'base', numeric: true })
     }
 
+    /**
+     * Render JSX for a whole meeting and its snapshots.
+     */
     renderMeeting = (snapshots: Array<Snapshot>): JSX.Element => {
         const snap = snapshots[0]
         const snapshotsJSX = snapshots.map((snapshot) => this.renderSnapshot(snapshot))
@@ -203,6 +240,9 @@ export class Loader extends React.Component<Props, State> {
 
     }
 
+    /**
+     * Render JSX for a list of all meetings.
+     */
     renderMeetings = (): JSX.Element => {
         const snapshots = this.props.subcalc.snapshots(this.state.showing)
 
@@ -273,6 +313,9 @@ export class Loader extends React.Component<Props, State> {
         )
     }
 
+    /**
+     * Render JSX for this component.
+     */
     render() {
         return (
             <div className="loader">

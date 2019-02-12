@@ -1,3 +1,14 @@
+/**
+ * ChangingCoinCard.tsx
+ *
+ * A card that allows the user to change the 
+ * random seed of the coin used to break ties
+ * built on the our ValueCard component.
+ *
+ * Copyright 2019 by Tenseg LLC
+ * Made available under the MIT License
+ */
+
 import * as React from 'react'
 
 // see https://www.primefaces.org/primereact

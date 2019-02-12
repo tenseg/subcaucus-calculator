@@ -1,3 +1,12 @@
+/** 
+ * App.tsx
+ *
+ * A ReactJS component that presents the Subcaucus Calculator.
+ *
+ * Copyright 2019 by Tenseg LLC
+ * Made available under the MIT License
+ */
+
 import * as React from 'react'
 
 // see https://www.primefaces.org/primereact
@@ -16,7 +25,6 @@ import { SubCalc } from './SubCalc'
 import { Snapshot } from './Snapshot'
 import { Subcaucus } from './Subcaucus'
 import { SubcaucusRow, SubcaucusRowAction } from './SubcaucusRow'
-import { ValueCard } from './ValueCard'
 import { Loader } from './Loader'
 import { ShowJSON } from './ShowJSON'
 
@@ -69,6 +77,10 @@ enum CardFor {
     Viability,
 }
 
+/**
+ * Used to represent which "screen" of the app we should
+ * be rendering.
+ */
 enum Presenting {
     Calculator,
     Loading,
@@ -87,6 +99,9 @@ interface SummaryInfo {
     nonViableCount: number
 }
 
+/**
+ * No properites for the app.
+ */
 interface Props { }
 
 /**
@@ -104,6 +119,9 @@ interface State {
     hideDelegates: boolean
 }
 
+/**
+ * A ReactJS component that presents the Subcaucus Calculator..
+ */
 export class App extends React.Component<Props, State> {
 
     /**
@@ -285,6 +303,10 @@ this.keySuffix = String(_u.randomSeed())
         this.removeCardState(remove)
     }
 
+    /**
+     * Prepare and ship an email summarizing this snapshot
+     * to the default email app for this device.
+     */
     emailSnapshot = () => {
         const snapshot = this.subcalc.snapshot
 
@@ -303,12 +325,16 @@ this.keySuffix = String(_u.randomSeed())
         location.href = mailto
     }
 
+    /**
+     * Prepare and ship an email soliciting feedback
+     * to the default email app for this device.
+     */
     emailFeedback = () => {
         const snapshot = this.subcalc.snapshot
 
         const url = snapshot.asURL()
 
-        let body = "\n\n\n\nInclude this  this very long and ugly link if you want Eric to be able to reproduce the current meeting:\n\n" + url + "\n"
+        let body = "Feel free to send whatever feedback you like. We have found that answering the following questions often helps us better understand requests. Thank you for using the subcaucus calculator and for caring enough to ask us to make it better!\n\nWhat were you trying to do?\n\nWhat action did you take to accomplish this goal?\n\nWhat did you expect to happen?\n\nWhat actually happened instead?\n\nInclude this  this very long and ugly link if you want us to be able to reproduce the current state of your calculator:\n\n" + url + "\n"
 
         let subject = `SubCalc Feedback (${process.env.REACT_APP_VERSION})`;
 
@@ -633,7 +659,8 @@ this.keySuffix = String(_u.randomSeed())
      * cards are displayed first.
      * 
      * NOTE: Please be sure to add any new `CardFor` values as 
-     * cases in this function. Do not `setState()` in this method.
+     * cases in this function. Do not `setState()` in this method,
+     * although you can do so within the callbacks.
      */
     renderNextCard = (): JSX.Element => {
         return this.state.cards.sort((a, b) => b - a).reduce((accumulator: JSX.Element, cardFor: CardFor): JSX.Element => {
@@ -777,10 +804,12 @@ this.keySuffix = String(_u.randomSeed())
      */
     sortBySubcaucusName = (a: Subcaucus, b: Subcaucus): number => {
 
+        const order = this.state.sortName || SortOrder.Ascending // default to ascending order
+
         const comparison = a.displayName().localeCompare(b.displayName(), undefined, { sensitivity: 'base', numeric: true })
             || a.id - b.id // fall back to order of entry
 
-        return comparison * this.state.sortName
+        return comparison * order
     }
 
     /**
@@ -796,26 +825,23 @@ this.keySuffix = String(_u.randomSeed())
      */
     sortBySubcaucusCounts = (a: Subcaucus, b: Subcaucus): number => {
 
-        // start with delegates, then check on count, then fall back if needed
+        const order = this.state.sortCount || SortOrder.Descending // default to descending order
+
+        // sort empty subcaucuses to the end by making them infinite in value
+        let ac = a.count ? a.count : order * Infinity
+        let bc = b.count ? b.count : order * Infinity
+        let comparison: number = (ac - bc).comparisonValue()
+
+        // use the delegate value to just nudge the comparison a bit one way or the other
         const delegateComparison = (a.delegates - b.delegates).comparisonValue()
-
-        let ac = a.count ? a.count : this.state.sortCount * Infinity
-        let bc = b.count ? b.count : this.state.sortCount * Infinity
-        const countComparison = (ac - bc).comparisonValue()
-
-
-        const weightedComparison = (0.1 * delegateComparison) + countComparison
-
-        let comparison = weightedComparison
+        comparison = (0.1 * delegateComparison) + comparison
 
         if (comparison == 0) {
-            // we want the names to always sort in descending order
-            // during count comparisons, so we undo the effect of direction
-            // (both 1 * 1 and -1 * -1 equal 1) and then force a -1 direction 
-            comparison = this.sortBySubcaucusName(a, b) * this.state.sortName * -1
+            // if otherwise equal, return a comparison of names in ascending order 
+            return this.sortBySubcaucusName(a, b)
         }
 
-        return comparison * this.state.sortCount
+        return comparison * order
     }
 
     /**
@@ -910,7 +936,7 @@ this.keySuffix = String(_u.randomSeed())
                     this.subcalc.snapshot.viableParticipants < this.subcalc.snapshot.participants
                         ? <div className="summary-row danger">
                             <div className="summary-label">
-                                {(this.subcalc.snapshot.participants - this.subcalc.snapshot.viableParticipants).singularPlural("person", "people")} in a non-viable subcaucus.
+                                {(this.subcalc.snapshot.participants - this.subcalc.snapshot.viableParticipants).singularPlural("person", "people")} in a non-viable subcaucus
                             </div>
                         </div>
                         : ''

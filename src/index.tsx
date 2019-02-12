@@ -1,3 +1,14 @@
+/**
+ * index.tsx
+ *
+ * The entry point for the Subcacucus Calculator.
+ *
+ * See public/index.html for regular headers and such.
+ *
+ * Copyright 2019 by Tenseg LLC
+ * Made available under the MIT License
+ */
+
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { App } from './App';

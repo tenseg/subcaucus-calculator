@@ -1,3 +1,13 @@
+/**
+ * SubcaucusRow.tsx
+ *
+ * A ReactJS component that presents a single subcaucus row.
+ * Also controles subcaucus row detail cards.
+ *
+ * Copyright 2019 by Tenseg LLC
+ * Made available under the MIT License
+ */
+
 import * as React from 'react'
 // see https://www.primefaces.org/primereact
 import { Button } from 'primereact/button'
@@ -8,8 +18,14 @@ import * as _u from './Utilities'
 import { Subcaucus } from './Subcaucus'
 import { SubcaucusRowInfoCard } from './Cards/SubcaucusRowInfoCard'
 
+/**
+ * The actions to be conveyed to via the exchange callback from this component.
+ */
 export type SubcaucusRowAction = 'recalc' | 'enter'
 
+/**
+ * Properties for the subcaucus row.
+ */
 interface Props {
 	subcaucus: Subcaucus
 	hideDelegates: boolean
@@ -18,6 +34,9 @@ interface Props {
 	exchange: ((subcaucus: Subcaucus, action: SubcaucusRowAction, index?: number, callback?: () => void) => void)
 }
 
+/**
+ * State of the subcaucus row.
+ */
 interface State {
 	name: string
 	count: number
@@ -26,11 +45,14 @@ interface State {
 }
 
 /**
- * Component to show a single subcaucus row.
- * Also controls subcaucus row info cards.
+ * A ReactJS component that presents a single subcaucus row.
+ * Also controles subcaucus row detail cards.
  */
 export class SubcaucusRow extends React.Component<Props, State> {
 
+	/**
+	 * Creates a new subcaucus row component.
+	 */
 	constructor(props: Props) {
 		super(props)
 		this.state = {
@@ -41,6 +63,9 @@ export class SubcaucusRow extends React.Component<Props, State> {
 		}
 	}
 
+	/**
+	 * Handles changes to the name of a subcaucus.
+	 */
 	handleName = () => (event: React.FormEvent<HTMLTextAreaElement>) => {
 		const currentTabIndex = event.currentTarget.tabIndex
 		var value = event.currentTarget.value
@@ -48,6 +73,9 @@ export class SubcaucusRow extends React.Component<Props, State> {
 		this.setState({ name: value })
 	}
 
+	/**
+	 * Handles changes to the member count of a subcaucus.
+	 */
 	handleCount = () => (event: React.FormEvent<HTMLInputElement>) => {
 		const currentTabIndex = event.currentTarget.tabIndex
 		var num = Number(event.currentTarget.value)
@@ -58,6 +86,10 @@ export class SubcaucusRow extends React.Component<Props, State> {
 		this.setState({ count: num })
 	}
 
+	/**
+	 * Makes sure the any changes to the subcaucus have been conveyed to the exchange
+	 * whenever a subcaucus field is blurred.
+	 */
 	handleBlur = () => (event: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>) => {
 		const { subcaucus } = this.props
 		const currentTabIndex = event.currentTarget.tabIndex
@@ -69,6 +101,12 @@ export class SubcaucusRow extends React.Component<Props, State> {
 		}
 	}
 
+	/**
+	 * Makes sure the any changes to the subcaucus have been conveyed to the exchange
+	 * whenever the user tabs or returns out of a subcaucus field.
+	 * 
+	 * Determines the next element to be focussed on based on the tab index.
+	 */
 	handleKey = () => (event: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
 		const { rows, subcaucus } = this.props
 		const currentTabIndex = event.currentTarget.tabIndex
@@ -95,6 +133,9 @@ export class SubcaucusRow extends React.Component<Props, State> {
 		}
 	}
 
+	/**
+	 * Selects all of the text in a subcaucus field.
+	 */
 	focusOnWholeText = () => (event: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>) => {
 		// event properties must be copied to use async
 		const target = event.currentTarget
@@ -102,10 +143,16 @@ export class SubcaucusRow extends React.Component<Props, State> {
 		setTimeout(() => target.setSelectionRange(0, 9999), 0)
 	}
 
+	/**
+	 * Helper for creating id's for the sucaucus field DOM elements.
+	 */
 	idPlus = (suffix: string): string | undefined => {
 		return `subcaucus-${this.props.subcaucus.id}-${suffix}`
 	}
 
+	/**
+	 * Render JSX for the subcaucus row component.
+	 */
 	render() {
 		const { subcaucus: s, hideDelegates } = this.props
 

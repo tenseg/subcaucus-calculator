@@ -1,5 +1,3 @@
-import { number } from "@mojotech/json-type-validation";
-
 /**
  * SubCalcPRNG.ts
  *
@@ -21,7 +19,10 @@ import { number } from "@mojotech/json-type-validation";
  * 
  * This class is based on http://stackoverflow.com/a/22313621/383737
  * but modified to accept strings and turn them into numbers.
- */;
+ *
+ * Copyright 2019 by Tenseg LLC
+ * Made available under the MIT License
+ */
 
 /**
  * Manages the generation of random numbers.
@@ -116,6 +117,10 @@ export class SubCalcPRNG {
 		return this.randomUpTo(2) ? -1 : 1
 	}
 
+	/**
+	 * Returns an object that summariezes the random numbers provided by this generator.
+	 * This can be useful for testing and debugging.
+	 */
 	recordSummary = (): { [limit: string]: { [result: string]: number } } => {
 		const summary: { [limit: string]: { [result: string]: number } } = {}
 

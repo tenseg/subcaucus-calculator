@@ -1,13 +1,19 @@
-// Utilities.tsx
-//
-// A number of helpful functions used throughout the app.
-//
-// Recommend this file be imported as:
-// import * as _u from './Utilities'
-//
-// We use the name "_u" so that tslint won't complain if we
-// do not actually use any _u functions in our file. This way
-// we still can import the prototype extensions.
+/**
+ * Utilities.ts
+ *
+ * A number of helpful functions used throughout the app.
+ *
+ * Recommend this file be imported as:
+ * 
+ * import * as _u from './Utilities'
+ *
+ * We use the name "_u" so that tslint won't complain if we
+ * do not actually use any _u functions in our file. This way
+ * we still can import the prototype extensions.
+ *
+ * Copyright 2019 by Tenseg LLC
+ * Made available under the MIT License
+ */
 
 // Prototype extensions
 
@@ -20,21 +26,62 @@ declare global {
 	// see: https://stackoverflow.com/a/53392268/383737
 
 	interface String {
+
+		/**
+		 * Trim whitespace off both ends of a string.
+		 */
 		trim(): string
+
+		/**
+		 * Return a simple hash code for the string.
+		 */
 		hashCode(): number
+
+		/**
+		 * Turn this string into a `Date` object as best you can.
+		 */
 		toDate(): Date
+
+		/**
+		 * Make sure this string is quoted as it would need to be for CSV output.
+		 */
 		csvQuoted(): string
 	}
 
 	interface Number {
+
+		/**
+		 * Turn number into a string with commas to indicate thousands.
+		 */
 		toCommaString(): string
+
+		/**
+		 * Return one string if this number is a 1, 
+		 * another string if it is anything else.
+		 */
 		singularPlural(singular: string, plural: string): string
+
+		/**
+		 * Turns values < 0 into -1, values > 0 into 1.
+		 */
 		comparisonValue(): ComparisonValue
+
+		/**
+		 * Round this number to this many places after the decimal point.
+		 */
 		decimalPlaces(decimalPlaces: number): number
 	}
 
 	interface Array<T> {
+
+		/**
+		 * Push this value onto the array only if it is not already there.
+		 */
 		pushUnique(something: T): Array<T>
+
+		/**
+		 * Return the maximum numeric value from this array.
+		 */
 		max(): number
 	}
 
@@ -43,6 +90,10 @@ declare global {
 	 * which is really just JSON format with a type to be clearer.
 	 */
 	interface Date {
+
+		/**
+		 * Render the date as a string consistently for this app.
+		 */
 		toTimestampString(): TimestampString
 	}
 
@@ -138,12 +189,22 @@ export function debug(message?: any, ...optionalParams: any[]) {
 	}
 }
 
+/**
+ * A placeholder for an alert callback function.
+ */
 var alertFunction: ((message: string) => void)
 
+/**
+ * Set the alert callback function.
+ */
 export function setAlertFunction(callback: ((message: string) => void)) {
 	alertFunction = callback
 }
 
+/**
+ * Alert the user to an error using either the alert callback function
+ * or a plain JavaScript alert.
+ */
 export function alertUser(error: Error, ...optionalParams: any[]) {
 	if (alertFunction) {
 		alertFunction(error.message)
@@ -153,16 +214,16 @@ export function alertUser(error: Error, ...optionalParams: any[]) {
 	debug(error, ...optionalParams)
 }
 
+/**
+ * Return true if we are debugging.
+ */
 export function isDebugging(): boolean {
 	return !process.env.NODE_ENV || process.env.NODE_ENV === "development" || window['_tg_debug']
 }
 
-export function setApp(app: string, version?: string, build?: string) {
-	window['_tg_app'] = app
-	window['_tg_version'] = version
-	window['_tg_build'] = build
-}
-
+/**
+ * Return an object with some version and build information about our iOS app.
+ */
 export function getApp(): { app: string, version: string, build: string } {
 	return {
 		app: process.env.REACT_APP_IOS_VERSION ? 'ios' : '',
@@ -171,16 +232,22 @@ export function getApp(): { app: string, version: string, build: string } {
 	}
 }
 
+/**
+ * Return true if this site is being run inside of an iOS app.
+ */
 export function isApp(): boolean {
 	return Boolean(process.env.REACT_APP_IOS_VERSION)
 }
 
-export function getQueryVariable(variable: string) {
+/**
+ * Return the value of a query key, if it exists.
+ */
+export function getQueryVariable(key: string): string | undefined {
 	var query = window.location.search.substring(1);
 	var vars = query.split('&');
 	for (var i = 0; i < vars.length; i++) {
 		var pair = vars[i].split('=');
-		if (decodeURIComponent(pair[0]) == variable) {
+		if (decodeURIComponent(pair[0]) == key) {
 			return decodeURIComponent(pair[1]);
 		}
 	}

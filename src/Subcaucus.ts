@@ -1,6 +1,11 @@
-// we will need a way to type validate the json we import
-// see https://github.com/mojotech/json-type-validation
-// or maybe just use a JSON.parse reviver to type the data
+/**
+ * Subcaucus.ts
+ * 
+ * Manages the affairs of a single subcaucus.
+ *
+ * Copyright 2019 by Tenseg LLC
+ * Made available under the MIT License
+ */
 
 // see: https://github.com/mojotech/json-type-validation
 import { Decoder, object, string, optional, number, boolean } from '@mojotech/json-type-validation'
@@ -10,12 +15,42 @@ import * as _u from './Utilities'
 
 declare global {
 
+	/**
+	 * An object used to set up a new subcaucus.
+	 * 
+	```typescript
+	interface SubcaucusInitializer {
+		id: number
+		with?: {
+			name?: string
+			count?: number
+			delegates?: number
+		}
+		json?: {
+			name: string
+			count: number
+			delegates?: number
+		}
+	}
+	```
+	 */
 	interface SubcaucusInitializer {
 		id: number
 		with?: Partial<SubcaucusJSON>
 		json?: SubcaucusJSON
 	}
 
+	/**
+	 * The JSON associated with a subcaucus.
+	 * 
+	```typescript
+	interface SubcaucusJSON {
+		name: string
+		count: number
+		delegates?: number
+	}
+	```
+	 */
 	interface SubcaucusJSON {
 		name: string
 		count: number
@@ -24,6 +59,9 @@ declare global {
 
 }
 
+/**
+ * Manages the affairs of a single subcaucus.
+ */
 export class Subcaucus {
 
 	debug = (): string => {
@@ -42,19 +80,6 @@ export class Subcaucus {
 
 	/**
 	 * Creates a new subcacucus instance.
-	 * 
-```typescript
-interface SubcaucusInitializer {
-	id: number
-	with?: {
-		name?: string
-		count?: number
-			delegates?: number
-	}
-	json?: SubcaucusJSON
-}
-```
-	 * @param {SubcaucusInitializer} init
 	 */
 	constructor(init: SubcaucusInitializer) {
 		this.id = init.id
@@ -74,6 +99,9 @@ interface SubcaucusInitializer {
 		}
 	}
 
+	/**
+	 * Return an independent copy of this subcaucus.
+	 */
 	recreate = (): Subcaucus => {
 		return new Subcaucus({
 			id: this.id,
@@ -85,6 +113,12 @@ interface SubcaucusInitializer {
 		})
 	}
 
+	/**
+	 * Encode this subcaucus as JSON.
+	 * 
+	 * NOTE: The delegate value is _not_ included in this representation,
+	 * since it is calculated dynamically.
+	 */
 	toJSON = (): SubcaucusJSON => {
 		return {
 			name: this.name,
@@ -92,6 +126,9 @@ interface SubcaucusInitializer {
 		}
 	}
 
+	/**
+	 * Validate the incomming JSON and use it to populate this subcaucus.
+	 */
 	fromJSON = (json: SubcaucusJSON) => {
 		const decoded = Subcaucus.decoder.run(json)
 
@@ -104,10 +141,18 @@ interface SubcaucusInitializer {
 		}
 	}
 
+	/**
+	 * A default name for this subcaucus (for example, "Subcaucus 1").
+	 */
 	defaultName = () => {
 		return `Subcaucus ${this.id}`
 	}
 
+	/**
+	 * The name to dispaly for this subcaucus.
+	 * 
+	 * Returns either the user-supplied name or the default name.
+	 */
 	displayName = () => {
 		return this.name || this.defaultName()
 	}

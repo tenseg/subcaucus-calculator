@@ -1,7 +1,15 @@
-import * as React from 'react'
+/**
+ * ViabilityCard.tsx
+ *
+ * A card that provides a summary of the snapshot
+ * in the language of the DFL call
+ * built on the our ValueCard component.
+ *
+ * Copyright 2019 by Tenseg LLC
+ * Made available under the MIT License
+ */
 
-// see https://www.primefaces.org/primereact
-import { Button } from 'primereact/button'
+import * as React from 'react'
 
 // local to this app
 import * as _u from '../Utilities'
@@ -25,7 +33,8 @@ interface State {
 
 
 /**
- * A card that allows the user to change the meeting name.
+ * A card that provides a summary of the snapshot
+ * in the language of the DFL call.
  */
 export class ViabilityCard extends React.Component<Props, State> {
 

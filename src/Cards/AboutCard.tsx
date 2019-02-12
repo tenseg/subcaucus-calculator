@@ -1,3 +1,13 @@
+/**
+ * AboutCard.tsx
+ *
+ * A card that tells the user about the calculator
+ * built on the our ValueCard component.
+ *
+ * Copyright 2019 by Tenseg LLC
+ * Made available under the MIT License
+ */
+
 import * as React from 'react'
 
 // see https://www.primefaces.org/primereact
@@ -24,7 +34,7 @@ interface State {
 
 
 /**
- * A card that allows the user to change the meeting name.
+ * A card that tells the user about the calculator.
  */
 export class AboutCard extends React.Component<Props, State> {
 

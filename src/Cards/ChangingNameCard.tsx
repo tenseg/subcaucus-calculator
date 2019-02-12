@@ -1,3 +1,13 @@
+/**
+ * ChangingNameCard.tsx
+ *
+ * A card that allows the user to change the meeting name
+ * built on the our ValueCard component.
+ *
+ * Copyright 2019 by Tenseg LLC
+ * Made available under the MIT License
+ */
+
 import * as React from 'react'
 
 // see https://www.primefaces.org/primereact

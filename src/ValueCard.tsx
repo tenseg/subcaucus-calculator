@@ -1,13 +1,31 @@
+/**
+ * ValueCard.tsx
+ *
+ * A ReactJS component that presents a modal dialog
+ * built on the Card component of PrimeReact.
+ *
+ * Copyright 2019 by Tenseg LLC
+ * Made available under the MIT License
+ */
+
 import * as React from 'react'
+
 // see https://www.primefaces.org/primereact
 import { Button } from 'primereact/button'
 import { Card } from 'primereact/card'
 import { InputText } from 'primereact/inputtext'
+
 // local to this app
 import * as _u from './Utilities'
 
+/**
+ * Helps distinguish the two kinds of values a ValueCard can ask for.
+ */
 type KindOfValue = 'text' | 'positive integer'
 
+/**
+ * Properties of a ValueCard component.
+ */
 interface Props {
     id?: string
     title: string
@@ -22,14 +40,29 @@ interface Props {
     allowEmpty?: boolean
     onSave?: ((value?: string) => void)
 }
+
+/**
+ * State of a ValueCard component.
+ */
 interface State {
     value: string
 }
 
+/**
+ * A ReactJS component that presents a modal dialog
+ * built on the Card component of PrimeReact.
+ */
 export class ValueCard extends React.Component<Props, State> {
 
+    /**
+     * True would indicate that this value card is supposed to only
+     * accept positive integers.
+     */
     isPositiveInteger = false
 
+    /**
+     * Construct a new ValueCard component.
+     */
     constructor(props: Props) {
         super(props)
         this.isPositiveInteger = this.props.type === 'positive integer'
@@ -42,6 +75,10 @@ export class ValueCard extends React.Component<Props, State> {
         }
     }
 
+    /**
+     * Preload any images that may be used by the card.
+     * Avoid a resizing card box.
+     */
     componentDidMount = () => {
         // force the browser to load the image before the render
         if (this.props.image) {
@@ -50,14 +87,23 @@ export class ValueCard extends React.Component<Props, State> {
         }
     }
 
+    /**
+     * Returns the value that was initially passed to the card.
+     */
     originalValue = (): string => {
         return _u.unwrapString(this.props.value)
     }
 
+    /**
+     * The value the card should return if the user leaves the value field blank.
+     */
     defaultValue = (): string => {
         return _u.unwrapString(this.props.defaultValue)
     }
 
+    /**
+     * Handle changes to the value field.
+     */
     handleChange = () => (event: React.FormEvent<HTMLInputElement>) => {
         _u.debug("change", event.currentTarget.value)
         if (this.isPositiveInteger) {
@@ -71,6 +117,9 @@ export class ValueCard extends React.Component<Props, State> {
         }
     }
 
+    /**
+     * Treat the return key the same as hitting the save button.
+     */
     handleKey = () => (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter') {
             if (this.props.onSave) {
@@ -79,6 +128,9 @@ export class ValueCard extends React.Component<Props, State> {
         }
     }
 
+    /**
+     * Select all of the text currently in the value field.
+     */
     focusOnWholeText = () => (event: React.FormEvent<HTMLInputElement>) => {
         // event properties must be copied to use async
         const target = event.currentTarget
@@ -86,6 +138,9 @@ export class ValueCard extends React.Component<Props, State> {
         setTimeout(() => target.setSelectionRange(0, 9999), 0)
     }
 
+    /**
+     * Test whether the supplied optional string is an empty string ("") or undefined.
+     */
     isEmpty = (value?: string): boolean => {
         var empty = (value === '') || (value === undefined)
         if (this.isPositiveInteger) {
@@ -94,6 +149,9 @@ export class ValueCard extends React.Component<Props, State> {
         return empty
     }
 
+    /**
+     * Return news of a saved value to the callback.
+     */
     save = (value?: string) => (event: React.MouseEvent<HTMLButtonElement | HTMLDivElement>) => {
         if (this.props.onSave) {
             if (value === undefined) {
@@ -108,10 +166,16 @@ export class ValueCard extends React.Component<Props, State> {
         }
     }
 
+	/**
+	 * Helper for creating id's for the card's DOM elements.
+	 */
     idPlus = (suffix: string): string | undefined => {
         return this.props.id ? `${this.props.id}-${suffix}` : undefined
     }
 
+    /**
+     * Render JSX for the value card component.
+     */
     render() {
 
         const { value } = this.state

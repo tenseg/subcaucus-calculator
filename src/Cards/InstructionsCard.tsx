@@ -1,7 +1,14 @@
-import * as React from 'react'
+/**
+ * InstructionsCard.tsx
+ *
+ * A card that provides some instructions
+ * built on the our ValueCard component.
+ *
+ * Copyright 2019 by Tenseg LLC
+ * Made available under the MIT License
+ */
 
-// see https://www.primefaces.org/primereact
-import { Button } from 'primereact/button'
+import * as React from 'react'
 
 // local to this app
 import * as _u from '../Utilities'
@@ -23,7 +30,7 @@ interface State {
 
 
 /**
- * A card that allows the user to change the meeting name.
+ * A card that provides some instructions.
  */
 export class InstructionsCard extends React.Component<Props, State> {
 

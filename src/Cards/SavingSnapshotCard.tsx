@@ -1,3 +1,13 @@
+/**
+ * SavingSnapshotCard.tsx
+ *
+ * A card to save a snapshot of the current state of the calculator
+ * built on the our ValueCard component.
+ *
+ * Copyright 2019 by Tenseg LLC
+ * Made available under the MIT License
+ */
+
 import * as React from 'react'
 
 // see https://www.primefaces.org/primereact

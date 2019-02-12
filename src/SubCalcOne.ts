@@ -2,6 +2,9 @@
  * SubCalcOne.ts
  * 
  * Manages retrieval of old subcalc v. 1 data from storage.
+ *
+ * Copyright 2019 by Tenseg LLC
+ * Made available under the MIT License
  */
 
 // see: https://github.com/mojotech/json-type-validation
@@ -12,7 +15,19 @@ import * as _u from './Utilities'
 import { Snapshot } from './Snapshot'
 
 /**
- * JSON representation of subcalc1 in storage
+ * JSON representation of subcalc1 in storage.
+ * 
+```typescript
+interface SubCalcOneJSON {
+	current: SubCalcOneCaucusJSON
+	saved: {
+		[key: string]: {
+			caucus: SubCalcOneCaucusJSON
+			saved: number
+		}
+	}
+}
+```
  */
 interface SubCalcOneJSON {
 	current: SubCalcOneCaucusJSON
@@ -25,7 +40,17 @@ interface SubCalcOneJSON {
 }
 
 /**
- * JSON representation of subcalc1 caucus in storage
+ * JSON representation of subcalc1 caucus in storage.
+ * 
+```typescript
+interface SubCalcOneCaucusJSON {
+	allowed: number
+	members: { [key: string]: number }
+	names: { [key: string]: string }
+	precinct: string
+	seed: number
+}
+```
  */
 interface SubCalcOneCaucusJSON {
 	allowed: number
@@ -150,6 +175,9 @@ export class SubCalcOne {
 		}
 	}
 
+	/**
+	 * Creates a current style snapshot from v.1 style caucus data.
+	 */
 	snapshotFromCaucus = (caucus: SubCalcOneCaucusJSON, saved?: number): Snapshot => {
 		const revised = saved
 			? new Date(saved).toTimestampString()

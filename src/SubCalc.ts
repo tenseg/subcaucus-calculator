@@ -3,6 +3,9 @@
  * 
  * Manages storage in app or localStorage.
  * Handles conversion to and from JSON.
+ *
+ * Copyright 2019 by Tenseg LLC
+ * Made available under the MIT License
  */
 
 // see: https://github.com/mojotech/json-type-validation
@@ -18,6 +21,14 @@ declare global {
 
 	/**
 	 * JSON representation of subcalc2 in storage.
+	 * 
+	```typescript
+	interface SubCalcJSON {
+		v: number
+		device: number
+		snapshot: SnapshotJSON
+	}
+	```
 	 */
 	interface SubCalcJSON {
 		v: number
@@ -33,6 +44,9 @@ declare global {
  */
 export class SubCalc {
 
+	/**
+	 * Consise textual representation of an instance of SubCalc for debugging.
+	 */
 	debug = (): string => {
 		return this.snapshot.debug()
 	}
@@ -288,6 +302,9 @@ export class SubCalc {
 		this.writeSnapshot()
 	}
 
+	/**
+	 * Zero out the counts of all the subcaucuses in our snapshot.
+	 */
 	zeroSubcaucuses = () => {
 		this.snapshot.clearCounts()
 		this.writeSnapshot()
@@ -550,9 +567,6 @@ export class SubCalc {
 		const snap = decodeURIComponent(params.get("snapshot") || '')
 		const subcalc2 = decodeURIComponent(params.get("subcalc2") || '')
 
-		const app = decodeURIComponent(params.get("app") || '')
-		const version = decodeURIComponent(params.get("version") || '')
-		const build = decodeURIComponent(params.get("build") || '')
 		const debug = decodeURIComponent(params.get("debug") || '')
 
 		if (subcalc2) {
@@ -579,10 +593,6 @@ export class SubCalc {
 			_u.debug("query caucus", caucus)
 			const snapshot = this.decodeCaucus(caucus)
 			if (snapshot) this.incoming.push(snapshot)
-		}
-
-		if (app) {
-			_u.setApp(app, version, build)
 		}
 
 		if (debug) {

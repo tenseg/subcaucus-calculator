@@ -1,9 +1,12 @@
 /**
  * Snapshot.ts
- * 
+ *
  * Holds all the information for a single snapshot.
  * Handles the calculation of delegates for a snapshot.
  * Handles conversion to and from JSON.
+ *
+ * Copyright 2019 by Tenseg LLC
+ * Made available under the MIT License
  */
 
 // see https://github.com/ClickSimply/typescript-map
@@ -19,6 +22,25 @@ import { SubCalcPRNG } from './SubCalcPRNG'
 
 declare global {
 
+	/**
+	 * An object used to set up a new snapshot.
+	 * 
+	```typescript
+	interface SnapshotInitializer {
+		device: number
+		created: TimestampString
+		with?: {
+			revised?: TimestampString
+			revision?: string
+			name?: string
+			allowed?: number
+			seed?: number
+			subcaucuses?: TSMap<number, Subcaucus>
+		},
+		json?: SnapshotJSON
+	}
+	```
+	 */
 	interface SnapshotInitializer {
 		device: number
 		created: TimestampString
@@ -33,6 +55,22 @@ declare global {
 		json?: SnapshotJSON
 	}
 
+	/**
+	 * The JSON associated with a snapshot.
+	 * 
+	```typescript
+	interface SnapshotJSON {
+		device: number
+		created: TimestampString
+		revised: TimestampString
+		revision: string
+		name: string
+		allowed: number
+		seed: number
+		subcaucuses: { [id: string]: SubcaucusJSON }
+	}
+	```
+	 */
 	interface SnapshotJSON {
 		device: number
 		created: TimestampString
@@ -46,23 +84,81 @@ declare global {
 
 }
 
+/**
+ * Holds all the information for a single snapshot.
+ * Handles the calculation of delegates for a snapshot.
+ * Handles conversion to and from JSON.
+ */
 export class Snapshot {
 
+	/**
+	 * Identifies the snapshot with a unique numeric string.
+	 */
 	debugID = ` ------ ${_u.uniqueNumber()} ------ `
+
+	/**
+	 * Describes the snapshot in a concise string.
+	 */
 	debug = (): string => {
 		return "\nSnapshot" + this.debugID + "\n"
 			+ this.name + "/" + this.revision + "/" + this.allowed
 			+ " " + this.subcaucuses.map((s) => s.debug()).join(", ")
 	}
-	created: TimestampString
-	device: number
-	revised: TimestampString
-	revision: string
+
+	/**
+	 * The name of the meeting associated with this snapshot.
+	 */
 	name: string
+
+	/**
+	 * The creation timestamp of the meeting associated with this snapshot.
+	 */
+	created: TimestampString
+
+	/**
+	 * The random number of the device which created the meeting associated with this snapshot.
+	 */
+	device: number
+
+	/**
+	 * The timestamp at which this snapshot was last revised.
+	 */
+	revised: TimestampString
+
+	/**
+	 * The name associated with this snapshot.
+	 * 
+	 * This value will be an empty string ('') whenever the snapshot has been
+	 * revised without saving it. It can be used to test whether the snapshot
+	 * has been saved.
+	 */
+	revision: string
+
+	/**
+	 * The number of delegates allowed for this meeting.
+	 * 
+	 * Note that this value is truely a snapshot value. A single "meeting"
+	 * could have snapshots with different allowed values.
+	 */
 	allowed: number
+
+	/**
+	 * The random seed of the coin used for this snapshot's delegate distribution.
+	 * 
+	 * Note that this value is truely a snapshot value. A single "meeting"
+	 * could have snapshots with different seed values.
+	 */
 	seed: number
+
+	/**
+	 * A list (`TSMap`) of the subcaucuses in this snapshot.
+	 */
 	subcaucuses: TSMap<number, Subcaucus>
 
+	/**
+	 * The JSON decoder for snapshots.
+	 * Used to validate JSON input.
+	 */
 	static decoder: Decoder<SnapshotJSON> = object({
 		device: number(),
 		created: string(),
@@ -76,24 +172,6 @@ export class Snapshot {
 
 	/**
 	 * Creates a new snapshot instance.
-	 * 
-```typescript
-interface SnapshotInitializer {
-	device: number
-	created: TimestampString
-	with?: {
-		revised?: TimestampString
-		revision?: string
-		name?: string
-		allowed?: number
-		seed?: number
-		subcaucuses?: TSMap<number, Subcaucus>
-	}
-	json?: SnapshotJSON
-}
-```
-	 * 
-	 * @param {SnapshotInitializer} init
 	 */
 	constructor(init: SnapshotInitializer) {
 		this.created = init.created
@@ -175,6 +253,10 @@ interface SnapshotInitializer {
 		}
 	}
 
+	/**
+	 * Checks that JSON is valid and fills this snapshot
+	 * with instance values derived from it, if it is.
+	 */
 	fromJSON = (json: SnapshotJSON) => {
 		const decoded = Snapshot.decoder.run(json)
 
@@ -231,6 +313,9 @@ interface SnapshotInitializer {
 		this.redistributeDelegates()
 	}
 
+	/**
+	 * Zero out all the subcaucus counts.
+	 */
 	clearCounts = () => {
 		this.revised = _u.now()
 		this.revision = ""

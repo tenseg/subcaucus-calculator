@@ -1,7 +1,14 @@
-import * as React from 'react'
+/**
+ * SubcaucusRowInfoCard.tsx
+ *
+ * A card that shows details about a single subcaucus
+ * built on the our ValueCard component.
+ *
+ * Copyright 2019 by Tenseg LLC
+ * Made available under the MIT License
+ */
 
-// see https://www.primefaces.org/primereact
-import { Button } from 'primereact/button'
+import * as React from 'react'
 
 // local to this app
 import * as _u from '../Utilities'
@@ -16,7 +23,7 @@ interface Props {
 interface State { }
 
 /**
- * Component to show a subcaucus row info cards.
+ * A card that shows details about a single subcaucus.
  */
 export class SubcaucusRowInfoCard extends React.Component<Props, State> {
 
