@@ -46,7 +46,7 @@ export class SavingSnapshotCard extends React.Component<Props, State> {
 				}
 				onSave={this.props.save}
 			>
-				<p>Consider names like "First walk" or "Final result".</p>
+				<p>Consider simple names like "First walk" or "Final result". Note that the date and time of this snapshot will be stored with the snapshot, so you don't really need to include that information in the name.</p>
 			</ValueCard>
 		)
 	}

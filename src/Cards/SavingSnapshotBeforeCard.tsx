@@ -59,7 +59,8 @@ export class SavingSnapshotBeforeCard extends React.Component<Props, State> {
 				}
 				onSave={this.props.save}
 			>
-				<p>It looks like you have unsaved changes in the calculator. Do you want to save a snapshot? If so, provide a name like "First walk" or "Final result". If you don't save a snapshot, your changes may be lost when you continue.
+				<p>It looks like you have unsaved changes in the calculator. Do you want to save a snapshot? If so, provide a name like "First walk" or "Final result". Note that the date and time of this snapshot will be stored with the snapshot, so you don't really need to include that information in the name.</p>
+				<p>If you don't save a snapshot, your changes may be lost when you continue.
                 </p>
 			</ValueCard>
 		)
