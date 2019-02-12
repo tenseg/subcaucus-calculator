@@ -773,16 +773,9 @@ this.keySuffix = String(_u.randomSeed())
      */
     sortBySubcaucusName = (a: Subcaucus, b: Subcaucus): number => {
 
-        // fall back to order of entry
-        let comparison = a.id - b.id
-        const nameA = a.displayName().toUpperCase()
-        const nameB = b.displayName().toUpperCase()
-        if (nameA < nameB) {
-            comparison = -1
-        }
-        if (nameA > nameB) {
-            comparison = 1
-        }
+        const comparison = a.displayName().localeCompare(b.displayName(), undefined, { sensitivity: 'base', numeric: true })
+            || a.id - b.id // fall back to order of entry
+
         return comparison * this.state.sortName
     }
 

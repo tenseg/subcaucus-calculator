@@ -167,16 +167,9 @@ export class Loader extends React.Component<Props, State> {
      * A method to sort snapshots by name.
      */
     sortBySnapshotName = (a: Snapshot, b: Snapshot): number => {
-        let comparison = 0
-        const revA = `${a.name} ${a.created} ${a.device} ${a.revision}`.toUpperCase()
-        const revB = `${b.name} ${b.created} ${b.device} ${b.revision}`.toUpperCase()
-        if (revA < revB) {
-            comparison = -1;
-        }
-        if (revA > revB) {
-            comparison = 1;
-        }
-        return comparison
+        const revA = `${a.name} ${a.created} ${a.device} ${a.revision}`
+        const revB = `${b.name} ${b.created} ${b.device} ${b.revision}`
+        return revA.localeCompare(revB, undefined, { sensitivity: 'base', numeric: true })
     }
 
     renderMeeting = (snapshots: Array<Snapshot>): JSX.Element => {
