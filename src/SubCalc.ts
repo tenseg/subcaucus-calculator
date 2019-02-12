@@ -130,9 +130,9 @@ export class SubCalc {
 		if (!this.snapshot.created) {
 
 			// since no actual snapshot was assigned
-			// we will get a real one now
+			// we will load the DFL examples
 
-			this.snapshot = this.newSnapshot()
+			this.saveAndShowExamples()
 		}
 
 	}
@@ -211,6 +211,74 @@ export class SubCalc {
 		// note, we return the copy of the snapshot we
 		// want used, which is this.snapshot, not snapshot
 		return this.snapshot
+	}
+
+	/**
+	 * Load the DFL example snapshots to help new users get oriented.
+	 */
+	saveAndShowExamples = () => {
+		const time = new Date().getTime()
+		const created = new Date(time - 120000).toTimestampString()
+
+		const firstExample = new Snapshot({
+			device: this.device,
+			created: created,
+			json: {
+				"created": created,
+				"device": this.device,
+				"revised": new Date(time - 60000).toTimestampString(),
+				"revision": "First Count",
+				"name": "DFL Call Example",
+				"allowed": 6,
+				"seed": 99938,
+				"subcaucuses": {
+					"1": {
+						"name": "A",
+						"count": 15
+					},
+					"2": {
+						"name": "B",
+						"count": 30
+					},
+					"3": {
+						"name": "C",
+						"count": 5
+					}
+				}
+			}
+		})
+
+		const secondExample = new Snapshot({
+			device: this.device,
+			created: created,
+			json: {
+				"created": created,
+				"device": this.device,
+				"revised": new Date(time).toTimestampString(),
+				"revision": "Second Count",
+				"name": "DFL Call Example",
+				"allowed": 6,
+				"seed": 99938,
+				"subcaucuses": {
+					"1": {
+						"name": "A",
+						"count": 15
+					},
+					"2": {
+						"name": "B",
+						"count": 30
+					},
+					"3": {
+						"name": "C",
+						"count": 1
+					}
+				}
+			}
+		})
+
+		this.snapshot = firstExample
+		this.writeSnapshot(firstExample)
+		this.writeSnapshot(secondExample)
 	}
 
 	/**

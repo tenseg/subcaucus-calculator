@@ -172,6 +172,22 @@ export class Snapshot {
 
 	/**
 	 * Creates a new snapshot instance.
+	 * 
+	```typescript
+	interface SnapshotInitializer {
+		device: number
+		created: TimestampString
+		with?: {
+			revised?: TimestampString
+			revision?: string
+			name?: string
+			allowed?: number
+			seed?: number
+			subcaucuses?: TSMap<number, Subcaucus>
+		},
+		json?: SnapshotJSON
+	}
+	```
 	 */
 	constructor(init: SnapshotInitializer) {
 		this.created = init.created
