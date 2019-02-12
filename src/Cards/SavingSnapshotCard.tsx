@@ -34,7 +34,7 @@ export class SavingSnapshotCard extends React.Component<Props, State> {
 			<ValueCard key="snapshot-value" id="snapshot-value"
 				title="Name for the snapshot?"
 				value=""
-				defaultValue={`Revision of ${this.props.name}`}
+				defaultValue={`Snapshot of ${this.props.name}`}
 				allowEmpty={false}
 				extraButtons={
 					<Button id="cancel-save-snapshot-button"
