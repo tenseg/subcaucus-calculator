@@ -319,7 +319,7 @@ this.keySuffix = String(_u.randomSeed())
      * Provide a default name for this meeting, including today's date.
      */
     defaultName = (): string => {
-        return "Meeting on " + this.subcalc.snapshot.created.toDate().toLocaleDateString("en-US")
+        return "My Meeting"
     }
 
     /**
