@@ -218,7 +218,7 @@ export function alertUser(error: Error, ...optionalParams: any[]) {
  * Return true if we are debugging.
  */
 export function isDebugging(): boolean {
-	return !process.env.NODE_ENV || process.env.NODE_ENV === "development" || window['_tg_debug']
+	return !process.env.NODE_ENV || process.env.NODE_ENV === "development" || window['_tg_debug'] || Boolean(process.env.REACT_APP_IOS_DEBUG)
 }
 
 /**
