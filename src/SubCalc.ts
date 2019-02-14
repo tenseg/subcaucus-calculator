@@ -38,6 +38,13 @@ declare global {
 
 }
 
+export enum SubCalcUpgrades {
+	None = '',
+	New = 'new user',
+	FromV1 = 'subcalc1'
+}
+
+
 /**
  * Manages storage in app or localStorage.
  * Handles conversion to and from JSON.
@@ -84,6 +91,11 @@ export class SubCalc {
 	 * remainder would be saved.
 	 */
 	incoming: Array<Snapshot> = []
+
+	/**
+	 * Set this to trigger special welcome messages for users.
+	 */
+	upgrade?: 'new' | 'subcalc1'
 
 	/**
 	 * A prefix to be used when creating local storage items
@@ -279,6 +291,7 @@ export class SubCalc {
 		this.snapshot = firstExample
 		this.writeSnapshot(firstExample)
 		this.writeSnapshot(secondExample)
+		this.upgrade = 'new'
 	}
 
 	/**
@@ -471,6 +484,7 @@ export class SubCalc {
 				subcalcOne.saved.forEach((snapshot) => {
 					this.writeSnapshot(snapshot)
 				})
+				this.upgrade = 'subcalc1'
 			}
 
 			// still nothing, look for incoming query data
@@ -653,6 +667,7 @@ export class SubCalc {
 			const incoming = new SubCalcOne(this.device, "incoming")
 			localStorage.removeItem("incoming")
 			this.incoming.push(...incoming.saved)
+			this.upgrade = 'subcalc1'
 		}
 
 		if (caucus) {

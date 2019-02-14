@@ -447,6 +447,8 @@ export class Snapshot {
 			vSubRanks[i] = temp
 		}
 
+		vSubs.forEach((s) => { s.rank = vSubRanks.indexOf(s.id) + 1 })
+
 		// sort the subcaucuses into remainder order with highest remainders first
 		vSubs.sort((a, b) => {
 			if (a.remainder > b.remainder) {
@@ -480,7 +482,7 @@ export class Snapshot {
 				assigned delegates.
 			*/
 
-			const coinFlip = vSubRanks.indexOf(a.id) < vSubRanks.indexOf(b.id) ? -1 : 1
+			const coinFlip = a.rank < b.rank ? -1 : 1
 
 			// report the coin flip to each subcaucus
 			a.coinToss(coinFlip === -1, b)

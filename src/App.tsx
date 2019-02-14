@@ -35,7 +35,7 @@ import { ChangingDelegatesAllowedCard } from './Cards/ChangingDelegatesAllowedCa
 import { ChangingNameCard } from './Cards/ChangingNameCard';
 import { SavingSnapshotCard } from './Cards/SavingSnapshotCard';
 import { SavingSnapshotBeforeCard } from './Cards/SavingSnapshotBeforeCard';
-import { WelcomeAndSetNameCard } from './Cards/WelcomeAndSetNameCard';
+import { WelcomeCard } from './Cards/WelcomeCard';
 import { InstructionsCard } from './Cards/InstructionsCard';
 import { AboutCard } from './Cards/AboutCard';
 import { CreditCard } from './Cards/CreditCard';
@@ -63,7 +63,7 @@ enum SortOrder {
  */
 enum CardFor {
     Nothing = 0,
-    WelcomeAndSetName,
+    Welcome,
     ChangingName,
     ChangingDelegates,
     ChangingCoin,
@@ -151,7 +151,7 @@ this.keySuffix = String(_u.randomSeed())
      * delegates to be allowed from this meeting.
      */
     initialCardState: Array<CardFor> = [
-        CardFor.WelcomeAndSetName,
+        CardFor.ChangingName,
         CardFor.ChangingDelegates,
         // CardFor.ShowingInstructions
     ]
@@ -192,6 +192,10 @@ this.keySuffix = String(_u.randomSeed())
                 afterBefore = this.completeIncoming
             } else {
                 this.completeIncoming()
+            }
+        } else {
+            if (this.subcalc.upgrade) {
+                cards = [CardFor.Welcome]
             }
         }
 
@@ -666,10 +670,10 @@ this.keySuffix = String(_u.randomSeed())
         return this.state.cards.sort((a, b) => b - a).reduce((accumulator: JSX.Element, cardFor: CardFor): JSX.Element => {
             _u.debug("filtering cards", accumulator, cardFor)
             switch (cardFor) {
-                case CardFor.WelcomeAndSetName: return <WelcomeAndSetNameCard
+                case CardFor.Welcome: return <WelcomeCard
                     name={this.subcalc.snapshot.name}
-                    defaultName={this.defaultName()}
-                    save={this.saveName}
+                    upgrade={this.subcalc.upgrade}
+                    save={() => this.removeCardState(CardFor.Welcome)}
                 />
                 case CardFor.ShowingInstructions: return <InstructionsCard
                     save={() => this.removeCardState(CardFor.ShowingInstructions)}
@@ -750,7 +754,7 @@ this.keySuffix = String(_u.randomSeed())
         if (value == undefined) {
             this.removeCardState(CardFor.ChangingName)
         } else {
-            this.setState({ cards: this.removeCard(CardFor.WelcomeAndSetName, this.removeCard(CardFor.ChangingName)) })
+            this.setState({ cards: this.removeCard(CardFor.Welcome, this.removeCard(CardFor.ChangingName)) })
             this.setStateName(value)
         }
     }

@@ -175,6 +175,11 @@ export class Subcaucus {
 	remainder = 0
 
 	/**
+	 * Random rank used to determine toss results.
+	 */
+	rank = 0
+
+	/**
 	 * Reported coin toss results.
 	 */
 	private _tosses: Array<{ won: boolean, against: Subcaucus }> = []
@@ -265,6 +270,10 @@ export class Subcaucus {
 				text += "remainder " + this.remainder.decimalPlaces(3)
 			}
 
+			if (this.rank) {
+				text += ", rank " + this.rank
+			}
+
 			this.tosses().forEach((toss) => {
 				text += ", " + (toss.won ? "won" : "lost") + " vs " + toss.against.displayName()
 			})
@@ -290,7 +299,7 @@ export class Subcaucus {
 		csv += ',' + this.count
 		csv += ',' + this.delegates
 		csv += ',' + this.remainder
-		csv += ',' + this.tosses().map((toss) => {
+		csv += ',' + 'rank ' + this.rank + ' ' + this.tosses().map((toss) => {
 			return (toss.won ? "won" : "lost") + " vs " + toss.against.displayName()
 		}).join(', ').csvQuoted()
 		csv += ',' + (this.delegates - this.baseDelegates)

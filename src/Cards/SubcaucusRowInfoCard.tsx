@@ -43,7 +43,12 @@ export class SubcaucusRowInfoCard extends React.Component<Props, State> {
 				onSave={dismiss}
 			>
 				{s.delegates
-					? <p>The <strong>{s.count.singularPlural("member", "members")}</strong> of this subcaucus may elect <strong>{s.delegates.singularPlural("delegate", "delegates")}</strong>.</p>
+					? <>
+						<p>The <strong>{s.count.singularPlural("member", "members")}</strong> of this subcaucus may elect <strong>{s.delegates.singularPlural("delegate", "delegates")}</strong>.</p>
+						<div className="fineprint">
+							{s.baseDelegates}+{s.delegates - s.baseDelegates} (r{s.rank})
+						</div>
+					</>
 					: <p>This subcaucus did not attract enough members to be viable. It may not elect any delegates. Members of this subcaucus should consider joining other subcaucuses in order to have some say in the delegates elected.</p>
 				}
 				<p>{s.remainder === 0 ? '' : <span>This subcaucus had a remainder of <strong>{s.remainder.decimalPlaces(3)}</strong>. </span>}

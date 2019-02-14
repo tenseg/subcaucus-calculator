@@ -1,5 +1,5 @@
 /**
- * WelcomeAndSetNameCard.tsx
+ * WelcomeCard.tsx
  *
  * A card that welcomes a new user and 
  * allows the user to change the meeting name
@@ -20,7 +20,7 @@ import { ValueCard } from '../ValueCard'
  */
 interface Props {
 	name: string
-	defaultName: string
+	upgrade?: string
 	save: (value?: string) => void
 }
 
@@ -35,19 +35,24 @@ interface State {
 /**
  * A card that welcomes a new user and allows the user to change the meeting name.
  */
-export class WelcomeAndSetNameCard extends React.Component<Props, State> {
-
+export class WelcomeCard extends React.Component<Props, State> {
 	render() {
+		let text = <p>We will start you off with an example from the DFL call.</p>
+
+		if (this.props.upgrade == 'subcalc1') {
+			text = <p>This is a new version of the calculator. Your old caucuses have been saved as snapshots and can be retreived by using the <strong>Open Snapshot</strong> item under the <strong>Meetings</strong> menu.</p>
+		}
+
 		return (
 			<ValueCard key="welcome-card" id="welcome-card"
 				title="Welcome to the Minnesota DFL Subcacus Calculator"
 				image="dfl.jpg"
-				description='Please start by specifying the name of your meeting here. Most meetings have a name, like the "Ward 4 Precinct 7 Caucus" or the "Saint Paul City Convention".'
-				value={this.props.name}
-				defaultValue={this.props.defaultName}
 				allowEmpty={false}
 				onSave={this.props.save}
-			/>
+			>
+				{text}
+				<p>When you are ready to create your own meeting, choose <strong>New Meeting</strong> from the <strong>Meetings</strong> menu at the top of the calculator. Please send us feedback any time using the <strong>Feedback</strong> option under the <strong>About</strong> menu. Have a great walking subcaucus!</p>
+			</ValueCard>
 		)
 	}
 

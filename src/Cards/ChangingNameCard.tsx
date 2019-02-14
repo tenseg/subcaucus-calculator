@@ -58,7 +58,10 @@ export class ChangingNameCard extends React.Component<Props, State> {
 				}
 				onSave={this.props.save}
 			>
-				<p>You can save a new name for this meeting or, if this is really a new event, you may want to start a new meeting altogether.</p>
+				{this.props.name
+					? <p>You can rename the current meeting. However, if this is really a new event, you may want to start a new meeting altogether.</p>
+					: <p>Please provide a name for this meeting. Consider a descriptive name like "Ward 4 Precinct 7 Caucus".</p>
+				}
 			</ValueCard>
 		)
 	}

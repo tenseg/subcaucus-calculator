@@ -2,7 +2,7 @@
  * SubcaucusRow.tsx
  *
  * A ReactJS component that presents a single subcaucus row.
- * Also controles subcaucus row detail cards.
+ * Also controls subcaucus row detail cards.
  *
  * Copyright 2019 by Tenseg LLC
  * Made available under the MIT License
@@ -46,7 +46,7 @@ interface State {
 
 /**
  * A ReactJS component that presents a single subcaucus row.
- * Also controles subcaucus row detail cards.
+ * Also controls subcaucus row detail cards.
  */
 export class SubcaucusRow extends React.Component<Props, State> {
 
