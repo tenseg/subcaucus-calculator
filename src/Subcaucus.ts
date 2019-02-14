@@ -8,7 +8,7 @@
  */
 
 // see: https://github.com/mojotech/json-type-validation
-import { Decoder, object, string, optional, number, boolean } from '@mojotech/json-type-validation'
+import { Decoder, object, string, optional, number } from '@mojotech/json-type-validation'
 
 // local to this app
 import * as _u from './Utilities'
