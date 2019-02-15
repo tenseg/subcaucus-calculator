@@ -245,15 +245,15 @@ export class SubCalc {
 				"seed": 99938,
 				"subcaucuses": {
 					"1": {
-						"name": "A",
+						"name": "Subcaucus A",
 						"count": 15
 					},
 					"2": {
-						"name": "B",
+						"name": "Subcaucus B",
 						"count": 30
 					},
 					"3": {
-						"name": "C",
+						"name": "Subcaucus C",
 						"count": 5
 					}
 				}
@@ -273,15 +273,15 @@ export class SubCalc {
 				"seed": 99938,
 				"subcaucuses": {
 					"1": {
-						"name": "A",
+						"name": "Subcaucus A",
 						"count": 15
 					},
 					"2": {
-						"name": "B",
+						"name": "Subcaucus B",
 						"count": 30
 					},
 					"3": {
-						"name": "C",
+						"name": "Subcaucus C",
 						"count": 1
 					}
 				}

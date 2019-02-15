@@ -21,10 +21,7 @@ import { Snapshot } from './Snapshot'
 interface SubCalcOneJSON {
 	current: SubCalcOneCaucusJSON
 	saved: {
-		[key: string]: {
-			caucus: SubCalcOneCaucusJSON
-			saved: number
-		}
+		[key: string]: SubCalcOneSavedItemJSON
 	}
 }
 ```
@@ -32,11 +29,23 @@ interface SubCalcOneJSON {
 interface SubCalcOneJSON {
 	current: SubCalcOneCaucusJSON
 	saved: {
-		[key: string]: {
-			caucus: SubCalcOneCaucusJSON
-			saved: number
-		}
+		[key: string]: SubCalcOneSavedItemJSON
 	}
+}
+
+/**
+ * JSON representation of a single saved subcalc1 item in storage.
+ * 
+```typescript
+interface SubCalcOneSavedItemJSON {
+	caucus: SubCalcOneCaucusJSON
+	saved: number
+}
+```
+ */
+interface SubCalcOneSavedItemJSON {
+	caucus: SubCalcOneCaucusJSON
+	saved: number
 }
 
 /**
@@ -77,16 +86,19 @@ export class SubCalcOne {
 	})
 
 	/**
+	 * The json-type-validation decoder for subcalc v. 1 saved item JSON.
+	 */
+	static savedItemDecoder: Decoder<SubCalcOneSavedItemJSON> = object({
+		caucus: SubCalcOne.caucusDecoder,
+		saved: number()
+	})
+
+	/**
 	 * The json-type-validation decoder for subcalc v. 1 JSON.
 	 */
 	static decoder: Decoder<SubCalcOneJSON> = object({
 		current: SubCalcOne.caucusDecoder,
-		saved: dict(
-			object({
-				caucus: SubCalcOne.caucusDecoder,
-				saved: number()
-			})
-		)
+		saved: dict(SubCalcOne.savedItemDecoder)
 	})
 
 	/**
@@ -145,31 +157,34 @@ export class SubCalcOne {
 
 		if (json) {
 
-			// the decoding process validates the JSON and imbues it with types
-			let decoded = SubCalcOne.decoder.run(json)
+			if (json.current) {
+				const decoded = SubCalcOne.caucusDecoder.run(json.current)
 
-			if (decoded.ok) {
-				// since the JSON looks good, we can use it to create our current snapshot
-				this.snapshot = this.snapshotFromCaucus(decoded.result.current)
-				this.snapshot.revision = "Latest"
-				this.saved.push(this.snapshot)
+				if (decoded.ok) {
+					this.snapshot = this.snapshotFromCaucus(decoded.result)
+					this.snapshot.revision = "Latest"
+					this.saved.push(this.snapshot)
+				} else {
+					_u.debug("error decoding current caucus from subcalc1", decoded.error)
+				}
+			}
 
-				// we also create an array of modern snapshots that can later be written to local storage
-				Object.keys(decoded.result.saved).forEach((key) => {
+			if (json.saved) {
+				Object.keys(json.saved).forEach((key) => {
+					const savedItem = json.saved[key]
+					const decoded = SubCalcOne.savedItemDecoder.run(savedItem)
 					if (decoded.ok) { // this reassures the compiler since we are in an anonymous function
 						this.saved.push(
 							this.snapshotFromCaucus(
-								decoded.result.saved[key].caucus,
-								decoded.result.saved[key].saved
+								json.saved[key].caucus,
+								json.saved[key].saved
 							)
 						)
+					} else {
+						_u.debug(`error decoding saved caucus ${key} from subcalc1`, decoded.error)
 					}
 				})
-
-			} else {
-				_u.debug(decoded.error)
 			}
-
 		} else {
 			_u.debug("No subcalc 1 data found")
 		}
