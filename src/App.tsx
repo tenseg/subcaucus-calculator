@@ -338,7 +338,7 @@ this.keySuffix = String(_u.randomSeed())
 
         const url = snapshot.asURL()
 
-        let body = "Feel free to send whatever feedback you like. We have found that answering the following questions often helps us better understand requests. Thank you for using the subcaucus calculator and for caring enough to ask us to make it better!\n\nWhat were you trying to do?\n\nWhat action did you take to accomplish this goal?\n\nWhat did you expect to happen?\n\nWhat actually happened instead?\n\nInclude this  this very long and ugly link if you want us to be able to reproduce the current state of your calculator:\n\n" + url + "\n"
+        let body = "Feel free to send whatever feedback you like. We have found that answering the following questions often helps us better understand requests. Thank you for using the subcaucus calculator and for caring enough to ask us to make it better!\n\nWhat were you trying to do?\n\nWhat action did you take to accomplish this goal?\n\nWhat did you expect to happen?\n\nWhat actually happened instead?\n\nInclude this very long and ugly link if you want us to be able to reproduce the current state of your calculator:\n\n" + url + "\n"
 
         let subject = `SubCalc Feedback (${process.env.REACT_APP_VERSION})`;
 
