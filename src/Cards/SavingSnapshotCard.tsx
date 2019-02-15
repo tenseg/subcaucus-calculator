@@ -50,7 +50,7 @@ export class SavingSnapshotCard extends React.Component<Props, State> {
 				extraButtons={
 					<Button id="cancel-save-snapshot-button"
 						label="Cancel"
-						icon="pi pi-times"
+						icon="fa fa-fw fa-times"
 						className="p-button-secondary"
 						onClick={() => this.props.save()}
 					/>

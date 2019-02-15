@@ -211,7 +211,7 @@ export class SubcaucusRow extends React.Component<Props, State> {
 					<Button id={this.idPlus("row-delegates")}
 						className={`subcaucus-delegates-button ${s.delegates > 0 && !hideDelegates ? "p-button-success" : "p-button-secondary"} ${hideDelegates ? "hide-delegates" : ""}`}
 						label={s.delegates && !hideDelegates ? `${s.delegates}` : undefined}
-						icon={s.delegates && !hideDelegates ? undefined : (count && !hideDelegates ? 'pi pi-ban' : 'pi')}
+						icon={s.delegates && !hideDelegates ? undefined : (count && !hideDelegates ? 'fa fa-ban' : 'fa')}
 						onClick={() => this.setState({ showInfo: true })}
 						disabled={count === 0 || hideDelegates}
 					>{hideDelegates

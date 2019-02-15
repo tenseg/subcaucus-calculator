@@ -193,13 +193,13 @@ export class ValueCard extends React.Component<Props, State> {
                 ? ((this.props.value != undefined)
                     ? <Button id={this.idPlus("save-button")}
                         label="Save"
-                        icon="pi pi-check"
+                        icon="fa fa-fw fa-check"
                         disabled={illegallyEmpty}
                         onClick={this.save(_u.unwrapString(value, this.defaultValue()))}
                     />
                     : <Button id={this.idPlus("close-button")}
                         label="Close"
-                        icon="pi pi-times"
+                        icon="fa fa-fw fa-times"
                         onClick={this.save()}
                     />
                 )
@@ -210,7 +210,7 @@ export class ValueCard extends React.Component<Props, State> {
                 ? ''
                 : <Button id={this.idPlus("cancel-button")}
                     label="Cancel"
-                    icon="pi pi-times"
+                    icon="fa fa-fw fa-times"
                     className="p-button-secondary"
                     onClick={this.save()}
                 />
@@ -240,7 +240,7 @@ export class ValueCard extends React.Component<Props, State> {
                             {this.props.onSave && this.props.value == undefined
                                 ? <Button
                                     id={this.idPlus("picture-close-button")}
-                                    icon="pi pi-times"
+                                    icon="fa fa-fw fa-times"
                                     onClick={this.save()}
                                 />
                                 : <></>

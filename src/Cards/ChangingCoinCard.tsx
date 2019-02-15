@@ -51,7 +51,7 @@ export class ChangingCoinCard extends React.Component<Props, State> {
 				extraButtons={this.props.allowed
 					? <Button id="random-coin-button"
 						label="Generate random coin"
-						icon="pi pi-refresh"
+						icon="fa fa-fw fa-sync-alt"
 						className="p-button-success"
 						onClick={this.props.generate}
 					/>

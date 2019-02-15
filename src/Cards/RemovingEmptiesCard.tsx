@@ -46,18 +46,18 @@ export class RemovingEmptiesCard extends React.Component<Props, State> {
 					<>
 						<Button id="remove-all-empties-button"
 							label="Remove All Empties"
-							icon="pi pi-trash"
+							icon="fa fa-fw fa-trash"
 							onClick={() => this.props.removeEmpties()}
 						/>
 						<Button id="remove-some-empties-button"
 							label="Remove Only Unnamed"
-							icon="pi pi-trash"
+							icon="fa fa-fw fa-trash"
 							className="p-button-warning"
 							onClick={() => this.props.removeEmpties('unnamed')}
 						/>
 						<Button id="cancel-remove-button"
 							label="Cancel"
-							icon="pi pi-times"
+							icon="fa fa-fw fa-times"
 							className="p-button-secondary"
 							onClick={() => this.props.cancel()}
 						/>

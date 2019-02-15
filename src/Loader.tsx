@@ -71,7 +71,7 @@ export class Loader extends React.Component<Props, State> {
         const items: any = []
         items.push({
             label: "Back to the calculator",
-            icon: "pi pi-fw pi-caret-left",
+            icon: "fa fa-fw fa-chevron-left",
             command: () => this.props.onLoad()
         })
         return <Menubar key="loader-menu" model={items} id="app-main-menu" />
@@ -83,11 +83,11 @@ export class Loader extends React.Component<Props, State> {
     sortOrderIcon = (button: 'name' | 'date'): string => {
         return button === 'name'
             ? this.state.sortBy === "name"
-                ? "pi pi-chevron-circle-up"
-                : "pi pi-chevron-circle-off"
+                ? "fa fa-fw fa-chevron-circle-up"
+                : "fa fa-fw fa-chevron-circle-off"
             : this.state.sortBy === "date"
-                ? "pi pi-chevron-circle-down"
-                : "pi pi-chevron-circle-off"
+                ? "fa fa-fw fa-chevron-circle-down"
+                : "fa fa-fw fa-chevron-circle-off"
     }
 
     /**
@@ -149,20 +149,26 @@ export class Loader extends React.Component<Props, State> {
                         {revisedString}
                     </div>
                     <div className="loader-snapshot-name">
-                        <span className={"pi pi-clock"}>&nbsp;</span>
+                        <span className={"far fa-fw fa-clock"}>&nbsp;</span>
                         {snapshot.revision}
                     </div>
                 </div>
                 {this.state.showing === "saved"
                     ? <div className="loader-snapshot-actions">
                         <Button
-                            icon="pi pi-trash"
-                            className="p-button-danger"
+                            icon="fa fa-fw fa-trash"
+                            className="p-button loader-snapshot-trash-button"
                             onClick={() => this.deleteSnapshot(snapshot)}
                         />
-
                     </div>
-                    : ''
+                    : <div className="loader-snapshot-actions">
+                        <Button
+                            icon="fa fa-fw fa-trash-restor"
+                            className="p-button loader-snapshot-fake-button"
+                            disabled={true}
+                        />
+                    </div>
+
                 }
             </div>
         )
@@ -254,7 +260,7 @@ export class Loader extends React.Component<Props, State> {
                     footer={
                         <Button key="nothing-to-load-button"
                             label="OK"
-                            icon="pi pi-check"
+                            icon="fa fa-fw fa-check"
                             onClick={() => this.props.onLoad()}
                         />
                     }
@@ -265,7 +271,7 @@ export class Loader extends React.Component<Props, State> {
                     footer={
                         <Button key="nothing-to-load-button"
                             label="OK"
-                            icon="pi pi-check"
+                            icon="fa fa-fw fa-check"
                             onClick={() => this.setState({ showing: "saved" })}
                         />
                     }
@@ -344,12 +350,12 @@ export class Loader extends React.Component<Props, State> {
                         {this.state.showing === 'saved'
                             ? <Button id="add-meeting-button"
                                 label="Add new meeting"
-                                icon="pi pi-calendar-plus"
+                                icon="fa fa-fw fa-calendar-plus"
                                 onClick={() => this.props.onNew()}
                             />
                             : <Button id="empty-trash-button"
                                 label="Empty trash"
-                                icon="pi pi-trash"
+                                icon="fa fa-fw fa-trash"
                                 onClick={() => {
                                     this.props.subcalc.emptyTrash()
                                     this.setState({ showing: "saved" })
@@ -359,20 +365,20 @@ export class Loader extends React.Component<Props, State> {
                         {this.state.showing === 'saved'
                             ? <Button id="show-trashed-button"
                                 label="Show trash"
-                                icon="pi pi-trash"
+                                icon="fa fa-fw fa-trash"
                                 className="p-button-secondary"
                                 onClick={() => this.setState({ showing: "trashed" })}
                             />
                             : <Button id="show-saved-button"
                                 label="Show saved"
-                                icon="pi pi-calendar"
+                                icon="fa fa-fw fa-calendar"
                                 className="p-button-secondary"
                                 onClick={() => this.setState({ showing: "saved" })}
                             />
                         }
                         <Button id="cancel-loader-button"
                             label="Cancel"
-                            icon="pi pi-times"
+                            icon="fa fa-fw fa-times"
                             className="p-button-secondary"
                             onClick={() => this.props.onLoad()}
                         />

@@ -46,7 +46,7 @@ export class SecurityCard extends React.Component<Props, State> {
 				extraButtons={
 					<Button id="clear-data -button"
 						label="Clear All Data"
-						icon="pi pi-exclamation-triangle"
+						icon="fa fa-fw fa-exclamation-triangle"
 						className="p-button-danger"
 						onClick={this.props.clearData}
 					/>

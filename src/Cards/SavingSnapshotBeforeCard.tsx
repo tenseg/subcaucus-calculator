@@ -57,13 +57,13 @@ export class SavingSnapshotBeforeCard extends React.Component<Props, State> {
 					<>
 						<Button id="just-load-snapshot-button"
 							label="Don't save"
-							icon="pi pi-folder-open"
+							icon="fa fa-fw fa-exclamation-triangle"
 							className="p-button-warning"
 							onClick={this.save("")}
 						/>
 						<Button id="cancel-save-and-load-snapshot-button"
 							label="Cancel"
-							icon="pi pi-times"
+							icon="fa fa-fw fa-times"
 							className="p-button-secondary"
 							onClick={this.save()}
 						/>

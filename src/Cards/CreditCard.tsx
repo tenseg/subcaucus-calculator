@@ -46,7 +46,7 @@ export class CreditCard extends React.Component<Props, State> {
 				<p>Please check us out at <a href="https://tenseg.net">tenseg.net</a> if you need help building a website or making appropriate use of technology.</p>
 				<h3>Licenses</h3>
 				<p>This calculator's code is available under the MIT License at Bitbucket.</p>
-				<p>It makes use of <a href="https://reactjs.org/">ReactJS</a>, <a href="https://www.typescriptlang.org/">TypeScript</a>, <a href="https://www.primefaces.org/primereact">PrimeReact</a>, <a href="https://www.primefaces.org/primeng/#/icons">PrimeIcons</a>, <a href="https://github.com/mojotech/json-type-validation">JSON Type Validation</a>, <a href="https://github.com/ClickSimply/typescript-map">typescript-map</a>, and many other open source projects.
+				<p>It makes use of <a href="https://reactjs.org/">ReactJS</a>, <a href="https://www.typescriptlang.org/">TypeScript</a>, <a href="https://www.primefaces.org/primereact">PrimeReact</a>, <a href="https://fontawesome.com">Font Awesome</a>, <a href="https://github.com/mojotech/json-type-validation">JSON Type Validation</a>, <a href="https://github.com/ClickSimply/typescript-map">typescript-map</a>, and many other open source projects.
 				</p>
 				<div className="fineprint">
 					<>v {process.env.REACT_APP_VERSION}</>

@@ -50,7 +50,7 @@ export class ChangingNameCard extends React.Component<Props, State> {
 				extraButtons={this.props.name
 					? <Button id="new-meeting-button"
 						label="New meeting"
-						icon="pi pi-calendar-plus"
+						icon="fa fa-fw fa-calendar-plus"
 						className="p-button-secondary"
 						onClick={this.props.newMeeting}
 					/>

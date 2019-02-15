@@ -47,7 +47,7 @@ export class AboutCard extends React.Component<Props, State> {
 				extraButtons={
 					<Button id="show-credits-button"
 						label="Credits"
-						icon="pi pi-user"
+						icon="fa fa-fw fa-user"
 						className="p-button-secondary"
 						onClick={this.props.showCredits}
 					/>

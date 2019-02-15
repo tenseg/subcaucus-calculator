@@ -16,6 +16,7 @@ import { Growl } from 'primereact/growl'
 import 'primereact/resources/primereact.min.css'
 import 'primereact/resources/themes/nova-light/theme.css'
 import 'primeicons/primeicons.css'
+import '@fortawesome/fontawesome-free/css/all.css';
 
 
 // local to this app
@@ -500,7 +501,7 @@ this.keySuffix = String(_u.randomSeed())
      * Returns an icon to represent the supplied `SortOrder`.
      */
     sortOrderIcon = (order: SortOrder): string => {
-        return ["pi pi-chevron-circle-down", "pi pi-circle-off", "pi pi-chevron-circle-up"][order + 1]
+        return ["fa fa-chevron-circle-down", "far fa-circle", "fa fa-chevron-circle-up"][order + 1]
     }
 
     /**
@@ -539,69 +540,73 @@ this.keySuffix = String(_u.randomSeed())
         const items = [
             {
                 label: "About",
-                icon: "pi pi-fw pi-info-circle",
+                icon: "fa fa-fw fa-info-circle",
                 items: [
                     {
                         label: "Minnesota DFL Subcaucus Calculator",
+                        icon: "fa fa-fw fa-democrat",
                         command: () => this.addCardState(CardFor.ShowingAbout),
                     },
                     {
                         label: "Instructions",
+                        icon: "fa fa-fw fa-question-circle",
                         command: () => this.addCardState(CardFor.ShowingInstructions),
                     },
                     {
                         label: "Data Security",
+                        icon: "fa fa-fw fa-shield-alt",
                         command: () => this.addCardState(CardFor.ShowingSecurity),
                     },
                     {
                         label: "Feedback",
+                        icon: "fa fa-fw fa-comment",
                         command: this.emailFeedback
                     },
                 ]
             },
             {
                 label: "Meetings",
-                icon: "pi pi-fw pi-calendar",
+                icon: "fa fa-fw fa-calendar-alt",
                 items: [
                     {
                         label: "New meeting",
-                        icon: "pi pi-fw pi-calendar-plus",
+                        icon: "fa fa-fw fa-calendar-plus",
                         command: () => this.checkForRevisionBefore(this.newMeeting, "Before creating a new meeting...")
                     },
                     {
                         label: "Open snapshot",
-                        icon: "pi pi-fw pi-folder-open",
+                        icon: "fa fa-fw fa-folder-open",
                         command: () => this.checkForRevisionBefore(() => this.setState({ present: Presenting.Loading }), "Before opening a snapshot...")
                     },
                     {
                         label: this.subcalc.snapshot.revision ? "Rename snapshot" : "Save snapshot",
-                        icon: "pi pi-fw pi-clock",
+                        icon: "fa fa-fw fa-clock",
                         command: () => this.addCardState(CardFor.SavingSnapshot),
                     },
                     {
                         label: "Duplicate meeting",
-                        icon: "pi pi-fw pi-clone",
+                        icon: "fa fa-fw fa-clone",
                         command: () => this.checkForRevisionBefore(this.duplicateMeeting, "Before duplicating the meeting...")
                     },
                     {
                         label: "Coin settings",
-                        icon: "pi pi-fw pi-refresh",
+                        icon: "fa fa-fw fa-cog",
                         command: () => this.addCardState(CardFor.ChangingCoin)
                     },
                 ]
             },
             {
                 label: "Share",
-                icon: "pi pi-fw pi-share-alt",
+                icon: "fa fa-fw fa-share-alt",
                 items: [
                     {
                         label: "Email report",
-                        icon: "pi pi-fw pi-envelope",
+                        icon: "fa fa-fw fa-envelope",
                         command: this.emailSnapshot
                     },
                     {
                         label: "Text document",
-                        icon: "pi pi-fw pi-align-left",
+                        icon: "fa fa-fw fa-file-alt",
                         command: () => {
                             if (_u.isApp()) {
                                 location.href = "subcalc://share-text/" + encodeURIComponent(this.subcalc.snapshot.asText())
@@ -612,7 +617,7 @@ this.keySuffix = String(_u.randomSeed())
                     },
                     {
                         label: "CSV spreadsheet",
-                        icon: "pi pi-fw pi-table",
+                        icon: "fa fa-fw fa-file-csv",
                         command: () => {
                             if (_u.isApp()) {
                                 location.href = "subcalc://share-csv/" + encodeURIComponent(this.subcalc.snapshot.asCSV()) + "?filename=subcalc"
@@ -623,7 +628,7 @@ this.keySuffix = String(_u.randomSeed())
                     },
                     {
                         label: "JSON code",
-                        icon: "pi pi-fw pi-save",
+                        icon: "fa fa-fw fa-file-code",
                         command: () => {
                             const jsnap = this.subcalc.snapshot.toJSON()
                             if (_u.isApp()) {
@@ -635,7 +640,7 @@ this.keySuffix = String(_u.randomSeed())
                     },
                     {
                         label: "Link",
-                        icon: "pi pi-fw pi-external-link",
+                        icon: "fa fa-fw fa-link",
                         command: () => {
                             if (_u.isApp()) {
                                 location.href = "subcalc://share-text/" + encodeURIComponent(this.subcalc.snapshot.asURL())
@@ -1005,7 +1010,7 @@ this.keySuffix = String(_u.randomSeed())
                         <Button id="subcaucus-delegate-head"
                             label="Dels"
                             iconPos="right"
-                            icon={hideDelegates ? "pi pi-eye-slash" : "pi pi-eye"}
+                            icon={hideDelegates ? "fa fa-fw fa-eye-slash" : "fa fa-fw fa-eye"}
                             onClick={() => this.setState({ hideDelegates: !hideDelegates })}
                         />
                     </div>
@@ -1015,7 +1020,7 @@ this.keySuffix = String(_u.randomSeed())
                     <div id="subcaucus-footer">
                         <Button id="add-subcaucus-button"
                             label="Add Subcaucus"
-                            icon="pi pi-plus"
+                            icon="fa fa-fw fa-plus"
                             onClick={() => {
                                 snapshot.addSubcaucus()
                                 this.setStateSubcaucuses()
@@ -1023,13 +1028,13 @@ this.keySuffix = String(_u.randomSeed())
                         />
                         <Button id="remove-empty-subcaucuses-button"
                             label="Empties"
-                            icon="pi pi-trash"
+                            icon="fa fa-fw fa-trash"
                             tooltip="Remove subcaucuses that have no members"
                             tooltipOptions={this.tooltipOptions}
                             onClick={() => this.addCardState(CardFor.RemovingEmpties)}
                         />
                         <Button id="clear-counts-button"
-                            icon="pi pi-minus-circle"
+                            icon="fa fa-fw fa-minus-circle"
                             tooltip="Zero out the members of each subcaucus"
                             tooltipOptions={this.tooltipOptions}
                             onClick={() => this.checkForRevisionBefore(() => {
@@ -1040,7 +1045,7 @@ this.keySuffix = String(_u.randomSeed())
                         />
                         {_u.isDebugging()
                             ? <Button id="random-coin-button"
-                                icon="pi pi-refresh"
+                                icon="fa fa-fw fa-sync-alt"
                                 className="p-button-success"
                                 tooltip="Get new random seed for the coin"
                                 tooltipOptions={this.tooltipOptions}
