@@ -667,6 +667,10 @@ body {
                 }
             }
             
+            &:after {
+                content: " "
+            }
+            
             img {
                 position: absolute;
                 top: 0;

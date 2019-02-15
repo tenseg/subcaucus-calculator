@@ -633,8 +633,11 @@ export class SubCalc {
 	 * this function will use the local storage version and then
 	 * remove the query from local storage.
 	 */
-	query = () => {
-		const query = localStorage.getItem("query")
+	query = (query?: string | undefined | null) => {
+
+		if (!query) {
+			query = localStorage.getItem("query") // may return null
+		}
 
 		if (!query) return
 

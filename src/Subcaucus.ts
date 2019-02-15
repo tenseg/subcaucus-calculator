@@ -127,7 +127,7 @@ export class Subcaucus {
 	}
 
 	/**
-	 * Validate the incomming JSON and use it to populate this subcaucus.
+	 * Validate the incoming JSON and use it to populate this subcaucus.
 	 */
 	fromJSON = (json: SubcaucusJSON) => {
 		const decoded = Subcaucus.decoder.run(json)

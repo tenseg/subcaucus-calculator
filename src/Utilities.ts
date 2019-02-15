@@ -225,9 +225,14 @@ export function isDebugging(): boolean {
  * Return an object with some version and build information about our iOS app.
  */
 export function getApp(): { app: string, version: string, build: string } {
+	let standalone = false
+	if (window.matchMedia('(display-mode: standalone)').matches) {
+		standalone = true
+	}
+
 	return {
-		app: process.env.REACT_APP_IOS_VERSION ? 'ios' : '',
-		version: process.env.REACT_APP_IOS_VERSION || '',
+		app: process.env.REACT_APP_IOS_VERSION ? 'ios' : (standalone ? 'standalone' : ''),
+		version: process.env.REACT_APP_IOS_VERSION || process.env.REACT_APP_VERSION || '',
 		build: process.env.REACT_APP_IOS_BUILD || ''
 	}
 }

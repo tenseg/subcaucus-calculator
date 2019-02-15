@@ -42,6 +42,7 @@ import { AboutCard } from './Cards/AboutCard';
 import { CreditCard } from './Cards/CreditCard';
 import { SecurityCard } from './Cards/SecurityCard';
 import { ViabilityCard } from './Cards/ViabilityCard';
+import { PasteCard } from './Cards/PasteCard';
 
 /**
  * Facilitates sorting up or down (or not at all), as needed.
@@ -76,6 +77,7 @@ enum CardFor {
     ShowingInstructions,
     ShowingSecurity,
     Viability,
+    Pasting,
 }
 
 /**
@@ -190,6 +192,7 @@ this.keySuffix = String(_u.randomSeed())
         if (this.subcalc.incoming.length > 0) {
             if (this.subcalc.snapshot.revision === '') {
                 cards = [CardFor.SavingSnapshotBefore]
+                before = "Before importing data..."
                 afterBefore = this.completeIncoming
             } else {
                 this.completeIncoming()
@@ -537,6 +540,7 @@ this.keySuffix = String(_u.randomSeed())
      * NOTE: Do not `setState()` in this method.
      */
     renderMenu = (): JSX.Element => {
+        const { app } = _u.getApp()
         const items = [
             {
                 label: "About",
@@ -607,6 +611,7 @@ this.keySuffix = String(_u.randomSeed())
                     {
                         label: "Text document",
                         icon: "fa fa-fw fa-file-alt",
+                        disabled: app === 'standalone',
                         command: () => {
                             if (_u.isApp()) {
                                 location.href = "subcalc://share-text/" + encodeURIComponent(this.subcalc.snapshot.asText())
@@ -618,6 +623,7 @@ this.keySuffix = String(_u.randomSeed())
                     {
                         label: "CSV spreadsheet",
                         icon: "fa fa-fw fa-file-csv",
+                        disabled: app === 'standalone',
                         command: () => {
                             if (_u.isApp()) {
                                 location.href = "subcalc://share-csv/" + encodeURIComponent(this.subcalc.snapshot.asCSV()) + "?filename=subcalc"
@@ -629,6 +635,7 @@ this.keySuffix = String(_u.randomSeed())
                     {
                         label: "JSON code",
                         icon: "fa fa-fw fa-file-code",
+                        disabled: app === 'standalone',
                         command: () => {
                             const jsnap = this.subcalc.snapshot.toJSON()
                             if (_u.isApp()) {
@@ -651,6 +658,18 @@ this.keySuffix = String(_u.randomSeed())
                                 } else {
                                     this.growlAlert(`Failed to get a copy.`, 'error', 'Not copied!')
                                 }
+                            }
+                        }
+                    },
+                    {
+                        label: "Paste clipboard",
+                        icon: "fa fa-fw fa-clipboard",
+                        command: () => {
+                            if (_u.isApp()) {
+                                // will reload the app with the clipboard content
+                                location.href = "subcalc://get-clipboard/"
+                            } else {
+                                this.addCardState(CardFor.Pasting)
                             }
                         }
                     },
@@ -732,6 +751,18 @@ this.keySuffix = String(_u.randomSeed())
                 case CardFor.Viability: return <ViabilityCard
                     save={() => this.removeCardState(CardFor.Viability)}
                     snapshot={this.subcalc.snapshot}
+                />
+                case CardFor.Pasting: return <PasteCard
+                    save={(value?: string) => {
+                        this.removeCardState(CardFor.Pasting)
+                        if (value) {
+                            this.growlAlert(value, 'success', 'Received')
+                            const url = new URL(value)
+                            window.location.search = url.search
+                        } else {
+                            this.growlAlert(`Failed to get anything from the clipboard.`, 'error', 'Nothing received!')
+                        }
+                    }}
                 />
             }
             return accumulator
@@ -1090,9 +1121,14 @@ this.keySuffix = String(_u.randomSeed())
 
         if (!_u.isDebugging()) return <></>
 
+        let standalone = false
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            standalone = true
+        }
+
         return (
             <div key={_u.randomSeed()} className="debugging">
-                <p>This is debugging info for <a href="https://grand.clst.org:3000/tenseg/subcalc-pr/issues" target="_repository">subcalc-pr</a> (with <a href="https://reactjs.org/docs/react-component.html" target="_react">ReactJS</a>, <a href="https://www.primefaces.org/primereact/" target="_primereact">PrimeReact</a>, <a href="https://www.primefaces.org/primeng/#/icons" target="_primeicons">PrimeIcons</a>) derrived from <a href="https://bitbucket.org/tenseg/subcalc-js/src" target="_bitbucket">subcalc-js</a>.
+                <p>This is debugging info for <a href="https://grand.clst.org:3000/tenseg/subcalc-pr/issues" target="_repository">subcalc-pr</a> (with <a href="https://reactjs.org/docs/react-component.html" target="_react">ReactJS</a>, <a href="https://www.primefaces.org/primereact/" target="_primereact">PrimeReact</a>, <a href="https://www.primefaces.org/primeng/#/icons" target="_primeicons">PrimeIcons</a>) derrived from <a href="https://bitbucket.org/tenseg/subcalc-js/src" target="_bitbucket">subcalc-js</a>. {standalone ? "(standalone)" : "(web)"}
                 </p>
                 <pre>{this.subcalc.snapshot.asText()}</pre>
                 <div className="columns">
