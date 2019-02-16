@@ -14,13 +14,13 @@ import { Decoder, object, number } from '@mojotech/json-type-validation'
 // local to this app
 import * as _u from './Utilities'
 import { Snapshot } from './Snapshot'
-import { SubCalcOne } from './SubCalcOne';
+import { SubCalcTwo } from './SubCalcTwo';
 import { isArray } from 'util';
 
 declare global {
 
 	/**
-	 * JSON representation of subcalc2 in storage.
+	 * JSON representation of subcalc3 in storage.
 	 * 
 	```typescript
 	interface SubCalcJSON {
@@ -41,7 +41,7 @@ declare global {
 export enum SubCalcUpgrades {
 	None = '',
 	New = 'new user',
-	FromV1 = 'subcalc1'
+	FromV1 = 'subcalc2'
 }
 
 
@@ -95,7 +95,7 @@ export class SubCalc {
 	/**
 	 * Set this to trigger special welcome messages for users.
 	 */
-	upgrade?: 'new' | 'subcalc1'
+	upgrade?: 'new' | 'subcalc2'
 
 	/**
 	 * A prefix to be used when creating local storage items
@@ -318,7 +318,7 @@ export class SubCalc {
 	}
 
 	/**
-	 * Write the current subcalc2 item out to local storage.
+	 * Write the current subcalc3 item out to local storage.
 	 * 
 	 * This includes writing the current snapshot out.
 	 */
@@ -330,10 +330,10 @@ export class SubCalc {
 		}
 		try {
 			const jsonSubCalcString = JSON.stringify(jsonSubCalc)
-			_u.debug("storing subcalc2", jsonSubCalcString)
-			localStorage.setItem("subcalc2", jsonSubCalcString)
+			_u.debug("storing subcalc3", jsonSubCalcString)
+			localStorage.setItem("subcalc3", jsonSubCalcString)
 		} catch (e) {
-			_u.alertUser(new Error("Failed to save subcalc2 to local storage"), e)
+			_u.alertUser(new Error("Failed to save subcalc3 to local storage"), e)
 		}
 	}
 
@@ -343,7 +343,7 @@ export class SubCalc {
 	 * Defaults to writing the current snapshot.
 	 */
 	writeSnapshot = (snapshot?: Snapshot) => {
-		// default to this.snapshot and if it is this.snapshot then write the subcalc2 record
+		// default to this.snapshot and if it is this.snapshot then write the subcalc3 record
 		if (!snapshot) {
 			snapshot = this.snapshot
 		}
@@ -445,13 +445,13 @@ export class SubCalc {
 
 
 	/**
-	 * Try to populate this instance with subcalc2 data from local storage.
+	 * Try to populate this instance with subcalc3 data from local storage.
 	 */
 	read = () => {
 		let json: SubCalcJSON
 
 		try {
-			json = JSON.parse(localStorage.getItem("subcalc2") || 'false')
+			json = JSON.parse(localStorage.getItem("subcalc3") || 'false')
 		} catch (e) {
 			_u.debug(e)
 			return
@@ -476,15 +476,15 @@ export class SubCalc {
 			}
 
 		} else {
-			// try to populate this instance with subcalc1 data
-			const subcalcOne = new SubCalcOne(this.device)
-			if (subcalcOne.snapshot) {
-				this.snapshot = subcalcOne.snapshot
+			// try to populate this instance with subcalc2 data
+			const subCalcTwo = new SubCalcTwo(this.device)
+			if (subCalcTwo.snapshot) {
+				this.snapshot = subCalcTwo.snapshot
 				this.write()
-				subcalcOne.saved.forEach((snapshot) => {
+				subCalcTwo.saved.forEach((snapshot) => {
 					this.writeSnapshot(snapshot)
 				})
-				this.upgrade = 'subcalc1'
+				this.upgrade = 'subcalc2'
 			}
 
 			// still nothing, look for incoming query data
@@ -578,7 +578,7 @@ export class SubCalc {
 			return undefined
 		}
 
-		const decoded = SubCalcOne.caucusDecoder.run(json)
+		const decoded = SubCalcTwo.caucusDecoder.run(json)
 
 		if (decoded.ok) {
 			const created = new Date(decoded.result.seed)
@@ -646,15 +646,15 @@ export class SubCalc {
 		const params = new URLSearchParams(query)
 
 		const caucus = decodeURIComponent(params.get("caucus") || '')
-		const subcalc1 = decodeURIComponent(params.get("subcalc1") || '')
-		const snap = decodeURIComponent(params.get("snapshot") || '')
 		const subcalc2 = decodeURIComponent(params.get("subcalc2") || '')
+		const snap = decodeURIComponent(params.get("snapshot") || '')
+		const subcalc3 = decodeURIComponent(params.get("subcalc3") || '')
 
 		const debug = decodeURIComponent(params.get("debug") || '')
 
-		if (subcalc2) {
-			_u.debug("query subcalc2", subcalc2)
-			const snapshots = this.decodeSnapshots(subcalc2)
+		if (subcalc3) {
+			_u.debug("query subcalc3", subcalc3)
+			const snapshots = this.decodeSnapshots(subcalc3)
 			this.incoming.push(...snapshots)
 		}
 
@@ -664,13 +664,13 @@ export class SubCalc {
 			if (snapshot) this.incoming.push(snapshot)
 		}
 
-		if (subcalc1) {
-			_u.debug("query subcalc1", subcalc1)
-			localStorage.setItem("incoming", subcalc1)
-			const incoming = new SubCalcOne(this.device, "incoming")
+		if (subcalc2) {
+			_u.debug("query subcalc2", subcalc2)
+			localStorage.setItem("incoming", subcalc2)
+			const incoming = new SubCalcTwo(this.device, "incoming")
 			localStorage.removeItem("incoming")
 			this.incoming.push(...incoming.saved)
-			this.upgrade = 'subcalc1'
+			this.upgrade = 'subcalc2'
 		}
 
 		if (caucus) {

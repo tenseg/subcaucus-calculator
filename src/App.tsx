@@ -197,10 +197,10 @@ this.keySuffix = String(_u.randomSeed())
             } else {
                 this.completeIncoming()
             }
-        } else {
-            if (this.subcalc.upgrade) {
-                cards = [CardFor.Welcome]
-            }
+        }
+
+        if (this.subcalc.upgrade) {
+            cards = [CardFor.Welcome]
         }
 
         this.state = {
@@ -1153,11 +1153,11 @@ this.keySuffix = String(_u.randomSeed())
      * or simply as an alert if there is not growl instance yet.
      */
     growlAlert = (message: string, severity: 'error' | 'warn' | 'success' | 'info' = 'error', summary = '') => {
-        if (!summary && message) {
-            summary = message
-            message = ''
-        }
         if (this.growl) {
+            if (!summary && message) {
+                summary = message
+                message = ''
+            }
             this.growl.show({
                 severity: severity,
                 summary: summary,
@@ -1165,7 +1165,7 @@ this.keySuffix = String(_u.randomSeed())
                 detail: message
             });
         } else {
-            alert(message)
+            alert((summary ? `${summary}: ` : '') + message)
         }
     }
 

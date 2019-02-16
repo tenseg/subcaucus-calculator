@@ -296,7 +296,7 @@ export function unwrapBoolean(maybeBoolean?: boolean, empty = false): boolean {
  * A random number provided by Math.random() to use as a seed
  * for our own random number sequences.
  * 
- * Note that in SubCalc1 we used seconds from Unix epoch as seeds,
+ * Note that in subcalc2 we used seconds from Unix epoch as seeds,
  * but that makes it somewhat confusing by implying a connection between
  * the time and the seed. There really is no such connection.
  */

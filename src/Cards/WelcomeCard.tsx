@@ -39,7 +39,7 @@ export class WelcomeCard extends React.Component<Props, State> {
 	render() {
 		let text = <p>We will start you off with an example from the DFL call.</p>
 
-		if (this.props.upgrade == 'subcalc1') {
+		if (this.props.upgrade == 'subcalc2') {
 			text = <p>This is a new version of the calculator. Your old caucuses have been saved as snapshots and can be retreived by using the <strong>Open Snapshot</strong> item under the <strong>Meetings</strong> menu.</p>
 		}
 
