@@ -291,7 +291,7 @@ export class SubCalc {
 		this.snapshot = firstExample
 		this.writeSnapshot(firstExample)
 		this.writeSnapshot(secondExample)
-		this.upgrade = 'new'
+		this.upgrade = this.upgrade || 'new'
 	}
 
 	/**
