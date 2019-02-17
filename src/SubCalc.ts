@@ -86,9 +86,13 @@ export class SubCalc {
 	/**
 	 * This is where we save snapshots awaiting import.
 	 * 
-	 * If there is more than one in the array, then the 
-	 * first would be come the current snapshot and the
-	 * remainder would be saved.
+	 * The first item in this array will always become the
+	 * current snapshot, then the and the remainder 
+	 * will be saved.
+	 * 
+	 * We queue these up so that we can always give the user
+	 * a chance to save changes in the current snapshot before 
+	 * they are overwritten by the incoming snapshot. 
 	 */
 	incoming: Array<Snapshot> = []
 
@@ -130,13 +134,12 @@ export class SubCalc {
 		// a poorly formed snapshot to mark failure of the read
 		this.snapshot = new Snapshot({ device: 0, created: "" })
 
-		// store any incoming query items into the incoming variable
-		this.query()
-
 		// look for local data
 		// if found, it will override the values above
-
 		this.read()
+
+		// store any incoming query items into the incoming variable
+		this.query()
 
 		// check to see if the read succeeded
 		if (!this.snapshot.created) {
@@ -487,10 +490,6 @@ export class SubCalc {
 				this.upgrade = 'subcalc2'
 			}
 
-			// still nothing, look for incoming query data
-			if (!this.snapshot && this.incoming.length > 0) {
-				this.completeIncoming()
-			}
 		}
 	}
 
@@ -608,6 +607,9 @@ export class SubCalc {
 
 	/**
 	 * Finish importing from the query parameters.
+	 * 
+	 * Presumably the user has had a chance to save changes 
+	 * to the current snapshot before this is called.
 	 */
 	completeIncoming = () => {
 		this.snapshot = this.incoming[0]

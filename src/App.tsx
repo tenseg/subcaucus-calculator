@@ -189,6 +189,13 @@ this.keySuffix = String(_u.randomSeed())
         let before: string | undefined = undefined
         let afterBefore: (() => void) | undefined = undefined
 
+        // if there was some kind of upgrade, make sure the user gets a welcome
+        if (this.subcalc.upgrade) {
+            cards = [CardFor.Welcome]
+        }
+
+        // complete the loading of incoming (query) data,
+        // but warn before overwriting unsaved changes
         if (this.subcalc.incoming.length > 0) {
             if (this.subcalc.snapshot.revision === '') {
                 cards = [CardFor.SavingSnapshotBefore]
@@ -197,10 +204,6 @@ this.keySuffix = String(_u.randomSeed())
             } else {
                 this.completeIncoming()
             }
-        }
-
-        if (this.subcalc.upgrade) {
-            cards = [CardFor.Welcome]
         }
 
         this.state = {

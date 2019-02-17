@@ -8,7 +8,7 @@
  */
 
 // see: https://github.com/mojotech/json-type-validation
-import { Decoder, object, string, number, array, dict } from '@mojotech/json-type-validation'
+import { Decoder, object, string, number, optional, dict } from '@mojotech/json-type-validation'
 
 // local to this app
 import * as _u from './Utilities'
@@ -28,7 +28,7 @@ interface SubCalcTwoJSON {
  */
 interface SubCalcTwoJSON {
 	current: SubCalcTwoCaucusJSON
-	saved: {
+	saved?: {
 		[key: string]: SubCalcTwoSavedItemJSON
 	}
 }
@@ -98,7 +98,7 @@ export class SubCalcTwo {
 	 */
 	static decoder: Decoder<SubCalcTwoJSON> = object({
 		current: SubCalcTwo.caucusDecoder,
-		saved: dict(SubCalcTwo.savedItemDecoder)
+		saved: optional(dict(SubCalcTwo.savedItemDecoder))
 	})
 
 	/**
@@ -137,16 +137,10 @@ export class SubCalcTwo {
 	}
 
 	/**
-	 * Try to populate this instance with subcalc v. 1 data from local storage.
+	 * Try to populate this instance with subcalc v. 2 data from local storage.
 	 */
 	read = (storageKey: string) => {
 		let json: SubCalcTwoJSON
-
-		// if we are running in the phone app, wait a few seconds
-		// for the app to get a chance to stuff subcalc data into local storage
-		if (_u.isApp()) {
-			this.sleep(2000) // hack hack hack... very flimsy
-		}
 
 		try {
 			json = JSON.parse(localStorage.getItem(storageKey) || 'false')
@@ -156,6 +150,11 @@ export class SubCalcTwo {
 		}
 
 		if (json) {
+			// prevent triggering a new restore from "subcalc" by moving the stored values to a backup
+			if (storageKey === 'subcalc') {
+				localStorage.setItem("subcalc2backup", JSON.stringify(json))
+				localStorage.removeItem(storageKey)
+			}
 
 			if (json.current) {
 				const decoded = SubCalcTwo.caucusDecoder.run(json.current)
@@ -169,8 +168,8 @@ export class SubCalcTwo {
 				}
 			}
 
-			if (json.saved) {
-				Object.keys(json.saved).forEach((key) => {
+			Object.keys(json.saved || {}).forEach((key) => {
+				if (json.saved) {
 					const savedItem = json.saved[key]
 					const decoded = SubCalcTwo.savedItemDecoder.run(savedItem)
 					if (decoded.ok) { // this reassures the compiler since we are in an anonymous function
@@ -183,15 +182,15 @@ export class SubCalcTwo {
 					} else {
 						_u.debug(`error decoding saved caucus ${key} from subcalc2`, decoded.error)
 					}
-				})
-			}
+				}
+			})
 		} else {
 			_u.debug("No subcalc 2 data found")
 		}
 	}
 
 	/**
-	 * Creates a current style snapshot from v.1 style caucus data.
+	 * Creates a current style snapshot from v.2 style caucus data.
 	 */
 	snapshotFromCaucus = (caucus: SubCalcTwoCaucusJSON, saved?: number): Snapshot => {
 		const revised = saved
