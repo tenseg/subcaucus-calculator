@@ -192,13 +192,15 @@ export function debug(message?: any, ...optionalParams: any[]) {
 /**
  * A placeholder for an alert callback function.
  */
-var alertFunction: ((message: string) => void)
+window['_tg_alert_function'] = (message: string, severity?: 'error' | 'warn' | 'success' | 'info', summary?: string, sticky?: 'sticky') => {
+	alert(message)
+}
 
 /**
  * Set the alert callback function.
  */
-export function setAlertFunction(callback: ((message: string) => void)) {
-	alertFunction = callback
+export function setAlertFunction(callback: ((message: string, severity?: 'error' | 'warn' | 'success' | 'info', summary?: string, sticky?: 'sticky') => void)) {
+	window['_tg_alert_function'] = callback
 }
 
 /**
@@ -206,12 +208,17 @@ export function setAlertFunction(callback: ((message: string) => void)) {
  * or a plain JavaScript alert.
  */
 export function alertUser(error: Error, ...optionalParams: any[]) {
-	if (alertFunction) {
-		alertFunction(error.message)
-	} else {
-		alert(error.message)
-	}
+	window['_tg_alert_function'](error.message)
 	debug(error, ...optionalParams)
+}
+
+/**
+ * Inform the user of something using either the alert callback function
+ * or a plain JavaScript alert.
+ */
+export function informUser(message: string, title: string = 'FYI', sticky?: 'sticky') {
+	window['_tg_alert_function'](message, 'info', title, sticky)
+	debug(title + ': ' + message)
 }
 
 /**

@@ -29,6 +29,9 @@ if (window.location.search) {
         <App />,
         document.getElementById('root') as HTMLElement
     );
-    registerServiceWorker();
+    // skip the service worker in the iOS app
+    if (!process.env.REACT_APP_IOS_VERSION) {
+        registerServiceWorker();
+    }
 
 }

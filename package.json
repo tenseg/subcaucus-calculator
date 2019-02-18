@@ -1,6 +1,6 @@
 {
   "name": "subcalc",
-  "version": "3.0.0",
+  "version": "3.0.0-rc.5",
   "homepage": ".",
   "private": true,
   "dependencies": {

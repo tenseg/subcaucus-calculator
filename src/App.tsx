@@ -1124,14 +1124,11 @@ this.keySuffix = String(_u.randomSeed())
 
         if (!_u.isDebugging()) return <></>
 
-        let standalone = false
-        if (window.matchMedia('(display-mode: standalone)').matches) {
-            standalone = true
-        }
+        const app = _u.getApp()
 
         return (
             <div key={_u.randomSeed()} className="debugging">
-                <p>This is debugging info for <a href="https://grand.clst.org:3000/tenseg/subcalc-pr/issues" target="_repository">subcalc-pr</a> (with <a href="https://reactjs.org/docs/react-component.html" target="_react">ReactJS</a>, <a href="https://www.primefaces.org/primereact/" target="_primereact">PrimeReact</a>, <a href="https://www.primefaces.org/primeng/#/icons" target="_primeicons">PrimeIcons</a>) derrived from <a href="https://bitbucket.org/tenseg/subcalc-js/src" target="_bitbucket">subcalc-js</a>. {standalone ? "(standalone)" : "(web)"}
+                <p>This is debugging info for <a href="https://grand.clst.org:3000/tenseg/subcalc-pr/issues" target="_repository">subcalc-pr</a> (with <a href="https://reactjs.org/docs/react-component.html" target="_react">ReactJS</a>, <a href="https://www.primefaces.org/primereact/" target="_primereact">PrimeReact</a>, <a href="https://www.primefaces.org/primeng/#/icons" target="_primeicons">PrimeIcons</a>) derrived from <a href="https://bitbucket.org/tenseg/subcalc-js/src" target="_bitbucket">subcalc-js</a>. ({app.app || 'web'} {app.version})
                 </p>
                 <pre>{this.subcalc.snapshot.asText()}</pre>
                 <div className="columns">
@@ -1155,7 +1152,7 @@ this.keySuffix = String(_u.randomSeed())
      * Shows an alert using PrimeReact `Growl` if it is available,
      * or simply as an alert if there is not growl instance yet.
      */
-    growlAlert = (message: string, severity: 'error' | 'warn' | 'success' | 'info' = 'error', summary = '') => {
+    growlAlert = (message: string, severity: 'error' | 'warn' | 'success' | 'info' = 'error', summary: string = '', sticky?: 'sticky') => {
         if (this.growl) {
             if (!summary && message) {
                 summary = message
@@ -1164,8 +1161,9 @@ this.keySuffix = String(_u.randomSeed())
             this.growl.show({
                 severity: severity,
                 summary: summary,
-                closable: false,
-                detail: message
+                closable: sticky === 'sticky',
+                detail: message,
+                sticky: sticky === 'sticky',
             });
         } else {
             alert((summary ? `${summary}: ` : '') + message)
