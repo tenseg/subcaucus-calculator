@@ -64,7 +64,7 @@ function registerValidSW(swUrl: string) {
                 // It's the perfect time to display a 'New content is
                 // available; please refresh.' message in your web app.
                 console.log('New content is available; please refresh.');
-                _u.informUser("A new version of the calculator is availble. Close this an all other calculators, then reopen to get the new version.", 'New version available', 'sticky')
+                _u.informUser("A new version of the calculator is availble. Close this and all other calculators, then reopen to get the new version.", 'New version available', 'sticky')
               } else {
                 // At this point, everything has been precached.
                 // It's the perfect time to display a
