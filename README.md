@@ -26,22 +26,22 @@ SubCalc only has to save the “coin’s” random seed in order to reproduce th
 
 ## Building the subcaucus calculator
 
-You can find a lot more detail about building this React app in the [Create React App readme](README-CRA.md), but here are a few basics. You will need [npm](https://www.npmjs.com/) to build and use this app. (Feel free to use [yarn](https://yarnpkg.com) as an alternative to npm, but the instructions below are based on npm.)
+You can find a lot more detail about building this React app in the [Create React App readme](README-CRA.md), but here are a few basics. You will need [yarn](https://yarnpkg.com) to build and use this app. (Feel free to use [npm](https://www.npmjs.com/) as an alternative to yarn, but the instructions below are based on yarn.)
 
 Once you clone this repository you will have to make sure all the dependencies are loaded to your copy with:
 
 ```
-npm install
+yarn install
 ```
 
 To build the app for distribution to a production environment, use:
 
 ```
-npm run build
+yarn run build
 ```
 
 To build the app for development and launch a local web server to show you the development version on [localhost:3000](http://localhost:3000), use:
 
 ```
-npm run start
+yarn run start
 ```

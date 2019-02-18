@@ -4,5 +4,7 @@ node_modules
 dist
 build
 *.lock
+!yarn.lock
 *-lock.*
 local-notes
+*.log
