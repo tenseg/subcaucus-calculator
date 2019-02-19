@@ -636,77 +636,95 @@ body {
         }
     }
     
-    .p-card.valuecard {
-        position: absolute;
-        z-index: 10;
-        top: ( 5 * $form-margin );
-        left: $form-margin;
-        right: $form-margin;
-        min-width: 300px;
-        max-width: 500px;
-        margin: auto;
-        background-color: $card-color;
+    .valuecard-wrapper {
         
-        .picture-container {
-            position: relative;
-            height: 0;
-            padding-top: 270px / 500px * 100%;
-            overflow: hidden;
+        $valuecard-top-margin: ( 5 * $form-margin );
+        z-index: 10;
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+
+        .valuecard-inner-wrapper {
             
-            .p-button {
-                position: absolute;
-                top: 0;
-                right: 0;
-                margin: 0;
-                border: none;
-                background-color: transparent;
-                color: white;
+            height: 100%;
+            padding-top: $valuecard-top-margin;
+            padding-bottom: 200px;
+            overflow: scroll;
+            -webkit-overflow-scrolling: touch;
+        
+            .valuecard {
+                min-width: 300px;
+                max-width: 500px;
+                margin: auto;
                 
-                &:hover {
-                    color: $card-color;
+                .p-card  {
+                    background-color: $card-color;
+                    
+                    .picture-container {
+                        position: relative;
+                        height: 0;
+                        padding-top: 270px / 500px * 100%;
+                        overflow: hidden;
+                        
+                        .p-button {
+                            position: absolute;
+                            top: 0;
+                            right: 0;
+                            margin: 0;
+                            border: none;
+                            background-color: transparent;
+                            color: white;
+                            
+                            &:hover {
+                                color: $card-color;
+                            }
+                        }
+                        
+                        &:after {
+                            content: " "
+                        }
+                        
+                        img {
+                            position: absolute;
+                            top: 0;
+                            left: 0;
+                            width: 100%;
+                            height: 100%;
+                        }
+                    }
+                    .p-card-content {
+                        margin-bottom: 0 - $form-margin;
+                        
+                        input {
+                            width: 100%;
+                        }
+                    }
+
+                    .p-card-footer {
+                        text-align: left;
+                        
+                        .p-button {
+                            margin-top: $form-margin;
+                            margin-right: $form-margin;
+                        }
+                    }
+                    
+                    .fineprint {
+                        position: absolute;
+                        bottom: $form-margin;
+                        right: $form-margin;
+                        font-size: 75%
+                    }
+                    
+                }
+                
+                .success-color {
+                    color: $success-color;
                 }
             }
-            
-            &:after {
-                content: " "
-            }
-            
-            img {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-            }
         }
-        .p-card-content {
-            margin-bottom: 0 - $form-margin;
-            
-            input {
-                width: 100%;
-            }
-        }
-
-        .p-card-footer {
-            text-align: left;
-            
-            .p-button {
-                margin-top: $form-margin;
-                margin-right: $form-margin;
-            }
-        }
-        
-        .fineprint {
-            position: absolute;
-            bottom: $form-margin;
-            right: $form-margin;
-            font-size: 75%
-        }
-        
-    }
-    
-    .success-color {
-        color: $success-color;
     }
 }
 

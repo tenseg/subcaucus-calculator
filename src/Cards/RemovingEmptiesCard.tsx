@@ -42,6 +42,8 @@ export class RemovingEmptiesCard extends React.Component<Props, State> {
 		return (
 			<ValueCard key="remove-empties-card" id="remove-empties-card"
 				title="Remove empty subcaucuses"
+				allowEmpty={true}
+				onSave={() => this.props.cancel()}
 				footer={
 					<>
 						<Button id="remove-all-empties-button"

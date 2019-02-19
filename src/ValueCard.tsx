@@ -15,6 +15,9 @@ import { Button } from 'primereact/button'
 import { Card } from 'primereact/card'
 import { InputText } from 'primereact/inputtext'
 
+// see https://github.com/willmcpo/body-scroll-lock
+import { disableBodyScroll, clearAllBodyScrollLocks } from 'body-scroll-lock'
+
 // local to this app
 import * as _u from './Utilities'
 
@@ -32,6 +35,7 @@ interface Props {
     description?: string
     image?: string
     alt?: string
+    className?: string
     extraButtons?: JSX.Element
     footer?: JSX.Element
     type?: KindOfValue
@@ -60,6 +64,8 @@ export class ValueCard extends React.Component<Props, State> {
      */
     isPositiveInteger = false
 
+    cardRef: React.RefObject<HTMLDivElement> = React.createRef();
+
     /**
      * Construct a new ValueCard component.
      */
@@ -85,6 +91,15 @@ export class ValueCard extends React.Component<Props, State> {
             const image = new Image()
             image.src = this.props.image
         }
+        // hook up the ref
+        const cardElement = this.cardRef.current
+        if (cardElement) {
+            disableBodyScroll(cardElement)
+        }
+    }
+
+    componentWillUnmount = () => {
+        clearAllBodyScrollLocks()
     }
 
     /**
@@ -153,6 +168,7 @@ export class ValueCard extends React.Component<Props, State> {
      * Return news of a saved value to the callback.
      */
     save = (value?: string) => (event: React.MouseEvent<HTMLButtonElement | HTMLDivElement>) => {
+        _u.debug("save")
         if (this.props.onSave) {
             if (value === undefined) {
                 this.props.onSave()
@@ -166,11 +182,19 @@ export class ValueCard extends React.Component<Props, State> {
         }
     }
 
+    /**
+     * Stop clicks in the card from going any further.
+     */
+    stopPropagation = () => (event: React.MouseEvent<HTMLDivElement>) => {
+        _u.debug("stop propagation")
+        event.stopPropagation()
+    }
+
 	/**
 	 * Helper for creating id's for the card's DOM elements.
 	 */
-    idPlus = (suffix: string): string | undefined => {
-        return this.props.id ? `${this.props.id}-${suffix}` : undefined
+    idPlus = (suffix: string): string => {
+        return this.props.id ? `${this.props.id}-${suffix}` : ''
     }
 
     /**
@@ -221,63 +245,69 @@ export class ValueCard extends React.Component<Props, State> {
         }
 
         return (
-            <div className="valuecard-wrapper">
+            <>
                 <div className="background-blocker"
                     onClick={this.save()}
                 >
                 </div>
-                <Card id={this.idPlus("valuecard")}
-                    className={`valuecard ${this.idPlus("valuecard")}`}
-                    title={this.props.title}
-                    header={this.props.image
-                        ? <div id={this.idPlus("picture-container")}
-                            className="picture-container"
-                        >
-                            <img
-                                alt={`${this.props.alt}`}
-                                src={`${this.props.image}`}
-                            />
-                            {this.props.onSave && this.props.value == undefined
-                                ? <Button
-                                    id={this.idPlus("picture-close-button")}
-                                    icon="fa fa-fw fa-times"
-                                    onClick={this.save()}
-                                />
-                                : <></>
-                            }
+                <div className="valuecard-wrapper" onClick={this.save()}>
+                    <div className="valuecard-inner-wrapper" ref={this.cardRef} onClick={this.save()}>
+                        <div className="valuecard" onClick={this.stopPropagation()}>
+                            <Card id={this.idPlus("valuecard")}
+                                className={`${this.idPlus("valuecard")} ${this.props.className}`}
+                                title={this.props.title}
+                                header={this.props.image
+                                    ? <div id={this.idPlus("picture-container")}
+                                        className="picture-container"
+                                    >
+                                        <img
+                                            alt={`${this.props.alt}`}
+                                            src={`${this.props.image}`}
+                                        />
+                                        {this.props.onSave && this.props.value == undefined
+                                            ? <Button
+                                                id={this.idPlus("picture-close-button")}
+                                                icon="fa fa-fw fa-times"
+                                                onClick={this.save()}
+                                            />
+                                            : <></>
+                                        }
+                                    </div>
+                                    : undefined
+                                }
+                                footer={cardFooter}
+                            >
+                                {this.props.children
+                                    ? <div id={this.idPlus("valuecard-children")} className="valuecard-children">
+                                        {this.props.children}
+                                    </div>
+                                    : ''}
+                                {this.props.description
+                                    ? <div id={this.idPlus("valuecard-description")} className="valuecard-description">
+                                        <p>{this.props.description}</p>
+                                    </div>
+                                    : ''}
+                                {this.props.value != undefined
+                                    ? <InputText id={this.idPlus("card-field")}
+                                        className={isPositiveInteger ? "number" : "text"}
+                                        autoComplete="off"
+                                        keyfilter={isPositiveInteger ? "pint" : ""}
+                                        type="text"
+                                        pattern={isPositiveInteger ? "\\d*" : undefined}
+                                        value={isPositiveInteger ? (value === '0' ? '' : value) : value} // show 0 as blank for positive integers
+                                        placeholder={this.props.defaultValue}
+                                        onChange={this.handleChange()}
+                                        // onFocus={this.isPositiveInt ? this.focusOnWholeText() : undefined}
+                                        onKeyUp={this.handleKey()}
+                                        autoFocus
+                                    />
+                                    : ''
+                                }
+                            </Card>
                         </div>
-                        : undefined
-                    }
-                    footer={cardFooter}
-                >
-                    {this.props.children
-                        ? <div id={this.idPlus("valuecard-children")} className="valuecard-children">
-                            {this.props.children}
-                        </div>
-                        : ''}
-                    {this.props.description
-                        ? <div id={this.idPlus("valuecard-description")} className="valuecard-description">
-                            <p>{this.props.description}</p>
-                        </div>
-                        : ''}
-                    {this.props.value != undefined
-                        ? <InputText id={this.idPlus("card-field")}
-                            className={isPositiveInteger ? "number" : "text"}
-                            autoComplete="off"
-                            keyfilter={isPositiveInteger ? "pint" : ""}
-                            type="text"
-                            pattern={isPositiveInteger ? "\\d*" : undefined}
-                            value={isPositiveInteger ? (value === '0' ? '' : value) : value} // show 0 as blank for positive integers
-                            placeholder={this.props.defaultValue}
-                            onChange={this.handleChange()}
-                            // onFocus={this.isPositiveInt ? this.focusOnWholeText() : undefined}
-                            onKeyUp={this.handleKey()}
-                            autoFocus
-                        />
-                        : ''
-                    }
-                </Card>
-            </div>
+                    </div>
+                </div>
+            </>
         )
     }
 }

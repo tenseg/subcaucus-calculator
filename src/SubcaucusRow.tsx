@@ -237,8 +237,8 @@ export class SubcaucusRow extends React.Component<Props, State> {
 							}></div>
 						</>
 						}</Button>
+					{infoCard}
 				</div>
-				{infoCard}
 			</>
 		)
 	}
