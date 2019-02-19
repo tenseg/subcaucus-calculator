@@ -18,6 +18,9 @@ $body-color: #8f1731;
 $card-color: #f9edcb;
 $summary-color: #cccccc;
 $success-color: rgb(58, 148, 58);
+
+$app-width: 600px;
+$menu-height: 42px;
 $count-width: 60px;
 $delegate-width: 80px;
 
@@ -74,6 +77,10 @@ body {
     }
     
     #app-main-menu {
+        z-index: 2;
+        position: fixed;
+        width: $app-width;
+        height: $menu-height;
         border: none;
         border-radius: 0;
         background-color: $header-color;
@@ -130,11 +137,12 @@ body {
     #app-content {
         position: relative;
         margin: auto;
-        max-width: 600px;
+        max-width: $app-width;
         padding: 0;
 
         #meeting-info {
-    
+            padding-top: $menu-height;
+
             div.not-button,
             div.button,
             button.p-button {
@@ -184,6 +192,9 @@ body {
             
             #loader-header,
             #subcaucus-header {
+                z-index: 1;
+                position: sticky;
+                top: $menu-height;
                 display: flex;
                 
                 #subcaucus-name-head {
