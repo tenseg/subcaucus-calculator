@@ -47,6 +47,7 @@ export class ChangingCoinCard extends React.Component<Props, State> {
 				title={"Coin settings"}
 				type="positive integer"
 				value={this.props.value}
+				valueLabel="Random seed for coin"
 				allowEmpty={false}
 				extraButtons={this.props.allowed
 					? <Button id="random-coin-button"

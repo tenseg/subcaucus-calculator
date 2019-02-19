@@ -192,6 +192,7 @@ export class SubcaucusRow extends React.Component<Props, State> {
 						onBlur={this.handleBlur()}
 						onFocus={this.focusOnWholeText()}
 					/>
+					<label className="screenreader" htmlFor={this.idPlus("row-name")}>Name for subcaucus {s.id}</label>
 					<InputText id={this.idPlus("row-count")}
 						className="subcaucus-field subcaucus-count"
 						autoComplete="off"
@@ -208,6 +209,7 @@ export class SubcaucusRow extends React.Component<Props, State> {
 						// see https://grand.clst.org:3000/tenseg/subcalc-pr/issues/3
 						onFocus={this.focusOnWholeText()}
 					/>
+					<label className="screenreader" htmlFor={this.idPlus("row-count")}>Number of members for subcaucus {s.id}</label>
 					<Button id={this.idPlus("row-delegates")}
 						className={`subcaucus-delegates-button ${s.delegates > 0 && !hideDelegates ? "p-button-success" : "p-button-secondary"} ${hideDelegates ? "hide-delegates" : ""}`}
 						label={s.delegates && !hideDelegates ? `${s.delegates}` : undefined}

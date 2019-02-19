@@ -806,6 +806,12 @@ body {
     }
 }
 
+.screenreader {
+    position: absolute !important;
+    top: -9999px !important;
+    left: -9999px !important;
+}
+ 
 .debugging {
     z-index: -100;
     margin: 40px 20px 0 20px;

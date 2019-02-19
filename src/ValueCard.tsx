@@ -41,6 +41,7 @@ interface Props {
     type?: KindOfValue
     value?: string
     defaultValue?: string
+    valueLabel?: string
     allowEmpty?: boolean
     onSave?: ((value?: string) => void)
 }
@@ -288,19 +289,22 @@ export class ValueCard extends React.Component<Props, State> {
                                     </div>
                                     : ''}
                                 {this.props.value != undefined
-                                    ? <InputText id={this.idPlus("card-field")}
-                                        className={isPositiveInteger ? "number" : "text"}
-                                        autoComplete="off"
-                                        keyfilter={isPositiveInteger ? "pint" : ""}
-                                        type="text"
-                                        pattern={isPositiveInteger ? "\\d*" : undefined}
-                                        value={isPositiveInteger ? (value === '0' ? '' : value) : value} // show 0 as blank for positive integers
-                                        placeholder={this.props.defaultValue}
-                                        onChange={this.handleChange()}
-                                        // onFocus={this.isPositiveInt ? this.focusOnWholeText() : undefined}
-                                        onKeyUp={this.handleKey()}
-                                        autoFocus
-                                    />
+                                    ? <>
+                                        <InputText id={this.idPlus("card-field")}
+                                            className={isPositiveInteger ? "number" : "text"}
+                                            autoComplete="off"
+                                            keyfilter={isPositiveInteger ? "pint" : ""}
+                                            type="text"
+                                            pattern={isPositiveInteger ? "\\d*" : undefined}
+                                            value={isPositiveInteger ? (value === '0' ? '' : value) : value} // show 0 as blank for positive integers
+                                            placeholder={this.props.defaultValue}
+                                            onChange={this.handleChange()}
+                                            // onFocus={this.isPositiveInt ? this.focusOnWholeText() : undefined}
+                                            onKeyUp={this.handleKey()}
+                                            autoFocus
+                                        />
+                                        <label htmlFor={this.idPlus("card-field")} className="screenreader">{this.props.valueLabel || this.props.title}</label>
+                                    </>
                                     : ''
                                 }
                             </Card>
