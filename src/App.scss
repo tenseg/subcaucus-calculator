@@ -666,6 +666,7 @@ body {
             -webkit-overflow-scrolling: touch;
         
             .valuecard {
+                position: relative;
                 min-width: 300px;
                 max-width: 500px;
                 margin: auto;
