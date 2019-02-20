@@ -370,9 +370,19 @@ export class Snapshot {
 	viabilityNumber = 0
 
 	/**
-	 * The number of people who are members of viable subcaucuses
+	 * The number of people who are members of viable subcaucuses.
 	 */
 	viableParticipants = 0
+
+	/**
+	 * The number of subcaucuses that are viable.
+	 */
+	viableSubcaucuses = 0
+
+	/**
+	 * The number of subcaucuses that have members but are not viable.
+	 */
+	nonViableSubcaucuses = 0
 
 	/**
 	 * The total number of people who are members of viable subcaucuses
@@ -415,8 +425,15 @@ export class Snapshot {
 		// and calculate the total number viable people in the room (viableParticipants)
 
 		const vSubs = subs.filter((s) => s.count >= this.viabilityNumber)
+
 		this.viableParticipants = vSubs.reduce((acc, sub) => {
 			return acc + sub.count
+		}, 0)
+
+		this.viableSubcaucuses = vSubs.length
+
+		this.nonViableSubcaucuses = subs.reduce((acc, sub) => {
+			return acc + (sub.count && sub.count < this.viabilityNumber ? 1 : 0)
 		}, 0)
 
 		if (!this.viableParticipants) return
@@ -614,9 +631,9 @@ export class Snapshot {
 			text += `${this.participants.singularPlural("person was", "people were")} participating, the initial viability number was ${this.viabilityNumber} (${this.participantsPerDelegate.decimalPlaces(3)} participants per delegate).\n\n`
 
 			if (this.participants > this.viableParticipants) {
-				text += `${this.viableParticipants.singularPlural("member was", "members were")} in a viable subcaucuses. `
+				text += `${this.viableParticipants.singularPlural("member was", "members were")} in ${this.viableSubcaucuses.singularPlural("viable subcaucus", "viable subcaucuses")}. `
 				text += `The delegate divisor (number of members needed to allocate each delegate) was ${this.delegateDivisor.decimalPlaces(3)}.\n\n`
-				text += `${(this.participants - this.viableParticipants).singularPlural("person was", "people were")} in a non-viable caucus.\n\n`
+				text += `${(this.participants - this.viableParticipants).singularPlural("person was", "people were")} in ${this.nonViableSubcaucuses.singularPlural("non-viable subcaucus", "non-viable subcaucuses")}.\n\n`
 			}
 
 		} else {

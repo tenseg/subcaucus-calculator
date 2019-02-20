@@ -989,7 +989,7 @@ this.keySuffix = String(_u.randomSeed())
                     this.subcalc.snapshot.viableParticipants < this.subcalc.snapshot.participants
                         ? <div className="summary-row danger">
                             <div className="summary-label">
-                                {(this.subcalc.snapshot.participants - this.subcalc.snapshot.viableParticipants).singularPlural("person", "people")} in a non-viable subcaucus
+                                {(this.subcalc.snapshot.participants - this.subcalc.snapshot.viableParticipants).singularPlural("person", "people")} in {this.subcalc.snapshot.nonViableSubcaucuses.singularPlural("a non-viable subcaucus", "non-viable subcaucuses", "no number")}
                             </div>
                         </div>
                         : ''
