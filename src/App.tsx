@@ -44,6 +44,7 @@ import { CreditCard } from './Cards/CreditCard';
 import { SecurityCard } from './Cards/SecurityCard';
 import { ViabilityCard } from './Cards/ViabilityCard';
 import { PasteCard } from './Cards/PasteCard';
+import { ParticipantsCard } from './Cards/ParticipantsCard';
 
 /**
  * Facilitates sorting up or down (or not at all), as needed.
@@ -73,6 +74,7 @@ enum CardFor {
     SavingSnapshot,
     SavingSnapshotBefore,
     RemovingEmpties,
+    Participants,
     ShowingAbout,
     ShowingBy,
     ShowingInstructions,
@@ -354,13 +356,6 @@ this.keySuffix = String(_u.randomSeed())
         const mailto = "mailto:subcalc@tenseg.net?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body)
 
         location.href = mailto
-    }
-
-    /**
-     * Provide a default name for this meeting, including today's date.
-     */
-    defaultName = (): string => {
-        return "My Meeting"
     }
 
     /**
@@ -727,7 +722,7 @@ this.keySuffix = String(_u.randomSeed())
                 />
                 case CardFor.ChangingName: return <ChangingNameCard
                     name={this.subcalc.snapshot.name}
-                    defaultName={this.defaultName()}
+                    defaultName={this.subcalc.snapshot.defaultName()}
                     save={this.saveName}
                     newMeeting={this.newMeeting}
                 />
@@ -751,6 +746,21 @@ this.keySuffix = String(_u.randomSeed())
                     clearData={() => {
                         this.subcalc.clear()
                         location.href = "/"
+                    }}
+                />
+                case CardFor.Participants: return <ParticipantsCard
+                    cancel={() => this.removeCardState(CardFor.Participants)}
+                    clear={() => {
+                        this.removeCardState(CardFor.Participants)
+                        this.checkForRevisionBefore(() => {
+                            this.subcalc.zeroSubcaucuses()
+                            this.keySuffix = String(_u.randomSeed())
+                            this.forceUpdate()
+                        }, "Before zeroing out the subcaucuses...")
+                    }}
+                    analyze={() => {
+                        this.removeCardState(CardFor.Participants)
+                        this.setState({ present: Presenting.Analyzing })
                     }}
                 />
                 case CardFor.Viability: return <ViabilityCard
@@ -1012,7 +1022,7 @@ this.keySuffix = String(_u.randomSeed())
                     <div id="meeting-name" className="button"
                         onClick={() => this.addCardState(CardFor.ChangingName)}
                     >
-                        {name ? name : this.defaultName()}
+                        {name ? name : this.subcalc.snapshot.defaultName()}
                         {revision != ''
                             ? <span className="snapshot">
                                 {revision}
@@ -1070,14 +1080,10 @@ this.keySuffix = String(_u.randomSeed())
                             onClick={() => this.addCardState(CardFor.RemovingEmpties)}
                         />
                         <Button id="clear-counts-button"
-                            icon="fa fa-fw fa-minus-circle"
-                            tooltip="Zero out the members of each subcaucus"
+                            icon="fa fa-fw fa-user"
+                            tooltip="Participants"
                             tooltipOptions={this.tooltipOptions}
-                            onClick={() => this.checkForRevisionBefore(() => {
-                                this.subcalc.zeroSubcaucuses()
-                                this.keySuffix = String(_u.randomSeed())
-                                this.forceUpdate()
-                            }, "Before zeroing out the subcaucuses...")}
+                            onClick={() => this.addCardState(CardFor.Participants)}
                         />
                         {_u.isDebugging()
                             ? <>
@@ -1141,7 +1147,7 @@ this.keySuffix = String(_u.randomSeed())
 
         return (
             <div key={_u.randomSeed()} className="debugging">
-                <p>This is debugging info for <a href="https://grand.clst.org:3000/tenseg/subcalc-pr/issues" target="_repository">subcalc-pr</a> (with <a href="https://reactjs.org/docs/react-component.html" target="_react">ReactJS</a>, <a href="https://www.primefaces.org/primereact/" target="_primereact">PrimeReact</a>, <a href="https://fontawesome.com/icons?d=gallery" target="_fontawesome">Font Awesome</a>) derrived from <a href="https://bitbucket.org/tenseg/subcalc-js/src" target="_bitbucket">subcalc-js</a>. ({app.app || 'web'} {app.version})
+                <p>This is debugging info for <a href="https://grand.clst.org:3000/tenseg/subcalc-pr/issues" target="_repository">subcalc-pr</a> (with <a href="https://reactjs.org/docs/react-component.html" target="_react">ReactJS</a>, <a href="https://www.primefaces.org/primereact/" target="_primereact">PrimeReact</a>, <a href="https://fontawesome.com/icons?d=gallery&s=solid&m=free" target="_fontawesome">Font Awesome</a>) derrived from <a href="https://bitbucket.org/tenseg/subcalc-js/src" target="_bitbucket">subcalc-js</a>. ({app.app || 'web'} {app.version})
                 </p>
                 <pre>{this.subcalc.snapshot.asText()}</pre>
                 <div className="columns">

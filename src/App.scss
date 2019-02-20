@@ -233,6 +233,48 @@ body {
                 }
             }
             
+            #analyzer-chart {
+                padding: $form-margin;
+                padding-bottom: 0;
+            }
+            
+            #analyzer-buttons {
+                display: flex;
+                padding: ($form-margin / 2);
+                
+                button {
+                    flex: 1 0 30px;
+                    width: 30px;
+                    margin: ($form-margin / 2);
+                    
+                    @mixin colorButton($red, $green, $blue) {
+                        $bgcolor: rgba($red, $green, $blue, 0.2);
+                        $fgcolor: rgb($red, $green, $blue);
+
+                        background-color: $bgcolor;
+                        border-color: $fgcolor;
+                        color: $fgcolor;
+                        
+                        &:hover,
+                        &.p-disabled {
+                            background-color: $fgcolor;
+                            color: white;
+                            opacity: 1.0;
+                        }
+                    }
+                    
+                    &.counting-members {
+                        @include colorButton(54, 162, 235);
+                    }
+                    &.counting-delegates {
+                        @include colorButton(75, 192, 192);
+                    }
+                    &.counting-subcaucuses {
+                        @include colorButton(255, 159, 64);
+                    }
+                }
+            }
+            
             .subcaucus-row {
                 position: relative;
                 display: flex;

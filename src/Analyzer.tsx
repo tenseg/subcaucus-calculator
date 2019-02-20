@@ -42,7 +42,7 @@ interface Props {
  * State for the snapshot loader.
  */
 interface State {
-    sortBy: 'words' | 'counts'
+    counting: 'members' | 'delegates' | 'subcaucuses'
 }
 
 /**
@@ -53,32 +53,8 @@ export class Analyzer extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props)
         this.state = {
-            sortBy: "counts",
+            counting: "delegates",
         }
-    }
-
-    /**
-     * Returns an icon to represent the button.
-     */
-    sortOrderIcon = (button: 'words' | 'counts'): string => {
-        return button === 'words'
-            ? this.state.sortBy === "words"
-                ? "fa fa-fw fa-chevron-circle-up"
-                : "far fa-fw fa-circle"
-            : this.state.sortBy === "counts"
-                ? "fa fa-fw fa-chevron-circle-down"
-                : "far fa-fw fa-circle"
-    }
-
-    /**
-     * Toggle between name and date sorting.
-     */
-    toggleSortOrder = () => {
-        this.setState({
-            sortBy: this.state.sortBy === "words"
-                ? "counts"
-                : "words"
-        })
     }
 
     /**
@@ -102,6 +78,8 @@ export class Analyzer extends React.Component<Props, State> {
      * NOTE: Do not `setState()` in this method.
      */
     renderAnalysis = (): Array<JSX.Element> => {
+        const counting = this.state.counting
+        const stopWords = ["for", "of", "the", "a", "s", "and", "that", "in", "it"]
         let words = new TSMap<string, { word: string, count: number }>()
         this.props.snapshot.subcaucuses.forEach((subcaucus) => {
             // snip the name into words
@@ -110,8 +88,16 @@ export class Analyzer extends React.Component<Props, State> {
                 // filter the words into a distinct set of lowercase words
                 const distinct = snips.map((v) => v.toLocaleLowerCase()).filter((value, index, self) => self.indexOf(value) === index)
                 distinct.forEach((word) => {
+                    if (stopWords.indexOf(word) !== -1) return
                     let record = words.get(word) || { word: word, count: 0 }
-                    record.count += subcaucus.count
+                    let count = subcaucus.count
+                    if (counting === 'delegates') {
+                        count = subcaucus.delegates
+                    }
+                    if (counting === 'subcaucuses') {
+                        count = 1
+                    }
+                    record.count += count
                     words.set(word, record)
                 })
             }
@@ -129,7 +115,9 @@ export class Analyzer extends React.Component<Props, State> {
             // that is why we include the "END" record above
             if (currentCount !== record.count) {
                 const joinedWords = currentWords.join(" ")
-                combinedWords.set(joinedWords, currentCount)
+                if (currentCount > 0) {
+                    combinedWords.set(joinedWords, currentCount)
+                }
                 currentCount = record.count
                 currentWords = [record.word]
             } else {
@@ -137,60 +125,117 @@ export class Analyzer extends React.Component<Props, State> {
             }
         })
 
+        let backgroundColor = 'rgba(54, 162, 235, 0.2)'
+        let borderColor = 'rgb(54, 162, 235)'
+
+        if (counting === 'delegates') {
+            backgroundColor = 'rgba(75, 192, 192, 0.2)'
+            borderColor = 'rgb(75, 192, 192)'
+        }
+
+        if (counting === 'subcaucuses') {
+            backgroundColor = 'rgba(255, 159, 64, 0.2)'
+            borderColor = 'rgb(255, 159, 64)'
+        }
+
         const data = {
             labels: combinedWords.keys(),
             datasets: [{
-                backgroundColor: '#42A5F5',
+                label: counting,
+                backgroundColor: backgroundColor,
+                borderColor: borderColor,
+                borderWidth: 1,
                 data: combinedWords.values()
             }]
         }
 
-        return ([<Chart type="horizontalBar" data={data} options={{ legend: { display: false } }} />])
+        _u.debug("data for chart", data)
 
-        // let rows: Array<JSX.Element> = []
-        // combinedWords.values().sort((a, b) => {
-        //     return b.count - a.count
-        // }).forEach((record) => {
-        //     if (record.count > 0) {
-        //         rows.push(
-        //             <div className={`analyzer-row`}>
-        //                 <div className="analyzer-word">{record.word}</div>
-        //                 <div className="analyzer-count">{record.count}</div>
-        //             </div>
-        //         )
-        //     }
-        // })
+        const fontFamily = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen-Sans,Ubuntu,Cantarell,'Helvetica Neue',sans-serif"
 
-        // return rows
+        return ([<Chart key="chart" type="horizontalBar" data={data} options={{
+            fontFamily: "serif",
+            legend: {
+                display: false,
+                labels: {
+                    fontFamily: fontFamily,
+                },
+            },
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        fontFamily: fontFamily,
+                        autoSkip: false,
+                    },
+                    gridLines: {
+                        display: false,
+                    },
+                }],
+                xAxes: [{
+                    ticks: {
+                        fontFamily: fontFamily,
+                        min: 0,
+                    },
+                }]
+            },
+            tooltips: {
+                titleFontFamily: fontFamily,
+                bodyFontFamily: fontFamily,
+                footerFontFamily: fontFamily,
+            },
+        }} />])
+
+    }
+
+    switch = (value: "members" | "delegates" | "subcaucuses") => (event: React.MouseEvent<HTMLButtonElement>) => {
+        event.currentTarget.blur()
+        this.setState({ counting: value })
     }
 
     /**
      * Render JSX for this component.
      */
     render() {
+        const { name, revision } = this.props.snapshot
+
         return (
             <div className="analyzer">
                 {this.renderMenu()}
                 <div id="meeting-info">
                     <div id="meeting-name" className="not-button">
-                        This is an analysis of the words in subcaucus names...
+                        {name ? name : this.props.snapshot.defaultName()}
+                        {revision != ''
+                            ? <span className="snapshot">
+                                {revision}
+                            </span>
+                            : ''
+                        }
                     </div>
                 </div>
                 <div id="analyzer-container">
-                    <div id="analyzer-header">
-                        <Button id="analyzer-words-head"
-                            label="Words"
-                            icon={this.sortOrderIcon("words")}
-                            onClick={() => this.toggleSortOrder()}
+                    <div id="analyzer-chart">
+                        {this.renderAnalysis()}
+                    </div>
+                    <div id="analyzer-buttons">
+                        <Button id="counting-delegates-button"
+                            label="Delegates"
+                            className={"counting-delegates"}
+                            disabled={this.state.counting === "delegates"}
+                            onClick={this.switch("delegates")}
                         />
-                        <Button id="analyzer-counts-head"
-                            label="Counts"
-                            iconPos="right"
-                            icon={this.sortOrderIcon("counts")}
-                            onClick={() => this.toggleSortOrder()}
+                        <Button id="counting-members-button"
+                            label="Members"
+                            className={"counting-members"}
+                            disabled={this.state.counting === "members"}
+                            onClick={this.switch("members")}
+                        />
+                        <Button id="counting-subcaucuses-button"
+                            label="Subcaucuses"
+                            className={"counting-subcaucuses"}
+                            disabled={this.state.counting === "subcaucuses"}
+                            onClick={this.switch("subcaucuses")}
                         />
                     </div>
-                    {this.renderAnalysis()}
                 </div>
             </div>
         )

@@ -110,6 +110,13 @@ export class Snapshot {
 	 */
 	name: string
 
+    /**
+     * Provide a default name for this meeting, including today's date.
+     */
+	defaultName = (): string => {
+		return "My Meeting"
+	}
+
 	/**
 	 * The creation timestamp of the meeting associated with this snapshot.
 	 */
