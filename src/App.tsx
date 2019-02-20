@@ -1015,6 +1015,9 @@ this.keySuffix = String(_u.randomSeed())
         const snapshot = this.subcalc.snapshot
         const { name, revision } = snapshot
 
+        const allEmpty = snapshot.subcaucuses.values().findIndex((s) => s.count > 0) === -1
+        const noEmpties = snapshot.subcaucuses.values().findIndex((s) => s.count === 0) === -1
+
         return (
             <div id="calculator">
                 {this.renderMenu()}
@@ -1075,12 +1078,14 @@ this.keySuffix = String(_u.randomSeed())
                         <Button id="remove-empty-subcaucuses-button"
                             label="Empties"
                             icon="fa fa-fw fa-trash"
+                            disabled={noEmpties}
                             tooltip="Remove subcaucuses that have no members"
                             tooltipOptions={this.tooltipOptions}
                             onClick={() => this.addCardState(CardFor.RemovingEmpties)}
                         />
                         <Button id="clear-counts-button"
                             icon="fa fa-fw fa-user"
+                            disabled={allEmpty}
                             tooltip="Participants"
                             tooltipOptions={this.tooltipOptions}
                             onClick={() => this.addCardState(CardFor.Participants)}

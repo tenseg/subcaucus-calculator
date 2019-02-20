@@ -94,7 +94,7 @@ body {
                         background-color: lighten($header-color, 25%);
                         
                         
-                        &:hover {
+                        &:hover:enabled {
                             background-color: lighten($header-color, 25%);
                         }
                     }
@@ -106,7 +106,7 @@ body {
                         .p-menuitem.p-menuitem-active > .p-menuitem-link {
                             background-color: lighten($header-color, 55%);
                             
-                            &:hover {
+                            &:hover:enabled {
                                 background-color: lighten($header-color, 55%);
                             }
                         }
@@ -116,7 +116,7 @@ body {
                 & > .p-menuitem-link {
                     padding-bottom: $form-margin;
                     
-                    &:hover {
+                    &:hover:enabled {
                         background-color: lighten($header-color, 25%);
                     }
                     
@@ -162,7 +162,7 @@ body {
             button.p-button {
                 cursor: pointer;
 
-                &:hover {
+                &:hover:enabled {
                     background-color: darken($meeting-info-color, 10%)
                 }
             }
@@ -416,7 +416,7 @@ body {
                         background-color: $success-color;
                         color: white;
                         
-                        &:hover {
+                        &:hover:enabled {
                             background-color: lighten($success-color, 25%);
                         }
                     }
@@ -429,7 +429,7 @@ body {
                         background-color: lighten($body-color, 55%);
                         color: $body-color;
                         
-                        &:hover {
+                        &:hover:enabled {
                             background-color: lighten($body-color, 60%);
                         }
                     }
@@ -447,7 +447,7 @@ body {
                     background-color: $header-color;
                     border-color: $header-color;
                     
-                    &:hover {
+                    &:hover:enabled {
                         background-color: lighten($header-color, 25%)
                     }
                 }
@@ -456,7 +456,7 @@ body {
                     background-color: $header-color;
                     border-color: $header-color;
                     
-                    &:hover {
+                    &:hover:enabled {
                         background-color: lighten($header-color, 25%)
                     }
                 }
@@ -465,7 +465,7 @@ body {
                     background-color: $body-color;
                     border-color: $body-color;
                     
-                    &:hover {
+                    &:hover:enabled {
                         background-color: lighten($body-color, 25%)
                     }
                 }
@@ -474,7 +474,7 @@ body {
                     background-color: $body-color;
                     border-color: $body-color;
                     
-                    &:hover {
+                    &:hover:enabled {
                         background-color: lighten($body-color, 25%)
                     }
                 }
@@ -484,7 +484,7 @@ body {
                     color: $body-color;
                     border-color: $body-color;
                     
-                    &:hover {
+                    &:hover:enabled {
                         background-color: lighten($body-color, 50%)
                     }
                 }
@@ -702,7 +702,7 @@ body {
                         color: $body-color;
                         border-color: $body-color;
                         
-                        &:hover {
+                        &:hover:enabled {
                             background-color: lighten($body-color, 50%)
                         }
                     }
@@ -714,7 +714,7 @@ body {
                         width: 0;
                         overflow: hidden;
                         
-                        &:hover {
+                        &:hover:enabled {
                             background-color: transparent
                         }
                     }
