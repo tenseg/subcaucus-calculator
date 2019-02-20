@@ -79,18 +79,39 @@ export class Analyzer extends React.Component<Props, State> {
      */
     renderAnalysis = (): Array<JSX.Element> => {
         const counting = this.state.counting
-        const stopWords = ["for", "of", "the", "a", "s", "and", "that", "in", "it"]
-        let words = new TSMap<string, { word: string, count: number }>()
+        // an empty target in joinWords means we want to ignore this word
+        const substitutions = {
+            for: '',
+            of: '',
+            the: '',
+            a: '',
+            s: '',
+            and: '',
+            that: '',
+            in: '',
+            it: '',
+            hillary: "Hillary Clinton",
+            hilary: "Hillary Clinton",
+            clinton: "Hillary Clinton",
+            bernie: "Bernie Sanders",
+            sanders: "Bernie Sanders",
+        }
+        let termsMap = new TSMap<string, { term: string, count: number }>()
         this.props.snapshot.subcaucuses.forEach((subcaucus) => {
+            let count = subcaucus.count
+            if (count === 0) return
             // snip the name into words
-            const snips = subcaucus.displayName().match(/\b(\w+)\b/g)
-            if (snips) {
+            const words = subcaucus.displayName().match(/\b(\w+)\b/g)
+            if (words) {
                 // filter the words into a distinct set of lowercase words
-                const distinct = snips.map((v) => v.toLocaleLowerCase()).filter((value, index, self) => self.indexOf(value) === index)
+                const distinct = words.map((v) => v.toLocaleLowerCase()).filter((value, index, self) => self.indexOf(value) === index)
                 distinct.forEach((word) => {
-                    if (stopWords.indexOf(word) !== -1) return
-                    let record = words.get(word) || { word: word, count: 0 }
-                    let count = subcaucus.count
+                    let term = word
+                    if (substitutions[word] !== undefined) {
+                        term = substitutions[word]
+                    }
+                    if (term === '') return
+                    let record = termsMap.get(term) || { term: term, count: 0 }
                     if (counting === 'delegates') {
                         count = subcaucus.delegates
                     }
@@ -98,30 +119,30 @@ export class Analyzer extends React.Component<Props, State> {
                         count = 1
                     }
                     record.count += count
-                    words.set(word, record)
+                    termsMap.set(term, record)
                 })
             }
         })
-        words.set("END", { word: "END", count: 0 }) // added just in case there is no empty subcaucus
+        termsMap.set("END", { term: "END", count: 0 }) // marking the end with a fake empty term
 
-        let combinedWords = new TSMap<string, number>()
+        let combinedTerms = new TSMap<string, number>()
         let currentCount = 0
-        let currentWords: Array<string> = []
-        words.values().sort((a, b) => {
+        let currentTerms: Array<string> = []
+        termsMap.values().sort((a, b) => {
             return b.count - a.count
         }).forEach((record) => {
             // note that the records with count of zero will never be pushed
             // because they will never differ from the currentCount
             // that is why we include the "END" record above
             if (currentCount !== record.count) {
-                const joinedWords = currentWords.join(" ")
+                const joinedTerms = currentTerms.join(" ")
                 if (currentCount > 0) {
-                    combinedWords.set(joinedWords, currentCount)
+                    combinedTerms.set(joinedTerms, currentCount)
                 }
                 currentCount = record.count
-                currentWords = [record.word]
+                currentTerms = [record.term]
             } else {
-                currentWords.push(record.word)
+                currentTerms.push(record.term)
             }
         })
 
@@ -139,13 +160,13 @@ export class Analyzer extends React.Component<Props, State> {
         }
 
         const data = {
-            labels: combinedWords.keys(),
+            labels: combinedTerms.keys(),
             datasets: [{
                 label: counting,
                 backgroundColor: backgroundColor,
                 borderColor: borderColor,
                 borderWidth: 1,
-                data: combinedWords.values()
+                data: combinedTerms.values()
             }]
         }
 
@@ -153,8 +174,9 @@ export class Analyzer extends React.Component<Props, State> {
 
         const fontFamily = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen-Sans,Ubuntu,Cantarell,'Helvetica Neue',sans-serif"
 
-        return ([<Chart key="chart" type="horizontalBar" data={data} options={{
-            fontFamily: "serif",
+        return ([<Chart key="chart" className="chart-element" type="horizontalBar" data={data} options={{
+            maintainAspectRatio: false,
+            aspectRatio: 1,
             legend: {
                 display: false,
                 labels: {
