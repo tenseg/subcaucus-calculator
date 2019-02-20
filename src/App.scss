@@ -187,10 +187,12 @@ body {
         }
         
         #loader-container,
+        #analyzer-container,
         #subcaucus-container {
             background: white;
             
             #loader-header,
+            #analyzer-header,
             #subcaucus-header {
                 z-index: 1;
                 position: sticky;
@@ -498,6 +500,38 @@ body {
                 }
             }
         }
+        
+        .analyzer {
+            #analyzer-words-head {
+                flex: 1 0 5em;
+            }
+            
+            #analyzer-counts-head {
+                flex: 0 0 15em;
+                width: 15em;
+                text-align: right !important;
+            }
+            
+            .analyzer-row {
+                display: flex;
+                width: 100%;
+                padding: $form-margin;
+                border-bottom: 1px solid $rule-color;
+                
+                .analyzer-word {
+                    flex: 2 0 5em;
+                    width: 5em;
+                    font-weight: 900;
+                }
+                
+                .analyzer-count {
+                    flex: 1 0 5em;
+                    width: 5em;
+                    text-align: right;
+                }
+            }
+        }
+        
         .loader {
 
             #loader-name-head {

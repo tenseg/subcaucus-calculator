@@ -27,6 +27,7 @@ import { Snapshot } from './Snapshot'
 import { Subcaucus } from './Subcaucus'
 import { SubcaucusRow, SubcaucusRowAction } from './SubcaucusRow'
 import { Loader } from './Loader'
+import { Analyzer } from './Analyzer'
 import { ShowJSON } from './ShowJSON'
 
 // cards
@@ -87,6 +88,7 @@ enum CardFor {
 enum Presenting {
     Calculator,
     Loading,
+    Analyzing,
 }
 
 /**
@@ -1078,18 +1080,29 @@ this.keySuffix = String(_u.randomSeed())
                             }, "Before zeroing out the subcaucuses...")}
                         />
                         {_u.isDebugging()
-                            ? <Button id="random-coin-button"
-                                icon="fa fa-fw fa-sync-alt"
-                                className="p-button-success"
-                                tooltip="Get new random seed for the coin"
-                                tooltipOptions={this.tooltipOptions}
-                                onClick={() => {
-                                    this.subcalc.reviseSnapshot({ seed: _u.randomSeed() })
-                                    this.growlAlert(`Random seed is now ${this.subcalc.snapshot.seed}.`, 'success', 'New Random Coin')
-                                    this.keySuffix = String(_u.randomSeed())
-                                    this.forceUpdate()
-                                }}
-                            />
+                            ? <>
+                                <Button id="random-coin-button"
+                                    icon="fa fa-fw fa-sync-alt"
+                                    className="p-button-success"
+                                    tooltip="Get new random seed for the coin"
+                                    tooltipOptions={this.tooltipOptions}
+                                    onClick={() => {
+                                        this.subcalc.reviseSnapshot({ seed: _u.randomSeed() })
+                                        this.growlAlert(`Random seed is now ${this.subcalc.snapshot.seed}.`, 'success', 'New Random Coin')
+                                        this.keySuffix = String(_u.randomSeed())
+                                        this.forceUpdate()
+                                    }}
+                                />
+                                <Button id="random-coin-button"
+                                    icon="fa fa-fw fa-chart-pie"
+                                    className="p-button-success"
+                                    tooltip="Show analysis"
+                                    tooltipOptions={this.tooltipOptions}
+                                    onClick={() => {
+                                        this.setState({ present: Presenting.Analyzing })
+                                    }}
+                                />
+                            </>
                             : ''
                         }
                     </div>
@@ -1188,6 +1201,12 @@ this.keySuffix = String(_u.randomSeed())
                             subcalc={this.subcalc}
                             onLoad={this.loadSnapshot}
                             onNew={this.newMeeting}
+                        />
+                        : ''}
+                    {this.state.present == Presenting.Analyzing
+                        ? <Analyzer
+                            snapshot={this.subcalc.snapshot}
+                            onExit={() => this.setState({ present: Presenting.Calculator })}
                         />
                         : ''}
                     {this.renderByline()}
