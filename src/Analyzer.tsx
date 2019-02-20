@@ -20,6 +20,7 @@ import { Chart } from 'primereact/chart';
 // local to this app
 import * as _u from './Utilities'
 import { Snapshot } from './Snapshot'
+import { ValueCard } from './ValueCard';
 
 /**
  * Facilitates sorting up or down (or not at all), as needed.
@@ -43,6 +44,7 @@ interface Props {
  */
 interface State {
     counting: 'members' | 'delegates' | 'subcaucuses'
+    showSettings: boolean
 }
 
 /**
@@ -50,10 +52,39 @@ interface State {
  */
 export class Analyzer extends React.Component<Props, State> {
 
+    substitutions: { [props: string]: string } = {
+        for: '',
+        of: '',
+        the: '',
+        a: '',
+        s: '',
+        and: '',
+        that: '',
+        in: '',
+        it: '',
+        hillary: "Hillary Clinton",
+        hilary: "Hillary Clinton",
+        clinton: "Hillary Clinton",
+        bernie: "Bernie Sanders",
+        sanders: "Bernie Sanders",
+    }
+
     constructor(props: Props) {
         super(props)
+        this.getLocalSubstitutions()
         this.state = {
             counting: "delegates",
+            showSettings: true,
+        }
+    }
+
+    /**
+     * Look for the user's own substitutions in local storage.
+     */
+    getLocalSubstitutions = () => {
+        const json = JSON.parse(localStorage.getItem('substitutions') || 'false')
+        if (json) {
+            this.substitutions = json
         }
     }
 
@@ -80,22 +111,6 @@ export class Analyzer extends React.Component<Props, State> {
     renderAnalysis = (): Array<JSX.Element> => {
         const counting = this.state.counting
         // an empty target in joinWords means we want to ignore this word
-        const substitutions = {
-            for: '',
-            of: '',
-            the: '',
-            a: '',
-            s: '',
-            and: '',
-            that: '',
-            in: '',
-            it: '',
-            hillary: "Hillary Clinton",
-            hilary: "Hillary Clinton",
-            clinton: "Hillary Clinton",
-            bernie: "Bernie Sanders",
-            sanders: "Bernie Sanders",
-        }
         let termsMap = new TSMap<string, { term: string, count: number }>()
         this.props.snapshot.subcaucuses.forEach((subcaucus) => {
             let count = subcaucus.count
@@ -107,8 +122,8 @@ export class Analyzer extends React.Component<Props, State> {
                 const distinct = words.map((v) => v.toLocaleLowerCase()).filter((value, index, self) => self.indexOf(value) === index)
                 distinct.forEach((word) => {
                     let term = word
-                    if (substitutions[word] !== undefined) {
-                        term = substitutions[word]
+                    if (this.substitutions[word] !== undefined) {
+                        term = this.substitutions[word]
                     }
                     if (term === '') return
                     let record = termsMap.get(term) || { term: term, count: 0 }
@@ -214,6 +229,52 @@ export class Analyzer extends React.Component<Props, State> {
         this.setState({ counting: value })
     }
 
+    saveSubstitutions = (value?: string) => {
+        if (value) {
+            this.substitutions = {}
+            const lines = value.split("\n")
+            lines.forEach((line) => {
+                const words = line.match(/\b(\w+)\b/g)
+                if (words) {
+                    let term = words.shift()
+                    if (term) {
+                        term = term.toLocaleLowerCase()
+                        const substitution = words.join(" ").trim()
+                        this.substitutions[term] = substitution
+                    }
+                }
+            })
+            localStorage.setItem('substitutions', JSON.stringify(this.substitutions))
+        }
+        this.setState({ showSettings: false })
+    }
+
+    renderSettings = (): JSX.Element => {
+        if (!this.state.showSettings) return <></>
+        let value = Object.keys(this.substitutions).reduce((sofar: string, term: string): string => {
+            const substitute = this.substitutions[term]
+            return sofar + `${term} ${substitute}\n`
+        }, '')
+        return (
+            <ValueCard
+                className="analysis-substitutions-card"
+                title="Substitutions"
+                value={value}
+                type="long text"
+                onSave={this.saveSubstitutions}
+                allowEmpty={true}
+            >
+                <p>
+                    This analysis is based on the words found in each subcaucus name. Below is a list of substitutions that will be made to allow you to group certain words together.
+                    </p><p>
+                    The first word on a line is the term that will be replaced, and any other words on the line will be the replacement value. Any single word on a line by itself will force the analysis to ignore that word.
+                    </p><p>
+                    Typically this is used to bring together variant forms of a name, for example including both "hillary Hillary Clinton" and "clinton Hillary Clinton" will make sure that both the first name and the last name are analyzed as the same term.
+                </p>
+            </ValueCard >
+        )
+    }
+
     /**
      * Render JSX for this component.
      */
@@ -259,6 +320,11 @@ export class Analyzer extends React.Component<Props, State> {
                         />
                     </div>
                 </div>
+                <Button id="analyzer-settings-button"
+                    icon="fa fa-fw fa-cog"
+                    onClick={() => this.setState({ showSettings: true })}
+                />
+                {this.renderSettings()}
             </div>
         )
     }

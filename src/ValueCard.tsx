@@ -14,6 +14,7 @@ import * as React from 'react'
 import { Button } from 'primereact/button'
 import { Card } from 'primereact/card'
 import { InputText } from 'primereact/inputtext'
+import { InputTextarea } from 'primereact/inputtextarea'
 
 // see https://github.com/willmcpo/body-scroll-lock
 import { disableBodyScroll, clearAllBodyScrollLocks } from 'body-scroll-lock'
@@ -24,7 +25,7 @@ import * as _u from './Utilities'
 /**
  * Helps distinguish the two kinds of values a ValueCard can ask for.
  */
-type KindOfValue = 'text' | 'positive integer'
+type KindOfValue = 'text' | 'long text' | 'positive integer'
 
 /**
  * Properties of a ValueCard component.
@@ -120,7 +121,7 @@ export class ValueCard extends React.Component<Props, State> {
     /**
      * Handle changes to the value field.
      */
-    handleChange = () => (event: React.FormEvent<HTMLInputElement>) => {
+    handleChange = () => (event: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         _u.debug("change", event.currentTarget.value)
         if (this.isPositiveInteger) {
             var num = Number(event.currentTarget.value)
@@ -290,19 +291,29 @@ export class ValueCard extends React.Component<Props, State> {
                                     : ''}
                                 {this.props.value != undefined
                                     ? <>
-                                        <InputText id={this.idPlus("card-field")}
-                                            className={isPositiveInteger ? "number" : "text"}
-                                            autoComplete="off"
-                                            keyfilter={isPositiveInteger ? "pint" : ""}
-                                            type="text"
-                                            pattern={isPositiveInteger ? "\\d*" : undefined}
-                                            value={isPositiveInteger ? (value === '0' ? '' : value) : value} // show 0 as blank for positive integers
-                                            placeholder={this.props.defaultValue}
-                                            onChange={this.handleChange()}
-                                            // onFocus={this.isPositiveInt ? this.focusOnWholeText() : undefined}
-                                            onKeyUp={this.handleKey()}
-                                            autoFocus
-                                        />
+                                        {this.props.type === 'long text'
+                                            ? <InputTextarea id={this.idPlus("card-field")}
+                                                className="text"
+                                                type="text"
+                                                value={value}
+                                                rows={5}
+                                                cols={40}
+                                                onChange={this.handleChange()}
+                                                autoFocus
+                                            />
+                                            : <InputText id={this.idPlus("card-field")}
+                                                className={isPositiveInteger ? "number" : "text"}
+                                                autoComplete="off"
+                                                keyfilter={isPositiveInteger ? "pint" : ""}
+                                                type="text"
+                                                pattern={isPositiveInteger ? "\\d*" : undefined}
+                                                value={isPositiveInteger ? (value === '0' ? '' : value) : value} // show 0 as blank for positive integers
+                                                placeholder={this.props.defaultValue}
+                                                onChange={this.handleChange()}
+                                                // onFocus={this.isPositiveInt ? this.focusOnWholeText() : undefined}
+                                                onKeyUp={this.handleKey()}
+                                                autoFocus
+                                            />}
                                         <label htmlFor={this.idPlus("card-field")} className="screenreader">{this.props.valueLabel || this.props.title}</label>
                                     </>
                                     : ''

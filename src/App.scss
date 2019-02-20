@@ -186,6 +186,24 @@ body {
         
         }
         
+        .analyzer {
+            position: relative;
+            
+            #analyzer-settings-button {
+                position: absolute;
+                top: $menu-height;
+                right: $form-margin;
+                margin-top: ($form-margin / 1.6);
+                background-color: white;
+                border-color: $rule-color;
+                color: $rule-color;
+                &:hover:enabled {
+                    background-color: $rule-color;
+                    color: white;
+                }
+            }
+        }
+        
         #loader-container,
         #analyzer-container,
         #subcaucus-container {
@@ -785,7 +803,8 @@ body {
                     .p-card-content {
                         margin-bottom: 0 - $form-margin;
                         
-                        input {
+                        input,
+                        textarea {
                             width: 100%;
                         }
                     }
