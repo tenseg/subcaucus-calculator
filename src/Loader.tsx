@@ -316,65 +316,69 @@ export class Loader extends React.Component<Props, State> {
     render() {
         return (
             <div className="loader">
-                {this.renderMenu()}
-                <div id="meeting-info">
-                    <div id="meeting-name" className="not-button">
-                        Pick a snapshot below to open it...
-                    </div>
-                </div>
-                <div id="loader-container">
-                    <div id="loader-header">
-                        <Button id="loader-name-head"
-                            label="Name"
-                            icon={this.sortOrderIcon("name")}
-                            onClick={() => this.toggleSortOrder()}
-                        />
-                        <Button id="loader-timestamp-head"
-                            label="Last Revised"
-                            iconPos="right"
-                            icon={this.sortOrderIcon("date")}
-                            onClick={() => this.toggleSortOrder()}
-                        />
-                    </div>
-                    {this.renderMeetings()}
-                    <div id="subcaucus-footer">
-                        {this.state.showing === 'saved'
-                            ? <Button id="add-meeting-button"
-                                label="Add new meeting"
-                                icon="fa fa-fw fa-calendar-plus"
-                                onClick={() => this.props.onNew()}
+                <nav>
+                    {this.renderMenu()}
+                </nav>
+                <main>
+                    <section id="meeting-info">
+                        <h1 id="meeting-name" className="not-button">
+                            Pick a snapshot below to open it...
+                        </h1>
+                    </section>
+                    <section id="loader-container">
+                        <div id="loader-header">
+                            <Button id="loader-name-head"
+                                label="Name"
+                                icon={this.sortOrderIcon("name")}
+                                onClick={() => this.toggleSortOrder()}
                             />
-                            : <Button id="empty-trash-button"
-                                label="Empty trash"
-                                icon="fa fa-fw fa-trash"
-                                onClick={() => {
-                                    this.props.subcalc.emptyTrash()
-                                    this.setState({ showing: "saved" })
-                                }}
+                            <Button id="loader-timestamp-head"
+                                label="Last Revised"
+                                iconPos="right"
+                                icon={this.sortOrderIcon("date")}
+                                onClick={() => this.toggleSortOrder()}
                             />
-                        }
-                        {this.state.showing === 'saved'
-                            ? <Button id="show-trashed-button"
-                                label="Show trash"
-                                icon="fa fa-fw fa-trash"
+                        </div>
+                        {this.renderMeetings()}
+                        <section id="subcaucus-footer">
+                            {this.state.showing === 'saved'
+                                ? <Button id="add-meeting-button"
+                                    label="Add new meeting"
+                                    icon="fa fa-fw fa-calendar-plus"
+                                    onClick={() => this.props.onNew()}
+                                />
+                                : <Button id="empty-trash-button"
+                                    label="Empty trash"
+                                    icon="fa fa-fw fa-trash"
+                                    onClick={() => {
+                                        this.props.subcalc.emptyTrash()
+                                        this.setState({ showing: "saved" })
+                                    }}
+                                />
+                            }
+                            {this.state.showing === 'saved'
+                                ? <Button id="show-trashed-button"
+                                    label="Show trash"
+                                    icon="fa fa-fw fa-trash"
+                                    className="p-button-secondary"
+                                    onClick={() => this.setState({ showing: "trashed" })}
+                                />
+                                : <Button id="show-saved-button"
+                                    label="Show saved"
+                                    icon="fa fa-fw fa-calendar"
+                                    className="p-button-secondary"
+                                    onClick={() => this.setState({ showing: "saved" })}
+                                />
+                            }
+                            <Button id="cancel-loader-button"
+                                label="Cancel"
+                                icon="fa fa-fw fa-times"
                                 className="p-button-secondary"
-                                onClick={() => this.setState({ showing: "trashed" })}
+                                onClick={() => this.props.onLoad()}
                             />
-                            : <Button id="show-saved-button"
-                                label="Show saved"
-                                icon="fa fa-fw fa-calendar"
-                                className="p-button-secondary"
-                                onClick={() => this.setState({ showing: "saved" })}
-                            />
-                        }
-                        <Button id="cancel-loader-button"
-                            label="Cancel"
-                            icon="fa fa-fw fa-times"
-                            className="p-button-secondary"
-                            onClick={() => this.props.onLoad()}
-                        />
-                    </div>
-                </div>
+                        </section>
+                    </section>
+                </main>
             </div>
         )
     }

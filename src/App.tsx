@@ -880,7 +880,7 @@ this.keySuffix = String(_u.randomSeed())
      */
     renderSummary = (): JSX.Element => {
         return ((this.subcalc.snapshot.participants > 0)
-            ? <div id="summary-container"
+            ? <section id="summary-container"
                 onClick={() => this.addCardState(CardFor.Viability)}
             >
                 <div className="summary-row">
@@ -938,14 +938,14 @@ this.keySuffix = String(_u.randomSeed())
                         </div>
                         : ''
                 }
-            </div >
-            : <div id="summary-container">
+            </section >
+            : <section id="summary-container">
                 <div className="summary-row">
                     <div className="summary-label">
                         To calculate an initial "viability number," put a count all participants into a single subcaucus.
                     </div>
                 </div>
-            </div>
+            </section>
         )
     }
 
@@ -964,105 +964,112 @@ this.keySuffix = String(_u.randomSeed())
 
         return (
             <div id="calculator">
-                {this.renderMenu()}
-                <div id="meeting-info">
-                    <div id="meeting-name" className="button"
-                        onClick={() => this.addCardState(CardFor.ChangingName)}
-                    >
-                        {name ? name : this.subcalc.snapshot.defaultName()}
-                        {revision != ''
-                            ? <span className="snapshot">
-                                {revision}
-                            </span>
-                            : ''
-                        }
-                    </div>
-                    <div id="delegates-allowed" className="button"
-                        onClick={() => this.addCardState(CardFor.ChangingDelegates)}
-                    >{this.allowedString()}</div>
-                </div>
-                <div id="subcaucus-container">
-                    <div id="subcaucus-header">
-                        <Button id="subcaucus-name-head"
-                            label="Subcaucuses"
-                            icon={this.sortOrderIcon(sortName)}
-                            onClick={() => this.setState({
-                                sortName: this.state.sortName ? _u.SortOrder.None : _u.SortOrder.Ascending,
-                                sortCount: _u.SortOrder.None
-                            })}
-                        />
-                        <Button id="subcaucus-count-head"
-                            label="Members"
-                            iconPos="right"
-                            icon={this.sortOrderIcon(sortCount)}
-                            onClick={() => this.setState({
-                                sortName: _u.SortOrder.None,
-                                sortCount: this.nextSortOrder(sortCount, -1)
-                            })}
-                        />
-                        <Button id="subcaucus-delegate-head"
-                            label="Dels"
-                            iconPos="right"
-                            icon={hideDelegates ? "fa fa-fw fa-eye-slash" : "fa fa-fw fa-eye"}
-                            onClick={() => this.setState({ hideDelegates: !hideDelegates })}
-                        />
-                    </div>
-                    <div id="subcaucus-list">
-                        {this.renderSubcaucusRows()}
-                    </div>
-                    <div id="subcaucus-footer">
-                        <Button id="add-subcaucus-button"
-                            label="Add Subcaucus"
-                            icon="fa fa-fw fa-plus"
-                            onClick={() => {
-                                snapshot.addSubcaucus()
-                                this.setStateSubcaucuses()
-                            }}
-                        />
-                        <Button id="remove-empty-subcaucuses-button"
-                            label="Empties"
-                            icon="fa fa-fw fa-trash"
-                            disabled={noEmpties}
-                            tooltip="Remove subcaucuses that have no members"
-                            tooltipOptions={this.tooltipOptions}
-                            onClick={() => this.addCardState(CardFor.RemovingEmpties)}
-                        />
-                        <Button id="clear-counts-button"
-                            icon="fa fa-fw fa-user"
-                            disabled={allEmpty}
-                            tooltip="Participants"
-                            tooltipOptions={this.tooltipOptions}
-                            onClick={() => this.addCardState(CardFor.Participants)}
-                        />
-                        {_u.isDebugging()
-                            ? <>
-                                <Button id="random-coin-button"
-                                    icon="fa fa-fw fa-sync-alt"
-                                    className="p-button-success"
-                                    tooltip="Get new random seed for the coin"
-                                    tooltipOptions={this.tooltipOptions}
-                                    onClick={() => {
-                                        this.subcalc.reviseSnapshot({ seed: _u.randomSeed() })
-                                        this.growlAlert(`Random seed is now ${this.subcalc.snapshot.seed}.`, 'success', 'New Random Coin')
-                                        this.keySuffix = String(_u.randomSeed())
-                                        this.forceUpdate()
-                                    }}
-                                />
-                                <Button id="random-coin-button"
-                                    icon="fa fa-fw fa-chart-pie"
-                                    className="p-button-success"
-                                    tooltip="Show analysis"
-                                    tooltipOptions={this.tooltipOptions}
-                                    onClick={() => {
-                                        this.setState({ present: Presenting.Analyzing })
-                                    }}
-                                />
-                            </>
-                            : ''
-                        }
-                    </div>
-                </div>
-                {this.renderSummary()}
+                <nav>
+                    {this.renderMenu()}
+                </nav>
+                <main>
+                    <section id="meeting-info">
+                        <h1 id="meeting-name" className="button"
+                            onClick={() => this.addCardState(CardFor.ChangingName)}
+                        >
+                            {name ? name : this.subcalc.snapshot.defaultName()}
+                            {revision != ''
+                                ? <span className="snapshot">
+                                    {revision}
+                                </span>
+                                : ''
+                            }
+                        </h1>
+                        <div id="delegates-allowed" className="button"
+                            onClick={() => this.addCardState(CardFor.ChangingDelegates)}
+                        >{this.allowedString()}</div>
+                    </section>
+                    <section id="subcaucus-container">
+                        <div id="subcaucus-header">
+                            <Button id="subcaucus-name-head"
+                                label="Subcaucuses"
+                                icon={this.sortOrderIcon(sortName)}
+                                onClick={() => this.setState({
+                                    sortName: this.state.sortName ? _u.SortOrder.None : _u.SortOrder.Ascending,
+                                    sortCount: _u.SortOrder.None
+                                })}
+                            />
+                            <Button id="subcaucus-count-head"
+                                label="Members"
+                                iconPos="right"
+                                icon={this.sortOrderIcon(sortCount)}
+                                onClick={() => this.setState({
+                                    sortName: _u.SortOrder.None,
+                                    sortCount: this.nextSortOrder(sortCount, -1)
+                                })}
+                            />
+                            <Button id="subcaucus-delegate-head"
+                                label="Dels"
+                                iconPos="right"
+                                icon={hideDelegates ? "fa fa-fw fa-eye-slash" : "fa fa-fw fa-eye"}
+                                onClick={() => this.setState({ hideDelegates: !hideDelegates })}
+                            />
+                        </div>
+                        <div id="subcaucus-list">
+                            {this.renderSubcaucusRows()}
+                        </div>
+                        <div id="subcaucus-footer">
+                            <Button id="add-subcaucus-button"
+                                label="Add Subcaucus"
+                                icon="fa fa-fw fa-plus"
+                                onClick={() => {
+                                    snapshot.addSubcaucus()
+                                    this.setStateSubcaucuses()
+                                }}
+                            />
+                            <Button id="remove-empty-subcaucuses-button"
+                                label="Empties"
+                                icon="fa fa-fw fa-trash"
+                                disabled={noEmpties}
+                                tooltip="Remove subcaucuses that have no members"
+                                tooltipOptions={this.tooltipOptions}
+                                onClick={() => this.addCardState(CardFor.RemovingEmpties)}
+                            />
+                            <Button id="participants-button"
+                                aria-label="Participants"
+                                icon="fa fa-fw fa-user"
+                                disabled={allEmpty}
+                                tooltip="Participants"
+                                tooltipOptions={this.tooltipOptions}
+                                onClick={() => this.addCardState(CardFor.Participants)}
+                            />
+                            {_u.isDebugging()
+                                ? <>
+                                    <Button id="random-coin-button"
+                                        aria-label="New random coin"
+                                        icon="fa fa-fw fa-sync-alt"
+                                        className="p-button-success"
+                                        tooltip="Get new random seed for the coin"
+                                        tooltipOptions={this.tooltipOptions}
+                                        onClick={() => {
+                                            this.subcalc.reviseSnapshot({ seed: _u.randomSeed() })
+                                            this.growlAlert(`Random seed is now ${this.subcalc.snapshot.seed}.`, 'success', 'New Random Coin')
+                                            this.keySuffix = String(_u.randomSeed())
+                                            this.forceUpdate()
+                                        }}
+                                    />
+                                    <Button id="analysis-button"
+                                        aria-label="Show Analysis"
+                                        icon="fa fa-fw fa-chart-pie"
+                                        className="p-button-success"
+                                        tooltip="Show analysis"
+                                        tooltipOptions={this.tooltipOptions}
+                                        onClick={() => {
+                                            this.setState({ present: Presenting.Analyzing })
+                                        }}
+                                    />
+                                </>
+                                : ''
+                            }
+                        </div>
+                    </section>
+                    {this.renderSummary()}
+                </main>
             </div>
         )
     }
@@ -1074,11 +1081,13 @@ this.keySuffix = String(_u.randomSeed())
      */
     renderByline = (): JSX.Element => {
         return (
-            <Button id="app-byline"
-                label="Brought to you by Tenseg LLC"
-                href="https://tenseg.net"
-                onClick={() => this.addCardState(CardFor.ShowingBy)}
-            />
+            <footer>
+                <Button id="app-byline"
+                    label="Brought to you by Tenseg LLC"
+                    href="https://tenseg.net"
+                    onClick={() => this.addCardState(CardFor.ShowingBy)}
+                />
+            </footer>
         )
     }
 
@@ -1095,7 +1104,7 @@ this.keySuffix = String(_u.randomSeed())
         const app = _u.getApp()
 
         return (
-            <div key={_u.randomSeed()} className="debugging">
+            <aside key={_u.randomSeed()} className="debugging">
                 <p>This is debugging info for <a href="https://grand.clst.org:3000/tenseg/subcalc-pr/issues" target="_repository">subcalc-pr</a> (with <a href="https://reactjs.org/docs/react-component.html" target="_react">ReactJS</a>, <a href="https://www.primefaces.org/primereact/" target="_primereact">PrimeReact</a>, <a href="https://fontawesome.com/icons?d=gallery&s=solid&m=free" target="_fontawesome">Font Awesome</a>) derrived from <a href="https://bitbucket.org/tenseg/subcalc-js/src" target="_bitbucket">subcalc-js</a>. ({app.app || 'web'} {app.version})
                 </p>
                 <pre>{this.subcalc.snapshot.asText()}</pre>
@@ -1112,7 +1121,7 @@ this.keySuffix = String(_u.randomSeed())
                 </div>
                 <pre>{JSON.stringify(process.env, null, 2)}</pre>
                 <p style={{ clear: "both" }}>Done.</p>
-            </div>
+            </aside>
         )
     }
 

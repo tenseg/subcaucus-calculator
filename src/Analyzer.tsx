@@ -290,48 +290,53 @@ export class Analyzer extends React.Component<Props, State> {
 
         return (
             <div className="analyzer">
-                {this.renderMenu()}
-                <div id="meeting-info">
-                    <div id="meeting-name" className="not-button">
-                        {name ? name : this.props.snapshot.defaultName()}
-                        {revision != ''
-                            ? <span className="snapshot">
-                                {revision}
-                            </span>
-                            : ''
-                        }
-                    </div>
-                </div>
-                <div id="analyzer-container">
-                    <div id="analyzer-chart">
-                        {this.renderAnalysis()}
-                    </div>
-                    <div id="analyzer-buttons">
-                        <Button id="counting-delegates-button"
-                            label="Delegates"
-                            className={"counting-delegates"}
-                            disabled={this.state.counting === "delegates"}
-                            onClick={this.switch("delegates")}
-                        />
-                        <Button id="counting-members-button"
-                            label="Members"
-                            className={"counting-members"}
-                            disabled={this.state.counting === "members"}
-                            onClick={this.switch("members")}
-                        />
-                        <Button id="counting-subcaucuses-button"
-                            label="Subcaucuses"
-                            className={"counting-subcaucuses"}
-                            disabled={this.state.counting === "subcaucuses"}
-                            onClick={this.switch("subcaucuses")}
-                        />
-                    </div>
-                </div>
-                <Button id="analyzer-settings-button"
-                    icon="fa fa-fw fa-cog"
-                    onClick={() => this.setState({ showSettings: true })}
-                />
-                {this.renderSettings()}
+                <nav>
+                    {this.renderMenu()}
+                </nav>
+                <main>
+                    <section id="meeting-info">
+                        <h1 id="meeting-name" className="not-button">
+                            {name ? name : this.props.snapshot.defaultName()}
+                            {revision != ''
+                                ? <span className="snapshot">
+                                    {revision}
+                                </span>
+                                : ''
+                            }
+                        </h1>
+                    </section>
+                    <section id="analyzer-container">
+                        <div id="analyzer-chart">
+                            {this.renderAnalysis()}
+                        </div>
+                        <section id="analyzer-buttons">
+                            <Button id="counting-delegates-button"
+                                label="Delegates"
+                                className={"counting-delegates"}
+                                disabled={this.state.counting === "delegates"}
+                                onClick={this.switch("delegates")}
+                            />
+                            <Button id="counting-members-button"
+                                label="Members"
+                                className={"counting-members"}
+                                disabled={this.state.counting === "members"}
+                                onClick={this.switch("members")}
+                            />
+                            <Button id="counting-subcaucuses-button"
+                                label="Subcaucuses"
+                                className={"counting-subcaucuses"}
+                                disabled={this.state.counting === "subcaucuses"}
+                                onClick={this.switch("subcaucuses")}
+                            />
+                        </section>
+                    </section>
+                    <Button id="analyzer-settings-button"
+                        aria-label="Settings"
+                        icon="fa fa-fw fa-cog"
+                        onClick={() => this.setState({ showSettings: true })}
+                    />
+                    {this.renderSettings()}
+                </main>
             </div>
         )
     }

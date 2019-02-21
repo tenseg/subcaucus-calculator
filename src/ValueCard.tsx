@@ -254,7 +254,7 @@ export class ValueCard extends React.Component<Props, State> {
                 </div>
                 <div className="valuecard-wrapper" onClick={this.save()}>
                     <div className="valuecard-inner-wrapper" ref={this.cardRef} onClick={this.save()}>
-                        <div className="valuecard" onClick={this.stopPropagation()}>
+                        <section className="valuecard" onClick={this.stopPropagation()}>
                             <Card id={this.idPlus("valuecard")}
                                 className={`${this.idPlus("valuecard")} ${this.props.className}`}
                                 title={this.props.title}
@@ -267,8 +267,8 @@ export class ValueCard extends React.Component<Props, State> {
                                             src={`${this.props.image}`}
                                         />
                                         {this.props.onSave && this.props.value == undefined
-                                            ? <Button
-                                                id={this.idPlus("picture-close-button")}
+                                            ? <Button id={this.idPlus("picture-close-button")}
+                                                aria-label="Close"
                                                 icon="fa fa-fw fa-times"
                                                 onClick={this.save()}
                                             />
@@ -319,7 +319,7 @@ export class ValueCard extends React.Component<Props, State> {
                                     : ''
                                 }
                             </Card>
-                        </div>
+                        </section>
                     </div>
                 </div>
             </>

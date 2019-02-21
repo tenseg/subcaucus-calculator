@@ -69,7 +69,7 @@ export class SubcaucusRow extends React.Component<Props, State> {
 	 * Handles changes to the name of a subcaucus.
 	 */
 	handleName = () => (event: React.FormEvent<HTMLTextAreaElement>) => {
-		const currentTabIndex = event.currentTarget.tabIndex
+		const currentTabIndex = Number(event.currentTarget.dataset.tabindex)
 		var value = event.currentTarget.value
 		_u.debug("handle name index", currentTabIndex, "is", value)
 		this.setState({ name: value })
@@ -79,7 +79,7 @@ export class SubcaucusRow extends React.Component<Props, State> {
 	 * Handles changes to the member count of a subcaucus.
 	 */
 	handleCount = () => (event: React.FormEvent<HTMLInputElement>) => {
-		const currentTabIndex = event.currentTarget.tabIndex
+		const currentTabIndex = Number(event.currentTarget.dataset.tabindex)
 		var num = Number(event.currentTarget.value)
 		_u.debug("handle count index", currentTabIndex, "is", num)
 		if (num < 0) {
@@ -94,7 +94,7 @@ export class SubcaucusRow extends React.Component<Props, State> {
 	 */
 	handleBlur = () => (event: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>) => {
 		const { subcaucus } = this.props
-		const currentTabIndex = event.currentTarget.tabIndex
+		const currentTabIndex = Number(event.currentTarget.dataset.tabindex)
 		_u.debug("handle blur index", currentTabIndex)
 		if (subcaucus.name !== this.state.name || subcaucus.count !== this.state.count) {
 			subcaucus.name = this.state.name
@@ -111,7 +111,7 @@ export class SubcaucusRow extends React.Component<Props, State> {
 	 */
 	handleKey = () => (event: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
 		const { rows, subcaucus } = this.props
-		const currentTabIndex = event.currentTarget.tabIndex
+		const currentTabIndex = Number(event.currentTarget.dataset.tabindex)
 		_u.debug("handle key index", currentTabIndex, "got", event.key, "for", subcaucus.id, subcaucus.debug())
 		if (event.key === 'Enter' || event.key === 'Tab') {
 			event.preventDefault()
@@ -126,7 +126,7 @@ export class SubcaucusRow extends React.Component<Props, State> {
 				// walk through all the subcaucus fields looking for the next one
 				document.querySelectorAll(".subcaucus-field").forEach((e) => {
 					const element = e as HTMLElement
-					if (element.tabIndex === currentTabIndex + next) {
+					if (Number(element.dataset.tabindex) === currentTabIndex + next) {
 						// then force the focus to this field
 						element.focus()
 					}
@@ -176,9 +176,10 @@ export class SubcaucusRow extends React.Component<Props, State> {
 				>
 					{_u.isDebugging() ? <div className="subcaucus-id">{s.id}</div> : ''}
 					<InputTextarea id={this.idPlus("row-name")}
+						aria-Label="Name for subcaucus"
 						className="subcaucus-field subcaucus-name"
 						autoComplete="off"
-						tabIndex={this.props.index}
+						data-tabindex={this.props.index}
 						type="text"
 						value={name}
 						rows={1}
@@ -192,11 +193,11 @@ export class SubcaucusRow extends React.Component<Props, State> {
 						onBlur={this.handleBlur()}
 						onFocus={this.focusOnWholeText()}
 					/>
-					<label className="screenreader" htmlFor={this.idPlus("row-name")}>Name for subcaucus {s.id}</label>
 					<InputText id={this.idPlus("row-count")}
+						aria-Label="Number of members for subcaucus"
 						className="subcaucus-field subcaucus-count"
 						autoComplete="off"
-						tabIndex={this.props.index + this.props.rows}
+						data-tabindex={this.props.index + this.props.rows}
 						keyfilter="pint"
 						type="text" // number does not support selection of the whole text on
 						pattern="\d*"
@@ -209,7 +210,6 @@ export class SubcaucusRow extends React.Component<Props, State> {
 						// see https://grand.clst.org:3000/tenseg/subcalc-pr/issues/3
 						onFocus={this.focusOnWholeText()}
 					/>
-					<label className="screenreader" htmlFor={this.idPlus("row-count")}>Number of members for subcaucus {s.id}</label>
 					<Button id={this.idPlus("row-delegates")}
 						className={`subcaucus-delegates-button ${s.delegates > 0 && !hideDelegates ? "p-button-success" : "p-button-secondary"} ${hideDelegates ? "hide-delegates" : ""}`}
 						label={s.delegates && !hideDelegates ? `${s.delegates}` : undefined}
