@@ -23,15 +23,6 @@ import { Snapshot } from './Snapshot'
 import { ValueCard } from './ValueCard';
 
 /**
- * Facilitates sorting up or down (or not at all), as needed.
- */
-enum SortOrder {
-    Descending = -1,
-    None = 0,
-    Ascending = 1,
-}
-
-/**
  * Properties for the snapshot loader.
  */
 interface Props {

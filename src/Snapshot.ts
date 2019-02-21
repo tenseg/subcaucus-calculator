@@ -22,6 +22,8 @@ import { SubCalcPRNG } from './SubCalcPRNG'
 
 declare global {
 
+	type SnapshotSortBy = "id" | "name" | "count"
+
 	/**
 	 * An object used to set up a new snapshot.
 	 * 
@@ -348,6 +350,86 @@ export class Snapshot {
 		this.redistributeDelegates()
 	}
 
+    /**
+     * A method to sort subcaucuses by name.
+     * 
+     * NOTE: This depends on the `sortName` state to determine
+     * whether the result will be ascending or descending.
+     */
+	sortBySubcaucusName = (order?: _u.SortOrder) => (a: Subcaucus, b: Subcaucus): number => {
+		if (!order) {
+			order = this.sortOrder
+		}
+		const comparison = a.displayName().localeCompare(b.displayName(), undefined, { sensitivity: 'base', numeric: true })
+			|| a.id - b.id // fall back to order of entry
+
+		return comparison * order
+	}
+
+    /**
+     * A method to sort subcaucuses by count.
+     * This method sorts first by count, then subsorts by
+     * the number of delegates, and then sorts by name
+     * (names will always be ascending). It also makes sure
+     * that subcaucuses without any members will sort to
+     * the bottom regardless of the chosen sort order.
+     * 
+     * NOTE: This depends on the `sortCount` state to determine
+     * whether the result will be ascending or descending.
+     */
+	sortBySubcaucusCount = (order?: _u.SortOrder) => (a: Subcaucus, b: Subcaucus): number => {
+		if (!order) {
+			order = this.sortOrder
+		}
+
+		// sort empty subcaucuses to the end by making them infinite in value
+		let ac = a.count ? a.count : order * Infinity
+		let bc = b.count ? b.count : order * Infinity
+		let comparison: number = (ac - bc).comparisonValue()
+
+		// use the delegate value to just nudge the comparison a bit one way or the other
+		const delegateComparison = (a.delegates - b.delegates).comparisonValue()
+		comparison = (0.1 * delegateComparison) + comparison
+
+		if (comparison == 0) {
+			// if otherwise equal, return a comparison of names in ascending order 
+			return this.sortBySubcaucusName(_u.SortOrder.Ascending)(a, b)
+		}
+
+		return comparison * order
+	}
+
+	/**
+	 * The element on which we want to sort the subcaucuses.
+	 */
+	sortBy: SnapshotSortBy = 'id'
+
+	/**
+	 * The order in which we want to sort the subcaucuses.
+	 */
+	sortOrder = _u.SortOrder.Ascending
+
+	/**
+	 * Return an array of subcaucuses sorted as requested.
+	 * Use `sortBy` and `sortOrder` to adjust the sort.
+	 */
+	subcaucusesSorted = (): Array<Subcaucus> => {
+
+		let sort = (a: Subcaucus, b: Subcaucus) => {
+			return (a.id - b.id) * this.sortOrder
+		}
+
+		if (this.sortBy === 'name') {
+			sort = this.sortBySubcaucusName()
+		}
+
+		if (this.sortBy === 'count') {
+			sort = this.sortBySubcaucusCount()
+		}
+
+		return this.subcaucuses.values().sort(sort)
+	}
+
 	/**
 	 * The number of people "in the room"
 	 * (the total of subcaucus counts).
@@ -623,7 +705,7 @@ export class Snapshot {
 
 		if (this.participants > 0) {
 
-			this.subcaucuses.forEach((subcaucus) => {
+			this.subcaucusesSorted().forEach((subcaucus) => {
 				const sText = subcaucus.asText()
 				text += sText ? `- ${sText}\n\n` : ''
 			})
@@ -656,7 +738,7 @@ export class Snapshot {
 
 		csv.push("Subcaucus,Members,Delegates,Remainder,Coin Tosses,Remainder Delegates")
 
-		this.subcaucuses.forEach((subcaucus) => {
+		this.subcaucusesSorted().forEach((subcaucus) => {
 			const row = subcaucus.asCSV()
 			if (row) {
 				csv.push(row)

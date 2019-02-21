@@ -47,15 +47,6 @@ import { PasteCard } from './Cards/PasteCard';
 import { ParticipantsCard } from './Cards/ParticipantsCard';
 
 /**
- * Facilitates sorting up or down (or not at all), as needed.
- */
-enum SortOrder {
-    Descending = -1,
-    None = 0,
-    Ascending = 1,
-}
-
-/**
  * Includes the modal cards we can display.
  * When more than one card is waiting to be viewed,
  * they will be presented in the order listed in
@@ -121,8 +112,8 @@ interface State {
     afterBefore?: () => void
     present: Presenting
     // sorting info
-    sortName: SortOrder
-    sortCount: SortOrder
+    sortName: _u.SortOrder
+    sortCount: _u.SortOrder
     hideDelegates: boolean
 }
 
@@ -217,8 +208,8 @@ this.keySuffix = String(_u.randomSeed())
             before: before,
             afterBefore: afterBefore,
             // sorting info
-            sortName: SortOrder.None,
-            sortCount: SortOrder.None,
+            sortName: _u.SortOrder.None,
+            sortCount: _u.SortOrder.None,
             hideDelegates: false,
         }
     }
@@ -503,14 +494,14 @@ this.keySuffix = String(_u.randomSeed())
     /**
      * Returns an icon to represent the supplied `SortOrder`.
      */
-    sortOrderIcon = (order: SortOrder): string => {
+    sortOrderIcon = (order: _u.SortOrder): string => {
         return ["fa fa-chevron-circle-down", "far fa-circle", "fa fa-chevron-circle-up"][order + 1]
     }
 
     /**
      * Cycles through the sort orders and returns the next one.
      */
-    nextSortOrder = (currentOrder: SortOrder, direction = 1): SortOrder => {
+    nextSortOrder = (currentOrder: _u.SortOrder, direction = 1): _u.SortOrder => {
         // shifting over with +1 to nudge values over to where modulo is happy
         let nextOrder = ((currentOrder + direction + 1) % 3)
         if (nextOrder < 0) {
@@ -850,73 +841,26 @@ this.keySuffix = String(_u.randomSeed())
     }
 
     /**
-     * A method to sort subcaucuses by name.
-     * 
-     * NOTE: This depends on the `sortName` state to determine
-     * whether the result will be ascending or descending.
-     */
-    sortBySubcaucusName = (a: Subcaucus, b: Subcaucus): number => {
-
-        const order = this.state.sortName || SortOrder.Ascending // default to ascending order
-
-        const comparison = a.displayName().localeCompare(b.displayName(), undefined, { sensitivity: 'base', numeric: true })
-            || a.id - b.id // fall back to order of entry
-
-        return comparison * order
-    }
-
-    /**
-     * A method to sort subcaucuses by count.
-     * This method sorts first by count, then subsorts by
-     * the number of delegates, and then sorts by name
-     * (names will always be ascending). It also makes sure
-     * that subcaucuses without any members will sort to
-     * the bottom regardless of the chosen sort order.
-     * 
-     * NOTE: This depends on the `sortCount` state to determine
-     * whether the result will be ascending or descending.
-     */
-    sortBySubcaucusCounts = (a: Subcaucus, b: Subcaucus): number => {
-
-        const order = this.state.sortCount || SortOrder.Descending // default to descending order
-
-        // sort empty subcaucuses to the end by making them infinite in value
-        let ac = a.count ? a.count : order * Infinity
-        let bc = b.count ? b.count : order * Infinity
-        let comparison: number = (ac - bc).comparisonValue()
-
-        // use the delegate value to just nudge the comparison a bit one way or the other
-        const delegateComparison = (a.delegates - b.delegates).comparisonValue()
-        comparison = (0.1 * delegateComparison) + comparison
-
-        if (comparison == 0) {
-            // if otherwise equal, return a comparison of names in ascending order 
-            return this.sortBySubcaucusName(a, b)
-        }
-
-        return comparison * order
-    }
-
-    /**
      * Returns JSX for the subcaucus rows.
      * 
      * NOTE: Do not `setState()` in this method.
      */
     renderSubcaucusRows = (): JSX.Element[] => {
         // sort subcaucuses by id number by default
-        let sort = (a: Subcaucus, b: Subcaucus) => {
-            return a.id - b.id
+        this.subcalc.snapshot.sortBy = 'id'
+        this.subcalc.snapshot.sortOrder = _u.SortOrder.Ascending
+
+        if (this.state.sortName != _u.SortOrder.None) {
+            this.subcalc.snapshot.sortBy = 'name'
+            this.subcalc.snapshot.sortOrder = this.state.sortName
         }
 
-        if (this.state.sortName != SortOrder.None) {
-            sort = this.sortBySubcaucusName
+        if (this.state.sortCount != _u.SortOrder.None) {
+            this.subcalc.snapshot.sortBy = 'count'
+            this.subcalc.snapshot.sortOrder = this.state.sortCount
         }
 
-        if (this.state.sortCount != SortOrder.None) {
-            sort = this.sortBySubcaucusCounts
-        }
-
-        return this.subcalc.snapshot.subcaucuses.values().sort(sort).map((subcaucus, index, array): JSX.Element => {
+        return this.subcalc.snapshot.subcaucusesSorted().map((subcaucus, index, array): JSX.Element => {
             return (
                 <SubcaucusRow key={`${subcaucus.id} ${this.keySuffix}`}
                     subcaucus={subcaucus}
@@ -1043,8 +987,8 @@ this.keySuffix = String(_u.randomSeed())
                             label="Subcaucuses"
                             icon={this.sortOrderIcon(sortName)}
                             onClick={() => this.setState({
-                                sortName: this.state.sortName ? SortOrder.None : SortOrder.Ascending,
-                                sortCount: SortOrder.None
+                                sortName: this.state.sortName ? _u.SortOrder.None : _u.SortOrder.Ascending,
+                                sortCount: _u.SortOrder.None
                             })}
                         />
                         <Button id="subcaucus-count-head"
@@ -1052,7 +996,7 @@ this.keySuffix = String(_u.randomSeed())
                             iconPos="right"
                             icon={this.sortOrderIcon(sortCount)}
                             onClick={() => this.setState({
-                                sortName: SortOrder.None,
+                                sortName: _u.SortOrder.None,
                                 sortCount: this.nextSortOrder(sortCount, -1)
                             })}
                         />

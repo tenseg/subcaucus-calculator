@@ -174,6 +174,17 @@ Date.prototype.toTimestampString = function (): TimestampString {
 	return this.toJSON()
 }
 
+// _u enums
+
+/**
+ * Facilitates sorting up or down (or not at all), as needed.
+ */
+export enum SortOrder {
+	Descending = -1,
+	None = 0,
+	Ascending = 1,
+}
+
 // _u functions
 
 /**
