@@ -213,7 +213,7 @@ this.keySuffix = String(_u.randomSeed())
         this.state = {
             // card status
             cards: cards,
-            present: Presenting.Analyzing, // Presenting.Calculator,
+            present: Presenting.Calculator,
             before: before,
             afterBefore: afterBefore,
             // sorting info

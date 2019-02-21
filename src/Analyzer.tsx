@@ -52,6 +52,10 @@ interface State {
  */
 export class Analyzer extends React.Component<Props, State> {
 
+    /**
+     * List of substitute terms. This allows for grouping certain words.
+     * The user can change this default list via `renderSettings()`.
+     */
     substitutions: { [props: string]: string } = {
         for: '',
         of: '',
@@ -74,7 +78,7 @@ export class Analyzer extends React.Component<Props, State> {
         this.getLocalSubstitutions()
         this.state = {
             counting: "delegates",
-            showSettings: true,
+            showSettings: false,
         }
     }
 
@@ -224,11 +228,18 @@ export class Analyzer extends React.Component<Props, State> {
 
     }
 
+    /**
+     * Switch among charts.
+     */
     switch = (value: "members" | "delegates" | "subcaucuses") => (event: React.MouseEvent<HTMLButtonElement>) => {
         event.currentTarget.blur()
         this.setState({ counting: value })
     }
 
+    /**
+     * Transform plain text version of substitutions to
+     * structured version and save that in localStorage.
+     */
     saveSubstitutions = (value?: string) => {
         if (value) {
             this.substitutions = {}
@@ -249,9 +260,14 @@ export class Analyzer extends React.Component<Props, State> {
         this.setState({ showSettings: false })
     }
 
+    /**
+     * Transform structured substitutions to plain text and
+     * allow the user to make changes.
+     */
     renderSettings = (): JSX.Element => {
         if (!this.state.showSettings) return <></>
-        let value = Object.keys(this.substitutions).reduce((sofar: string, term: string): string => {
+        // change substitutions object into plain text for editing
+        let text = Object.keys(this.substitutions).reduce((sofar: string, term: string): string => {
             const substitute = this.substitutions[term]
             return sofar + `${term} ${substitute}\n`
         }, '')
@@ -259,7 +275,7 @@ export class Analyzer extends React.Component<Props, State> {
             <ValueCard
                 className="analysis-substitutions-card"
                 title="Substitutions"
-                value={value}
+                value={text}
                 type="long text"
                 onSave={this.saveSubstitutions}
                 allowEmpty={true}
