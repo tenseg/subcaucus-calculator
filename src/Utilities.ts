@@ -59,7 +59,7 @@ declare global {
 		 * Return one string if this number is a 1, 
 		 * another string if it is anything else.
 		 */
-		singularPlural(singular: string, plural: string): string
+		singularPlural(singular: string, plural: string, includeNumber?: 'no number'): string
 
 		/**
 		 * Turns values < 0 into -1, values > 0 into 1.

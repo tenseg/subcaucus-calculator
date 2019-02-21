@@ -27,6 +27,7 @@ import { Snapshot } from './Snapshot'
 import { Subcaucus } from './Subcaucus'
 import { SubcaucusRow, SubcaucusRowAction } from './SubcaucusRow'
 import { Loader } from './Loader'
+import { Analyzer } from './Analyzer'
 import { ShowJSON } from './ShowJSON'
 
 // cards
@@ -43,6 +44,7 @@ import { CreditCard } from './Cards/CreditCard';
 import { SecurityCard } from './Cards/SecurityCard';
 import { ViabilityCard } from './Cards/ViabilityCard';
 import { PasteCard } from './Cards/PasteCard';
+import { ParticipantsCard } from './Cards/ParticipantsCard';
 
 /**
  * Facilitates sorting up or down (or not at all), as needed.
@@ -72,6 +74,7 @@ enum CardFor {
     SavingSnapshot,
     SavingSnapshotBefore,
     RemovingEmpties,
+    Participants,
     ShowingAbout,
     ShowingBy,
     ShowingInstructions,
@@ -87,6 +90,7 @@ enum CardFor {
 enum Presenting {
     Calculator,
     Loading,
+    Analyzing,
 }
 
 /**
@@ -352,13 +356,6 @@ this.keySuffix = String(_u.randomSeed())
         const mailto = "mailto:subcalc@tenseg.net?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body)
 
         location.href = mailto
-    }
-
-    /**
-     * Provide a default name for this meeting, including today's date.
-     */
-    defaultName = (): string => {
-        return "My Meeting"
     }
 
     /**
@@ -725,7 +722,7 @@ this.keySuffix = String(_u.randomSeed())
                 />
                 case CardFor.ChangingName: return <ChangingNameCard
                     name={this.subcalc.snapshot.name}
-                    defaultName={this.defaultName()}
+                    defaultName={this.subcalc.snapshot.defaultName()}
                     save={this.saveName}
                     newMeeting={this.newMeeting}
                 />
@@ -749,6 +746,21 @@ this.keySuffix = String(_u.randomSeed())
                     clearData={() => {
                         this.subcalc.clear()
                         location.href = "/"
+                    }}
+                />
+                case CardFor.Participants: return <ParticipantsCard
+                    cancel={() => this.removeCardState(CardFor.Participants)}
+                    clear={() => {
+                        this.removeCardState(CardFor.Participants)
+                        this.checkForRevisionBefore(() => {
+                            this.subcalc.zeroSubcaucuses()
+                            this.keySuffix = String(_u.randomSeed())
+                            this.forceUpdate()
+                        }, "Before zeroing out the subcaucuses...")
+                    }}
+                    analyze={() => {
+                        this.removeCardState(CardFor.Participants)
+                        this.setState({ present: Presenting.Analyzing })
                     }}
                 />
                 case CardFor.Viability: return <ViabilityCard
@@ -977,7 +989,7 @@ this.keySuffix = String(_u.randomSeed())
                     this.subcalc.snapshot.viableParticipants < this.subcalc.snapshot.participants
                         ? <div className="summary-row danger">
                             <div className="summary-label">
-                                {(this.subcalc.snapshot.participants - this.subcalc.snapshot.viableParticipants).singularPlural("person", "people")} in a non-viable subcaucus
+                                {(this.subcalc.snapshot.participants - this.subcalc.snapshot.viableParticipants).singularPlural("person", "people")} in {this.subcalc.snapshot.nonViableSubcaucuses.singularPlural("a non-viable subcaucus", "non-viable subcaucuses", "no number")}
                             </div>
                         </div>
                         : ''
@@ -1003,6 +1015,9 @@ this.keySuffix = String(_u.randomSeed())
         const snapshot = this.subcalc.snapshot
         const { name, revision } = snapshot
 
+        const allEmpty = snapshot.subcaucuses.values().findIndex((s) => s.count > 0) === -1
+        const noEmpties = snapshot.subcaucuses.values().findIndex((s) => s.count === 0) === -1
+
         return (
             <div id="calculator">
                 {this.renderMenu()}
@@ -1010,7 +1025,7 @@ this.keySuffix = String(_u.randomSeed())
                     <div id="meeting-name" className="button"
                         onClick={() => this.addCardState(CardFor.ChangingName)}
                     >
-                        {name ? name : this.defaultName()}
+                        {name ? name : this.subcalc.snapshot.defaultName()}
                         {revision != ''
                             ? <span className="snapshot">
                                 {revision}
@@ -1063,33 +1078,42 @@ this.keySuffix = String(_u.randomSeed())
                         <Button id="remove-empty-subcaucuses-button"
                             label="Empties"
                             icon="fa fa-fw fa-trash"
+                            disabled={noEmpties}
                             tooltip="Remove subcaucuses that have no members"
                             tooltipOptions={this.tooltipOptions}
                             onClick={() => this.addCardState(CardFor.RemovingEmpties)}
                         />
                         <Button id="clear-counts-button"
-                            icon="fa fa-fw fa-minus-circle"
-                            tooltip="Zero out the members of each subcaucus"
+                            icon="fa fa-fw fa-user"
+                            disabled={allEmpty}
+                            tooltip="Participants"
                             tooltipOptions={this.tooltipOptions}
-                            onClick={() => this.checkForRevisionBefore(() => {
-                                this.subcalc.zeroSubcaucuses()
-                                this.keySuffix = String(_u.randomSeed())
-                                this.forceUpdate()
-                            }, "Before zeroing out the subcaucuses...")}
+                            onClick={() => this.addCardState(CardFor.Participants)}
                         />
                         {_u.isDebugging()
-                            ? <Button id="random-coin-button"
-                                icon="fa fa-fw fa-sync-alt"
-                                className="p-button-success"
-                                tooltip="Get new random seed for the coin"
-                                tooltipOptions={this.tooltipOptions}
-                                onClick={() => {
-                                    this.subcalc.reviseSnapshot({ seed: _u.randomSeed() })
-                                    this.growlAlert(`Random seed is now ${this.subcalc.snapshot.seed}.`, 'success', 'New Random Coin')
-                                    this.keySuffix = String(_u.randomSeed())
-                                    this.forceUpdate()
-                                }}
-                            />
+                            ? <>
+                                <Button id="random-coin-button"
+                                    icon="fa fa-fw fa-sync-alt"
+                                    className="p-button-success"
+                                    tooltip="Get new random seed for the coin"
+                                    tooltipOptions={this.tooltipOptions}
+                                    onClick={() => {
+                                        this.subcalc.reviseSnapshot({ seed: _u.randomSeed() })
+                                        this.growlAlert(`Random seed is now ${this.subcalc.snapshot.seed}.`, 'success', 'New Random Coin')
+                                        this.keySuffix = String(_u.randomSeed())
+                                        this.forceUpdate()
+                                    }}
+                                />
+                                <Button id="random-coin-button"
+                                    icon="fa fa-fw fa-chart-pie"
+                                    className="p-button-success"
+                                    tooltip="Show analysis"
+                                    tooltipOptions={this.tooltipOptions}
+                                    onClick={() => {
+                                        this.setState({ present: Presenting.Analyzing })
+                                    }}
+                                />
+                            </>
                             : ''
                         }
                     </div>
@@ -1128,7 +1152,7 @@ this.keySuffix = String(_u.randomSeed())
 
         return (
             <div key={_u.randomSeed()} className="debugging">
-                <p>This is debugging info for <a href="https://grand.clst.org:3000/tenseg/subcalc-pr/issues" target="_repository">subcalc-pr</a> (with <a href="https://reactjs.org/docs/react-component.html" target="_react">ReactJS</a>, <a href="https://www.primefaces.org/primereact/" target="_primereact">PrimeReact</a>, <a href="https://fontawesome.com/icons?d=gallery" target="_fontawesome">Font Awesome</a>) derrived from <a href="https://bitbucket.org/tenseg/subcalc-js/src" target="_bitbucket">subcalc-js</a>. ({app.app || 'web'} {app.version})
+                <p>This is debugging info for <a href="https://grand.clst.org:3000/tenseg/subcalc-pr/issues" target="_repository">subcalc-pr</a> (with <a href="https://reactjs.org/docs/react-component.html" target="_react">ReactJS</a>, <a href="https://www.primefaces.org/primereact/" target="_primereact">PrimeReact</a>, <a href="https://fontawesome.com/icons?d=gallery&s=solid&m=free" target="_fontawesome">Font Awesome</a>) derrived from <a href="https://bitbucket.org/tenseg/subcalc-js/src" target="_bitbucket">subcalc-js</a>. ({app.app || 'web'} {app.version})
                 </p>
                 <pre>{this.subcalc.snapshot.asText()}</pre>
                 <div className="columns">
@@ -1188,6 +1212,12 @@ this.keySuffix = String(_u.randomSeed())
                             subcalc={this.subcalc}
                             onLoad={this.loadSnapshot}
                             onNew={this.newMeeting}
+                        />
+                        : ''}
+                    {this.state.present == Presenting.Analyzing
+                        ? <Analyzer
+                            snapshot={this.subcalc.snapshot}
+                            onExit={() => this.setState({ present: Presenting.Calculator })}
                         />
                         : ''}
                     {this.renderByline()}

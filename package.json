@@ -1,6 +1,6 @@
 {
   "name": "subcalc",
-  "version": "3.0.1",
+  "version": "3.1.0-dev.1",
   "homepage": ".",
   "private": true,
   "dependencies": {
@@ -8,6 +8,7 @@
     "@mojotech/json-type-validation": "^3.1.0",
     "@types/body-scroll-lock": "^2.6.0",
     "body-scroll-lock": "^2.6.1",
+    "chart.js": "^2.7.3",
     "classnames": "^2.2.6",
     "node-sass": "^4.11.0",
     "primeicons": "^1.0.0",

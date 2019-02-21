@@ -84,10 +84,10 @@ export class Loader extends React.Component<Props, State> {
         return button === 'name'
             ? this.state.sortBy === "name"
                 ? "fa fa-fw fa-chevron-circle-up"
-                : "fa fa-fw fa-chevron-circle-off"
+                : "far fa-fw fa-circle"
             : this.state.sortBy === "date"
                 ? "fa fa-fw fa-chevron-circle-down"
-                : "fa fa-fw fa-chevron-circle-off"
+                : "far fa-fw fa-circle"
     }
 
     /**
