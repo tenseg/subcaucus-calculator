@@ -201,6 +201,7 @@ export class SubcaucusRow extends React.Component<Props, State> {
 						keyfilter="pint"
 						type="text" // number does not support selection of the whole text on
 						pattern="\d*"
+						inputMode="numeric"
 						value={count ? count : ''}
 						placeholder={`—`}
 						onChange={this.handleCount()}

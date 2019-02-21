@@ -307,6 +307,7 @@ export class ValueCard extends React.Component<Props, State> {
                                                 keyfilter={isPositiveInteger ? "pint" : ""}
                                                 type="text"
                                                 pattern={isPositiveInteger ? "\\d*" : undefined}
+                                                inputMode={isPositiveInteger ? "numeric" : undefined}
                                                 value={isPositiveInteger ? (value === '0' ? '' : value) : value} // show 0 as blank for positive integers
                                                 placeholder={this.props.defaultValue}
                                                 onChange={this.handleChange()}
