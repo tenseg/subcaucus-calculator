@@ -1153,6 +1153,7 @@ this.keySuffix = String(_u.randomSeed())
     render() {
 
         _u.debug("rendering", this.subcalc.snapshot)
+        _u.debug(`history length ${history.length}`, history)
 
         return (
             <div id="app">

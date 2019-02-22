@@ -176,7 +176,7 @@ export class SubcaucusRow extends React.Component<Props, State> {
 				>
 					{_u.isDebugging() ? <div className="subcaucus-id">{s.id}</div> : ''}
 					<InputTextarea id={this.idPlus("row-name")}
-						aria-Label="Name for subcaucus"
+						aria-label="Name for subcaucus"
 						className="subcaucus-field subcaucus-name"
 						autoComplete="off"
 						data-tabindex={this.props.index}
@@ -194,7 +194,7 @@ export class SubcaucusRow extends React.Component<Props, State> {
 						onFocus={this.focusOnWholeText()}
 					/>
 					<InputText id={this.idPlus("row-count")}
-						aria-Label="Number of members for subcaucus"
+						aria-label="Number of members for subcaucus"
 						className="subcaucus-field subcaucus-count"
 						autoComplete="off"
 						data-tabindex={this.props.index + this.props.rows}
