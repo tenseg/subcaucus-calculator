@@ -45,7 +45,7 @@ export class WelcomeCard extends React.Component<Props, State> {
 
 		return (
 			<ValueCard key="welcome-card" id="welcome-card"
-				title="Welcome to the Minnesota DFL Subcacus Calculator"
+				title="Welcome to the Minnesota DFL Subcaucus Calculator"
 				image="dfl.jpg"
 				allowEmpty={false}
 				onSave={this.props.save}
