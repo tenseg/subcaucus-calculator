@@ -1,11 +1,11 @@
 #  Version History
 
-## 3.1.1 — 22 February 2019
+## 3.1.1 — 23 February 2019
 
 * Prints at higher contrast without buttons and menus
-* Handle the back buttom more intelligently
+* Handle the back button more intelligently
 * Added version number to bottom of screen and exports
-* Fixed an embarassing type on the welcome card (you would think we could spell "subcaucus" by now)
+* Fixed an embarrassing type on the welcome card (you would think we could spell "subcaucus" by now)
 
 ## 3.1.0 — 21 February 2019
 
