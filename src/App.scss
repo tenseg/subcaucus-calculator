@@ -68,17 +68,32 @@ body {
     }
     
     #app-byline {
-        display: block;
+        display: flex;
+        justify-content: space-between;
         font-size: 9px;
-        text-align: right;
+        text-align: left;
+        
+        .p-button-text {
+            display: none;
+        }
+    }
+    
+    #credit-line {
+        display: block;
+        
+        @media print {
+            &::after {
+                content: " - visit https://subcalc.tenseg.net"
+            }
+        }
     }
     
     #app-version {
         display: block;
-        padding: $form-margin;
         font-size: 9px;
+        font-weight: 100;
         text-align: right;
-        color: darken($body-color, 20%);
+        color: lighten($header-color, 40%);
         
         @media print {
             background-color: white;

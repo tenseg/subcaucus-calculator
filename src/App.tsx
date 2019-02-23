@@ -1092,11 +1092,13 @@ this.keySuffix = String(_u.randomSeed())
         return (
             <footer>
                 <Button id="app-byline"
-                    label="Brought to you by Tenseg LLC"
                     href="https://tenseg.net"
+                    label="&nbsp;"
                     onClick={() => this.addCardState(CardFor.ShowingBy)}
-                />
-                <div id="app-version">version {process.env.REACT_APP_VERSION}{process.env.REACT_APP_IOS_VERSION ? ' iOS' : ''}</div>
+                >
+                    <div id="app-version">v. {process.env.REACT_APP_VERSION}{process.env.REACT_APP_IOS_VERSION ? ' iOS' : ''}</div>
+                    <div id="credit-line">Brought to you by Tenseg LLC</div>
+                </Button>
             </footer>
         )
     }
