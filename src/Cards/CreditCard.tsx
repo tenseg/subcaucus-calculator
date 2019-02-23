@@ -43,7 +43,7 @@ export class CreditCard extends React.Component<Props, State> {
 		if (app && appVersion) {
 			versions.push(`${app} ${appVersion}`)
 		}
-		if (_u.isDebugging) {
+		if (_u.isDebugging()) {
 			if (appBuild) {
 				versions.push(appBuild)
 			}

@@ -3,9 +3,9 @@
 ## 3.1.1 — 23 February 2019
 
 * Prints at higher contrast without buttons and menus
-* Handle the back button more intelligently
-* Added version number to bottom of screen and exports
-* Fixed an embarrassing type on the welcome card (you would think we could spell "subcaucus" by now)
+* Handle the back button more intelligently (thanks SC)
+* Added version number to bottom of screen and exports (thanks CT)
+* Fixed an embarrassing typo on the welcome card (thanks SC, you would think we could spell "subcaucus" by now)
 
 ## 3.1.0 — 21 February 2019
 
