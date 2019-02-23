@@ -64,6 +64,14 @@ body {
         text-align: right;
     }
     
+    #app-version {
+        display: block;
+        padding: $form-margin;
+        font-size: 9px;
+        text-align: right;
+        color: darken($body-color, 20%)
+    }
+    
     #app-header {
         display: flex;
         

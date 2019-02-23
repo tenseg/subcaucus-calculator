@@ -735,6 +735,10 @@ export class Snapshot {
 
 		text += `The coin had a random seed of ${this.seed}.\n`
 		text += `Last revised ${revised.toLocaleString('en-US', { timeZoneName: 'short' })} \n`
+
+		const app = _u.getApp()
+		text += `\nSubCalc version ${app.version} ${app.build}\n`
+
 		return text
 	}
 
@@ -772,7 +776,10 @@ export class Snapshot {
 		csv.push(`Revision,${this.revision.csvQuoted()}`)
 		csv.push(`Meeting,${this.name.csvQuoted()}`)
 
+		csv.push('"",""')
 
+		const app = _u.getApp()
+		csv.push(`SubCalc version,"${app.version} ${app.build}"`)
 
 		return csv.join("\r\n")
 	}

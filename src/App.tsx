@@ -340,9 +340,17 @@ this.keySuffix = String(_u.randomSeed())
 
         const url = snapshot.asURL()
 
-        let body = "Feel free to send whatever feedback you like. We have found that answering the following questions often helps us better understand requests. Thank you for using the subcaucus calculator and for caring enough to ask us to make it better!\n\nWhat were you trying to do?\n\nWhat action did you take to accomplish this goal?\n\nWhat did you expect to happen?\n\nWhat actually happened instead?\n\nInclude this very long and ugly link if you want us to be able to reproduce the current state of your calculator:\n\n" + url + "\n"
+        let body = "Feel free to send whatever feedback you like. We have found that answering the following questions often helps us better understand requests. Thank you for using the subcaucus calculator and for caring enough to ask us to make it better!\n\nWhat were you trying to do?\n\nWhat action did you take to accomplish this goal?\n\nWhat did you expect to happen?\n\nWhat actually happened instead?"
 
-        let subject = `SubCalc Feedback (${process.env.REACT_APP_VERSION})`;
+        body += "\n\nInclude the odd looking information below if you want us to be able to help you with a question or problem. Thanks!\n\n"
+            + url + "\n\n"
+            + navigator.platform + " "
+            + navigator.userAgent + "\n"
+
+        const app = _u.getApp()
+        body += `\nSubCalc version ${app.version} ${app.build}\n`
+
+        let subject = `SubCalc Feedback`;
 
         const mailto = "mailto:subcalc@tenseg.net?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body)
 
@@ -1088,6 +1096,7 @@ this.keySuffix = String(_u.randomSeed())
                     href="https://tenseg.net"
                     onClick={() => this.addCardState(CardFor.ShowingBy)}
                 />
+                <div id="app-version">version {process.env.REACT_APP_VERSION}{process.env.REACT_APP_IOS_VERSION ? ' iOS' : ''}</div>
             </footer>
         )
     }
