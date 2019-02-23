@@ -307,6 +307,14 @@ export class Snapshot {
 		}
 	}
 
+	matchesRevisionOf = (snapshot: Snapshot): boolean => {
+		if (this.created != snapshot.created) return false
+		if (this.device != snapshot.device) return false
+		if (this.revised != snapshot.revised) return false
+		if (this.revision != snapshot.revision) return false
+		return true
+	}
+
 	/**
 	 * Update the snapshot with new values. 
 	 * If signalling a change to subcaucuses

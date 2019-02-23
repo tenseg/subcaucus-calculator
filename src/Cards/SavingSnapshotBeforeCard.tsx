@@ -43,12 +43,13 @@ interface State {
 export class SavingSnapshotBeforeCard extends React.Component<Props, State> {
 
 	save = (value?: string) => (event: React.MouseEvent<HTMLButtonElement>) => {
+		_u.switchHistory()
 		this.props.save(value)
 	}
 
 	render() {
 		return (
-			<ValueCard key="snapshot-value" id="snapshot-value"
+			<ValueCard key="snapshot-before-card" id="snapshot-before-card"
 				title={this.props.title || "Save changes?"}
 				value={this.props.revisionName || ''}
 				valueLabel="Name for the snapshot?"

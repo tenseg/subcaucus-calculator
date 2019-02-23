@@ -683,7 +683,7 @@ this.keySuffix = String(_u.randomSeed())
      */
     renderNextCard = (): JSX.Element => {
         return this.state.cards.sort((a, b) => b - a).reduce((accumulator: JSX.Element, cardFor: CardFor): JSX.Element => {
-            _u.debug("filtering cards", accumulator, cardFor)
+            _u.debug(`filtering card for ${cardFor}`, accumulator)
             switch (cardFor) {
                 case CardFor.Welcome: return <WelcomeCard
                     name={this.subcalc.snapshot.name}
@@ -784,6 +784,7 @@ this.keySuffix = String(_u.randomSeed())
         if (value !== undefined) {
             this.saveSnapshot(value, CardFor.Nothing)
             if (this.state.afterBefore) {
+                _u.switchHistory()
                 this.state.afterBefore()
             }
         }
@@ -1105,7 +1106,7 @@ this.keySuffix = String(_u.randomSeed())
 
         return (
             <aside key={_u.randomSeed()} className="debugging">
-                <p>This is debugging info for <a href="https://grand.clst.org:3000/tenseg/subcalc-pr/issues" target="_repository">subcalc-pr</a> (with <a href="https://reactjs.org/docs/react-component.html" target="_react">ReactJS</a>, <a href="https://www.primefaces.org/primereact/" target="_primereact">PrimeReact</a>, <a href="https://fontawesome.com/icons?d=gallery&s=solid&m=free" target="_fontawesome">Font Awesome</a>) derrived from <a href="https://bitbucket.org/tenseg/subcalc-js/src" target="_bitbucket">subcalc-js</a>. ({app.app || 'web'} {app.version})
+                <p>This is debugging info for <a href="https://github.com/tenseg/subcaucus-calculator/issues" target="_repository">subcaucus-calculator</a> (with <a href="https://reactjs.org/docs/react-component.html" target="_react">ReactJS</a>, <a href="https://www.primefaces.org/primereact/" target="_primereact">PrimeReact</a>, <a href="https://fontawesome.com/icons?d=gallery&s=solid&m=free" target="_fontawesome">Font Awesome</a>) derrived from <a href="https://bitbucket.org/tenseg/subcalc-js/src" target="_bitbucket">subcalc-js</a>. ({app.app || 'web'} {app.version})
                 </p>
                 <pre>{this.subcalc.snapshot.asText()}</pre>
                 <div className="columns">
@@ -1153,7 +1154,8 @@ this.keySuffix = String(_u.randomSeed())
     render() {
 
         _u.debug("rendering", this.subcalc.snapshot)
-        _u.debug(`history length ${history.length}`, history)
+        _u.debug(`rendering app history length ${history.length}`, history)
+        _u.debug(`rendering app with history state`, history.state)
 
         return (
             <div id="app">

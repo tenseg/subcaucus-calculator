@@ -49,7 +49,10 @@ export class AboutCard extends React.Component<Props, State> {
 						label="Credits"
 						icon="fa fa-fw fa-user"
 						className="p-button-secondary"
-						onClick={this.props.showCredits}
+						onClick={() => {
+							_u.switchHistory()
+							this.props.showCredits()
+						}}
 					/>
 				}
 			>

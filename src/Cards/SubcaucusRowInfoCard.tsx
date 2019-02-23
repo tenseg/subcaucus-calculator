@@ -38,7 +38,7 @@ export class SubcaucusRowInfoCard extends React.Component<Props, State> {
 		const { subcaucus: s, dismiss } = this.props
 
 		return (
-			<ValueCard
+			<ValueCard id="subcaucus-info-card"
 				className='subcaucus-info-card'
 				title={s.displayName()}
 				onSave={dismiss}

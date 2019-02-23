@@ -431,6 +431,9 @@ export class SubCalc {
 		if (keyContent) {
 			localStorage.removeItem(`${this.storedSnapshotPrefix} ${snapshotKey}`)
 			localStorage.setItem(`${this.trashedSnapshotPrefix} ${snapshotKey}`, keyContent)
+			if (snapshot.matchesRevisionOf(this.snapshot)) {
+				this.snapshot.revision = "" // remind us that this is no longer a saved revision
+			}
 		} else {
 			_u.alertUser(new Error(`Could not find ${this.storedSnapshotPrefix} ${snapshotKey}`))
 		}

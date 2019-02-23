@@ -42,7 +42,7 @@ export class SavingSnapshotCard extends React.Component<Props, State> {
 
 	render() {
 		return (
-			<ValueCard key="snapshot-value" id="snapshot-value"
+			<ValueCard key="snapshot-value-card" id="snapshot-value-card"
 				title="Name for the snapshot?"
 				value={this.props.revisionName || ''}
 				defaultValue={`Snapshot of ${this.props.meetingName}`}

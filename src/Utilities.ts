@@ -1,3 +1,5 @@
+import { string } from "prop-types";
+
 /**
  * Utilities.ts
  *
@@ -283,7 +285,7 @@ export function getQueryVariable(key: string): string | undefined {
  * @param {string | undefined} maybeString
  * @param {string} empty An alternative string to return if the input was undefined.
  */
-export function unwrapString(maybeString?: string, empty = ''): string {
+export function unwrapString(maybeString?: string, empty: string = ''): string {
 	if (maybeString == undefined) return empty
 	return maybeString
 }
@@ -292,9 +294,9 @@ export function unwrapString(maybeString?: string, empty = ''): string {
  * Unwrap the optional number, returning 0 if it was undefined.
  * 
  * @param {string | undefined} maybeNumber
- * @param {string} empty An alternative number to return if the input was undefined.
+ * @param {number} empty An alternative number to return if the input was undefined.
  */
-export function unwrapNumber(maybeNumber?: number, empty = 0): number {
+export function unwrapNumber(maybeNumber?: number, empty: number = 0): number {
 	if (maybeNumber == undefined) return empty
 	return maybeNumber
 }
@@ -303,9 +305,9 @@ export function unwrapNumber(maybeNumber?: number, empty = 0): number {
  * Unwrap the optional boolean, returning false if it was undefined.
  * 
  * @param {string | undefined} maybeBoolean
- * @param {string} empty An alternative boolean value to return if the input was undefined.
+ * @param {boolean} empty An alternative boolean value to return if the input was undefined.
  */
-export function unwrapBoolean(maybeBoolean?: boolean, empty = false): boolean {
+export function unwrapBoolean(maybeBoolean?: boolean, empty: boolean = false): boolean {
 	if (maybeBoolean == undefined) return empty
 	return maybeBoolean
 }
@@ -335,6 +337,58 @@ export function uniqueNumber(): number {
  */
 export function now(): TimestampString {
 	return (new Date()).toTimestampString()
+}
+
+/**
+ * If the state already has a value for the given key,
+ * then this replaces the state with a new value, otherwise
+ * this pushes the state with this key and value.
+ * 
+ * @param {string} value 
+ * @param {string} key defaults to 'tenseg'
+ */
+export function setHistory(value: string, key: string = 'tenseg') {
+	let state = {}
+	state[key] = value
+	if (history.state) {
+		if (history.state[key]) {
+			history.replaceState(state, '')
+			return
+		}
+	}
+	history.pushState(state, '')
+}
+
+/**
+ * Swap out one value for another for the given key. This is done whenever you
+ * need to be sure the back button is not triggered by a card or presentation that
+ * is about to close, but immediately open another card or presenation.
+ * 
+ * The new value will be the same as the old with the prefix "switching-from-" added.
+ * 
+ * @param {string} key defaults to 'tenseg'
+ */
+export function switchHistory(key: string = 'tenseg') {
+	let value = "unknown"
+	if (history.state) {
+		value = history.state[key] || value
+	}
+	setHistory(`switch-from-${value}`, key)
+}
+
+/**
+ * Returns true if the history state has a key with the given value.
+ * 
+ * @param {string} value 
+ * @param {string} key defaults to 'tenseg'
+ */
+export function isHistory(value: string, key: string = 'tenseg'): boolean {
+	if (history.state) {
+		if (history.state[key] === value) {
+			return true
+		}
+	}
+	return false
 }
 
 /**

@@ -31,7 +31,7 @@ type KindOfValue = 'text' | 'long text' | 'positive integer'
  * Properties of a ValueCard component.
  */
 interface Props {
-    id?: string
+    id: string
     title: string
     description?: string
     image?: string
@@ -44,7 +44,8 @@ interface Props {
     defaultValue?: string
     valueLabel?: string
     allowEmpty?: boolean
-    onSave?: ((value?: string) => void)
+    historyKey?: string
+    onSave: ((value?: string) => void)
 }
 
 /**
@@ -73,6 +74,7 @@ export class ValueCard extends React.Component<Props, State> {
      */
     constructor(props: Props) {
         super(props)
+
         this.isPositiveInteger = this.props.type === 'positive integer'
         let initialValue = _u.unwrapString(this.props.value)
         if (!this.props.allowEmpty && this.isEmpty(initialValue)) {
@@ -84,10 +86,27 @@ export class ValueCard extends React.Component<Props, State> {
     }
 
     /**
+     * A place to store whatever function was handling
+     * `window.onopostate` before we got here.
+     */
+    priorBackButtonHandler: any
+
+    /**
      * Preload any images that may be used by the card.
      * Avoid a resizing card box.
+     * 
+     * Arrange to handle the back button.
+     * 
+     * Called when an instance of a component is being created and inserted into the DOM.
      */
     componentDidMount = () => {
+        // register for back button
+        _u.debug(`${this.props.id} did mount with history state: `, history.state)
+        _u.setHistory(this.props.id, this.props.historyKey)
+        _u.debug(`${this.props.id} pushed, now history state: `, history.state)
+        this.priorBackButtonHandler = window.onpopstate
+        window.onpopstate = this.handleBackButton(this.props.id)
+
         // force the browser to load the image before the render
         if (this.props.image) {
             const image = new Image()
@@ -100,8 +119,36 @@ export class ValueCard extends React.Component<Props, State> {
         }
     }
 
+    /**
+     * Let go of the back button.
+     * 
+     * Called when a component is being removed from the DOM.
+     */
     componentWillUnmount = () => {
+        // let go of the back button
+        _u.debug(`${this.props.id} will unmount with history state: `, history.state)
+        window.onpopstate = this.priorBackButtonHandler
+        if (_u.isHistory(this.props.id, this.props.historyKey)) {
+            history.back()
+        }
+
+        // make sure we are no longer preventing the main body from scrolling
         clearAllBodyScrollLocks()
+    }
+
+    /**
+     * Make sure we properly exit when the back button is pressed.
+     */
+    handleBackButton = (from: string) => (event: PopStateEvent) => {
+        _u.debug(`${this.props.id} handling back button with history state ${history.state} from ${from}`)
+        // only handle the exit case if this is the history.state we expect to encounter
+        if (from === this.props.id) {
+            this.props.onSave()
+        } else {
+            // just in case we get a late report from another component
+            // sending a programatic history.back() from its unmount
+            _u.setHistory(this.props.id, this.props.historyKey)
+        }
     }
 
     /**
@@ -196,7 +243,7 @@ export class ValueCard extends React.Component<Props, State> {
 	 * Helper for creating id's for the card's DOM elements.
 	 */
     idPlus = (suffix: string): string => {
-        return this.props.id ? `${this.props.id}-${suffix}` : ''
+        return `${this.props.id}-${suffix}`
     }
 
     /**

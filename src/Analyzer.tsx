@@ -66,10 +66,58 @@ export class Analyzer extends React.Component<Props, State> {
 
     constructor(props: Props) {
         super(props)
+
         this.getLocalSubstitutions()
         this.state = {
             counting: "delegates",
             showSettings: false,
+        }
+    }
+
+    /**
+     * A place to store whatever function was handling
+     * `window.onopostate` before we got here.
+     */
+    priorBackButtonHandler: any
+
+    /**
+     * Arrange to handle the back button.
+     * 
+     * Called when an instance of a component is being created and inserted into the DOM.
+     */
+    componentDidMount = () => {
+        _u.debug("Analyzer did mount with history state: ", history.state)
+        _u.setHistory("Analyzer")
+        _u.debug(`Analyzer pushed, now history state: `, history.state)
+        this.priorBackButtonHandler = window.onpopstate
+        window.onpopstate = this.handleBackButton("Analyzer")
+    }
+
+    /**
+     * Let go of the back button.
+     * 
+     * Called when a component is being removed from the DOM.
+     */
+    componentWillUnmount = () => {
+        _u.debug("Analyzer will unmount with history state: ", history.state)
+        if (_u.isHistory("Analyzer")) {
+            history.back()
+        }
+        window.onpopstate = this.priorBackButtonHandler
+    }
+
+    /**
+     * Make sure we properly exit when the back button is pressed.
+     */
+    handleBackButton = (from: string) => (event: PopStateEvent) => {
+        _u.debug(`Analyzer handling back button with history state ${history.state} from ${from}`)
+        // only handle the exit case if this is the history.state we expect to encounter
+        if (from === "Analyzer") {
+            this.props.onExit()
+        } else {
+            // just in case we get a late report from another component
+            // sending a programatic history.back() from its unmount
+            _u.setHistory("Analyzer")
         }
     }
 
@@ -263,13 +311,14 @@ export class Analyzer extends React.Component<Props, State> {
             return sofar + `${term} ${substitute}\n`
         }, '')
         return (
-            <ValueCard
+            <ValueCard id="substitutions-card"
                 className="analysis-substitutions-card"
                 title="Substitutions"
                 value={text}
                 type="long text"
                 onSave={this.saveSubstitutions}
                 allowEmpty={true}
+                historyKey="analyzer"
             >
                 <p>
                     This analysis is based on the words found in each subcaucus name. Below is a list of substitutions that will be made to allow you to group certain words together.

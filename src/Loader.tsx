@@ -47,9 +47,57 @@ export class Loader extends React.Component<Props, State> {
 
     constructor(props: Props) {
         super(props)
+
         this.state = {
             sortBy: "date",
             showing: "saved"
+        }
+    }
+
+    /**
+     * A place to store whatever function was handling
+     * `window.onopostate` before we got here.
+     */
+    priorBackButtonHandler: any
+
+    /**
+     * Arrange to handle the back button.
+     * 
+     * Called when an instance of a component is being created and inserted into the DOM.
+     */
+    componentDidMount = () => {
+        _u.debug("Loader did mount with history state: ", history.state)
+        _u.setHistory("Loader")
+        _u.debug(`Loader pushed, now history state: `, history.state)
+        this.priorBackButtonHandler = window.onpopstate
+        window.onpopstate = this.handleBackButton("Loader")
+    }
+
+    /**
+     * Let go of the back button.
+     * 
+     * Called when a component is being removed from the DOM.
+     */
+    componentWillUnmount = () => {
+        _u.debug("Loader will unmount with history state: ", history.state)
+        if (_u.isHistory("Loader")) {
+            history.back()
+        }
+        window.onpopstate = this.priorBackButtonHandler
+    }
+
+    /**
+     * Make sure we properly exit when the back button is pressed.
+     */
+    handleBackButton = (from: string) => (event: PopStateEvent) => {
+        _u.debug(`Loader handling back button with history state ${history.state} from ${from}`)
+        // only handle the exit case if this is the history.state we expect to encounter
+        if (from === "Loader") {
+            this.props.onLoad()
+        } else {
+            // just in case we get a late report from another component
+            // sending a programatic history.back() from its unmount
+            _u.setHistory("Loader")
         }
     }
 
@@ -245,27 +293,15 @@ export class Loader extends React.Component<Props, State> {
 
         if (snapshots.length === 0) {
             return this.state.showing === "saved"
-                ? <ValueCard key="nothing-to-load"
+                ? <ValueCard id="nothing-to-load"
                     title="No snapshots yet"
                     description="You will have to save a snapshot before you can open one!"
-                    footer={
-                        <Button key="nothing-to-load-button"
-                            label="OK"
-                            icon="fa fa-fw fa-check"
-                            onClick={() => this.props.onLoad()}
-                        />
-                    }
+                    onSave={() => this.props.onLoad()}
                 />
-                : <ValueCard key="nothing-to-load"
+                : <ValueCard id="nothing-to-load"
                     title="Nothing in the trash"
                     description="The trash is empty."
-                    footer={
-                        <Button key="nothing-to-load-button"
-                            label="OK"
-                            icon="fa fa-fw fa-check"
-                            onClick={() => this.setState({ showing: "saved" })}
-                        />
-                    }
+                    onSave={() => this.setState({ showing: "saved" })}
                 />
         }
 

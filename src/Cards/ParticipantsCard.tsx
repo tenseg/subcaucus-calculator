@@ -50,7 +50,10 @@ export class ParticipantsCard extends React.Component<Props, State> {
 						<Button id="analyze-participants-button"
 							label="Analyze participants"
 							icon="fa fa-fw fa-users"
-							onClick={this.props.analyze}
+							onClick={() => {
+								_u.switchHistory()
+								this.props.analyze()
+							}}
 						/>
 						<Button id="clear-participants-button"
 							label="Clear all participants"
