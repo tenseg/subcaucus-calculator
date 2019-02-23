@@ -172,7 +172,7 @@ export class SubcaucusRow extends React.Component<Props, State> {
 		return (
 			<>
 				<div id={this.idPlus("row")}
-					className={`subcaucus-row ${hideDelegates ? '' : s.delegates > 0 ? "has-delegates" : (count > 0 ? "no-delegates" : "")}`}
+					className={`subcaucus-row ${hideDelegates ? '' : s.delegates > 0 ? "has-delegates" : (count > 0 ? "no-delegates" : "")} ${s.name === '' && s.count === 0 ? "empty" : ""}`}
 				>
 					{_u.isDebugging() ? <div className="subcaucus-id">{s.id}</div> : ''}
 					<InputTextarea id={this.idPlus("row-name")}

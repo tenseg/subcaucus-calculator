@@ -233,18 +233,21 @@ export class Analyzer extends React.Component<Props, State> {
         const fontFamily = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen-Sans,Ubuntu,Cantarell,'Helvetica Neue',sans-serif"
 
         return ([<Chart key="chart" className="chart-element" type="horizontalBar" data={data} options={{
+            devicePixelRatio: 4,
             maintainAspectRatio: false,
             aspectRatio: 1,
             legend: {
                 display: false,
                 labels: {
                     fontFamily: fontFamily,
+                    fontColor: 'black',
                 },
             },
             scales: {
                 yAxes: [{
                     ticks: {
                         fontFamily: fontFamily,
+                        fontColor: 'black',
                         autoSkip: false,
                     },
                     gridLines: {
@@ -254,6 +257,7 @@ export class Analyzer extends React.Component<Props, State> {
                 xAxes: [{
                     ticks: {
                         fontFamily: fontFamily,
+                        fontColor: 'black',
                         min: 0,
                     },
                 }]

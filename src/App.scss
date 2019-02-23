@@ -27,6 +27,10 @@ $delegate-width: 80px;
 body {
     background-color: $body-color;
     
+    @media print {
+        background-color: white;
+    }
+    
     .p-component {
         font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
     }
@@ -40,14 +44,19 @@ body {
     #app-byline,
     #app-instruction-button,
     #app-about-button {
-        background-color: $header-color;
         width: 100%;
         padding: $form-margin;
         border: none;
         border-radius: 0;
         overflow: hidden;
+        background-color: $header-color;
         color: white;
         text-align: left;
+        
+        @media print {
+            background-color: white;
+            color: black;
+        }
         
         .p-button-text {
             padding: 0;
@@ -69,7 +78,13 @@ body {
         padding: $form-margin;
         font-size: 9px;
         text-align: right;
-        color: darken($body-color, 20%)
+        color: darken($body-color, 20%);
+        
+        @media print {
+            background-color: white;
+            color: black;
+            padding-top: 0;
+        }
     }
     
     #app-header {
@@ -92,6 +107,10 @@ body {
         border: none;
         border-radius: 0;
         background-color: $header-color;
+        
+        @media print {
+            display: none;
+        }
         
         & > .p-menubar-root-list {
             
@@ -146,11 +165,24 @@ body {
         position: relative;
         margin: auto;
         max-width: $app-width;
+        @media print {
+            max-width: 80%;
+        }
         padding: 0;
 
         #meeting-info {
             padding-top: $menu-height;
 
+            @media print {                
+                &:before {
+                    display: block;
+                    margin: 0 $form-margin $form-margin $form-margin;
+                    content: "Minnesota DFL Subcaucus Calculator";
+                    text-align: right;
+                    font-size: 12px;
+                }
+            }
+            
             .not-button,
             .button,
             button.p-button {
@@ -161,6 +193,9 @@ body {
                 border-radius: 0;
                 border: none;
                 background-color: $meeting-info-color;
+                @media print {
+                    background-color: white;
+                }
                 color: black;
                 cursor: default;
                 font-size: 18px;
@@ -179,6 +214,10 @@ body {
             #meeting-name {
                 border-bottom: 1px solid $rule-color;
                 text-align: left;
+                
+                @media print {
+                    border-top: 1px solid $rule-color;
+                }
             }
             
             #delegates-allowed {
@@ -209,6 +248,10 @@ body {
                 &:hover:enabled {
                     background-color: $rule-color;
                     color: white;
+                }
+                
+                @media print {
+                    display: none;
                 }
             }
         }
@@ -282,11 +325,23 @@ body {
                         border-color: $fgcolor;
                         color: $fgcolor;
                         
+                        @media print {
+                            background-color: white;
+                            border-color: white;
+                            color: white;
+                        }
+                        
                         &:hover,
                         &.p-disabled {
                             background-color: $fgcolor;
+                            border-color: $fgcolor;
                             color: white;
                             opacity: 1.0;
+                            
+                            @media print {
+                                background-color: $bgcolor;
+                                color: black;
+                            }
                         }
                     }
                     
@@ -345,7 +400,7 @@ body {
                     position: absolute;
                     top: 2px;
                     left: 2px;
-                    color: $rule-color;
+                    color: black;
                     font-size: 50%;
                 }
                 
@@ -408,10 +463,19 @@ body {
                             
                             &.won {
                                 border: 2px solid lighten($success-color, 20%);
-                                background-color: lighten($success-color, 20%)
+                                background-color: lighten($success-color, 20%);
+                                
+                                @media print {
+                                    border-color: black;
+                                    background-color: black;
+                                }
                             }
                             &.lost {
                                 border: 2px solid lighten($success-color, 20%);
+                                
+                                @media print {
+                                    border-color: black;
+                                }
                             }
                         }
                         
@@ -424,6 +488,10 @@ body {
                             border: none;
                             background-color: lighten($success-color, 20%);
                             
+                            @media print {
+                                background-color: black;
+                            }
+
                             &:after {
                                 position: absolute;
                                 top: 4px;
@@ -431,6 +499,9 @@ body {
                                 bottom: 4px;
                                 left: -4px;
                                 background-color: lighten($success-color, 20%);
+                                @media print {
+                                    background-color: black;
+                                }
                                 content: "";
                             }
                         }
@@ -461,10 +532,28 @@ body {
                         }
                     }
                 }
+                
+                @media print {
+                    &.empty {
+                        display: none;
+                    }
+                    &.has-delegates,
+                    &.has-delegates .subcaucus-delegates-button,
+                    &.no-delegates,
+                    &.no-delegates .subcaucus-delegates-button,
+                    .subcaucus-delegates-button.p-disabled {
+                        background-color: white;
+                        color: black;
+                    }
+                }
             }
             
             #subcaucus-footer {
                 margin-top: $form-margin;
+                
+                @media print {
+                    display: none;
+                }
                 
                 .p-button {
                     margin: 0 0 $form-margin $form-margin;
@@ -526,6 +615,11 @@ body {
                 background-color: lighten($summary-color, 5%)
             }
             
+            @media print {
+                border-bottom: 1px solid $rule-color;
+                page-break-inside: avoid;
+            }
+            
             .summary-row {
                 position: relative;
                 display: flex;
@@ -540,6 +634,9 @@ body {
                 
                 &.danger {
                     color: $body-color;
+                    @media print {
+                        color: black;
+                    }
                 }
 
                 .summary-label {
@@ -928,6 +1025,10 @@ body {
     padding: 20px 20px;
     overflow: hidden;
     background-color: rgba(255, 255, 255, 0.65);
+    
+    @media print {
+        page-break-before: always;
+    }
     
     .columns {
         width: 100%;

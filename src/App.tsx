@@ -204,7 +204,7 @@ this.keySuffix = String(_u.randomSeed())
         this.state = {
             // card status
             cards: cards,
-            present: Presenting.Calculator,
+            present: Presenting.Analyzing, // Calculator,
             before: before,
             afterBefore: afterBefore,
             // sorting info
@@ -772,7 +772,7 @@ this.keySuffix = String(_u.randomSeed())
                         if (value) {
                             this.growlAlert(value, 'success', 'Received')
                             const url = new URL(value)
-                            window.location.search = url.search
+                            setTimeout(() => { window.location.search = url.search }, 250);
                         } else {
                             this.growlAlert(`Failed to get anything from the clipboard.`, 'error', 'Nothing received!')
                         }
