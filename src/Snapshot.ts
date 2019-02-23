@@ -737,7 +737,7 @@ export class Snapshot {
 		text += `Last revised ${revised.toLocaleString('en-US', { timeZoneName: 'short' })} \n`
 
 		const app = _u.getApp()
-		text += `\nSubCalc version ${app.version} ${app.build}\n`
+		text += `\nSubCalc version ${app.version}${app.appBuild ? ` - ${app.appBuild}` : ''}\n`
 
 		return text
 	}
@@ -779,7 +779,7 @@ export class Snapshot {
 		csv.push('"",""')
 
 		const app = _u.getApp()
-		csv.push(`SubCalc version,"${app.version} ${app.build}"`)
+		csv.push(`SubCalc version,"${app.version}${app.appBuild ? ` - ${app.appBuild}` : ''}"`)
 
 		return csv.join("\r\n")
 	}

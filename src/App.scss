@@ -415,7 +415,7 @@ body {
                     position: absolute;
                     top: 2px;
                     left: 2px;
-                    color: black;
+                    color: $rule-color;
                     font-size: 50%;
                 }
                 
@@ -481,15 +481,15 @@ body {
                                 background-color: lighten($success-color, 20%);
                                 
                                 @media print {
-                                    border-color: black;
-                                    background-color: black;
+                                    border-color: $rule-color;
+                                    background-color: $rule-color;
                                 }
                             }
                             &.lost {
                                 border: 2px solid lighten($success-color, 20%);
                                 
                                 @media print {
-                                    border-color: black;
+                                    border-color: $rule-color;
                                 }
                             }
                         }
@@ -504,7 +504,7 @@ body {
                             background-color: lighten($success-color, 20%);
                             
                             @media print {
-                                background-color: black;
+                                background-color: $rule-color;
                             }
 
                             &:after {
@@ -515,7 +515,7 @@ body {
                                 left: -4px;
                                 background-color: lighten($success-color, 20%);
                                 @media print {
-                                    background-color: black;
+                                    background-color: $rule-color;
                                 }
                                 content: "";
                             }

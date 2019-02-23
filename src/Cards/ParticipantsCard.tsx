@@ -40,7 +40,6 @@ interface State {
 export class ParticipantsCard extends React.Component<Props, State> {
 
 	render() {
-		const { app, version, build } = _u.getApp()
 		return (
 			<ValueCard key="participants-card" id="participants-card"
 				title="Participants"

@@ -35,7 +35,21 @@ interface State {
 export class CreditCard extends React.Component<Props, State> {
 
 	render() {
-		const { app, version, build } = _u.getApp()
+		const { version, app, appVersion, appBuild } = _u.getApp()
+
+		let versions: Array<String> = []
+
+		versions.push(`v ${version}`)
+		if (app && appVersion) {
+			versions.push(`${app} ${appVersion}`)
+		}
+		if (_u.isDebugging) {
+			if (appBuild) {
+				versions.push(appBuild)
+			}
+			versions.push("d")
+		}
+
 		return (
 			<ValueCard key="by-card" id="by-card"
 				title="Brought to you by Tenseg LLC"
@@ -49,14 +63,7 @@ export class CreditCard extends React.Component<Props, State> {
 				<p>It makes use of <a href="https://reactjs.org/">ReactJS</a>, <a href="https://www.typescriptlang.org/">TypeScript</a>, <a href="https://www.primefaces.org/primereact">PrimeReact</a>, <a href="https://fontawesome.com">Font Awesome</a>, <a href="https://github.com/mojotech/json-type-validation">JSON Type Validation</a>, <a href="https://github.com/ClickSimply/typescript-map">typescript-map</a>, and many other open source projects.
 				</p>
 				<div className="fineprint">
-					{app === 'ios'
-						? <> a {version}</>
-						: <> v {version}</>
-					}
-					{_u.isDebugging()
-						? <> d {build}</>
-						: ''
-					}
+					{versions.join(" - ")}
 				</div>
 			</ValueCard>
 		)
