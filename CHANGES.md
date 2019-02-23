@@ -1,5 +1,12 @@
 #  Version History
 
+## 3.1.1 — 22 February 2019
+
+* Prints at higher contrast without buttons and menus
+* Handle the back buttom more intelligently
+* Added version number to bottom of screen and exports
+* Fixed an embarassing type on the welcome card (you would think we could spell "subcaucus" by now)
+
 ## 3.1.0 — 21 February 2019
 
 We've added the ability to analyze how many members, delegates, and subcaucuses were associated to given words used in their names. Want to know how many delegates are coming from subcaucuses that were formed around issues of the environment? That is the kind of question the new analysis view can answer.
