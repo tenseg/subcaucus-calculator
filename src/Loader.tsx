@@ -66,9 +66,9 @@ export class Loader extends React.Component<Props, State> {
      * Called when an instance of a component is being created and inserted into the DOM.
      */
     componentDidMount = () => {
-        _u.debug("Loader did mount with history state: ", history.state)
+        _u.debug("Loader did mount with history state: ", history.state, history.length)
         _u.setHistory("Loader")
-        _u.debug(`Loader pushed, now history state: `, history.state)
+        _u.debug(`Loader pushed, now history state: `, history.state, history.length)
         this.priorBackButtonHandler = window.onpopstate
         window.onpopstate = this.handleBackButton("Loader")
     }
@@ -79,7 +79,7 @@ export class Loader extends React.Component<Props, State> {
      * Called when a component is being removed from the DOM.
      */
     componentWillUnmount = () => {
-        _u.debug("Loader will unmount with history state: ", history.state)
+        _u.debug("Loader will unmount with history state: ", history.state, history.length)
         if (_u.isHistory("Loader")) {
             history.back()
         }
@@ -90,7 +90,7 @@ export class Loader extends React.Component<Props, State> {
      * Make sure we properly exit when the back button is pressed.
      */
     handleBackButton = (from: string) => (event: PopStateEvent) => {
-        _u.debug(`Loader handling back button with history state ${history.state} from ${from}`)
+        _u.debug(`Loader handling back button from ${from} with history state`, history.state, history.length)
         // only handle the exit case if this is the history.state we expect to encounter
         if (from === "Loader") {
             this.props.onLoad()

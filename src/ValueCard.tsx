@@ -101,9 +101,9 @@ export class ValueCard extends React.Component<Props, State> {
      */
     componentDidMount = () => {
         // register for back button
-        _u.debug(`${this.props.id} did mount with history state: `, history.state)
+        _u.debug(`${this.props.id} did mount with history state: `, history.state, history.length)
         _u.setHistory(this.props.id, this.props.historyKey)
-        _u.debug(`${this.props.id} pushed, now history state: `, history.state)
+        _u.debug(`${this.props.id} pushed, now history state: `, history.state, history.length)
         this.priorBackButtonHandler = window.onpopstate
         window.onpopstate = this.handleBackButton(this.props.id)
 
@@ -126,7 +126,7 @@ export class ValueCard extends React.Component<Props, State> {
      */
     componentWillUnmount = () => {
         // let go of the back button
-        _u.debug(`${this.props.id} will unmount with history state: `, history.state)
+        _u.debug(`${this.props.id} will unmount with history state: `, history.state, history.length)
         window.onpopstate = this.priorBackButtonHandler
         if (_u.isHistory(this.props.id, this.props.historyKey)) {
             history.back()
@@ -140,7 +140,7 @@ export class ValueCard extends React.Component<Props, State> {
      * Make sure we properly exit when the back button is pressed.
      */
     handleBackButton = (from: string) => (event: PopStateEvent) => {
-        _u.debug(`${this.props.id} handling back button with history state ${history.state} from ${from}`)
+        _u.debug(`${this.props.id} handling back button from ${from} with history state`, history.state, history.length)
         // only handle the exit case if this is the history.state we expect to encounter
         if (from === this.props.id) {
             this.props.onSave()

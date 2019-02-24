@@ -351,8 +351,10 @@ export function now(): TimestampString {
 export function setHistory(value: string, key: string = 'tenseg') {
 	let state = {}
 	state[key] = value
+	state["index"] = history.length
 	if (history.state) {
 		if (history.state[key]) {
+			state["index"] = history.state["index"]
 			history.replaceState(state, '')
 			return
 		}

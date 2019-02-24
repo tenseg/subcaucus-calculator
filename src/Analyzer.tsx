@@ -21,6 +21,7 @@ import { Chart } from 'primereact/chart';
 import * as _u from './Utilities'
 import { Snapshot } from './Snapshot'
 import { ValueCard } from './ValueCard';
+import { ShowJSON } from './ShowJSON';
 
 /**
  * Properties for the snapshot loader.
@@ -86,9 +87,9 @@ export class Analyzer extends React.Component<Props, State> {
      * Called when an instance of a component is being created and inserted into the DOM.
      */
     componentDidMount = () => {
-        _u.debug("Analyzer did mount with history state: ", history.state)
+        _u.debug("Analyzer did mount with history state: ", history.state, history.length)
         _u.setHistory("Analyzer")
-        _u.debug(`Analyzer pushed, now history state: `, history.state)
+        _u.debug(`Analyzer pushed, now history state: `, history.state, history.length)
         this.priorBackButtonHandler = window.onpopstate
         window.onpopstate = this.handleBackButton("Analyzer")
     }
@@ -99,7 +100,7 @@ export class Analyzer extends React.Component<Props, State> {
      * Called when a component is being removed from the DOM.
      */
     componentWillUnmount = () => {
-        _u.debug("Analyzer will unmount with history state: ", history.state)
+        _u.debug("Analyzer will unmount with history state: ", history.state, history.length)
         if (_u.isHistory("Analyzer")) {
             history.back()
         }
@@ -107,18 +108,29 @@ export class Analyzer extends React.Component<Props, State> {
     }
 
     /**
+     * Lets us know that the settings card was shown,
+     * tracked outside the component state because we need
+     * to consult it during the `handleBackButton()` function
+     * which appears to be called asyncronously.
+     */
+    showingSettings = false
+
+    /**
      * Make sure we properly exit when the back button is pressed.
      */
     handleBackButton = (from: string) => (event: PopStateEvent) => {
-        _u.debug(`Analyzer handling back button with history state ${history.state} from ${from}`)
+        _u.debug(`Analyzer handling back button from ${from} with history state`, history.state, history.length)
+        _u.debug(`Current showingSettings`, this.showingSettings)
         // only handle the exit case if this is the history.state we expect to encounter
-        if (from === "Analyzer") {
+        if (from === "Analyzer" && !this.showingSettings) {
             this.props.onExit()
         } else {
             // just in case we get a late report from another component
             // sending a programatic history.back() from its unmount
             _u.setHistory("Analyzer")
         }
+        // we always return this to fals so it only blocks once
+        this.showingSettings = false
     }
 
     /**
@@ -309,6 +321,7 @@ export class Analyzer extends React.Component<Props, State> {
      */
     renderSettings = (): JSX.Element => {
         if (!this.state.showSettings) return <></>
+        this.showingSettings = true
         // change substitutions object into plain text for editing
         let text = Object.keys(this.substitutions).reduce((sofar: string, term: string): string => {
             const substitute = this.substitutions[term]
