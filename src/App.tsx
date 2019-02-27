@@ -672,6 +672,17 @@ this.keySuffix = String(_u.randomSeed())
                             }
                         }
                     },
+                    {
+                        label: "Print",
+                        icon: "fa fa-fw fa-print",
+                        command: () => {
+                            if (_u.isApp()) {
+                                location.href = "subcalc://print/"
+                            } else {
+                                window.print()
+                            }
+                        }
+                    },
                 ]
             },
         ]
