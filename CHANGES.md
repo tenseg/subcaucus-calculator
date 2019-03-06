@@ -1,5 +1,9 @@
 #  Version History
 
+## 3.1.2 - 6 March 2019
+
+* Adds explicit option to print the table of subcaucuses from the share menu
+  
 ## 3.1.1 — 23 February 2019
 
 * Prints at higher contrast without buttons and menus
