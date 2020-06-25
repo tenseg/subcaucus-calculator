@@ -250,9 +250,11 @@ export function getApp(): { version: string, app: string, appVersion: string, ap
 		standalone = true
 	}
 
+	var osPlatform: string = process.env.REACT_APP_PLATFORM || ''
+
 	return {
 		version: process.env.REACT_APP_VERSION || 'unknown',
-		app: process.env.REACT_APP_IOS_VERSION ? 'ios' : (standalone ? 'standalone' : ''),
+		app: process.env.REACT_APP_IOS_VERSION ? osPlatform : (standalone ? 'standalone' : ''),
 		appVersion: process.env.REACT_APP_IOS_VERSION || '',
 		appBuild: process.env.REACT_APP_IOS_BUILD || ''
 	}
