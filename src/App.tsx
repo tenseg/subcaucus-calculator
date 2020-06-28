@@ -539,7 +539,7 @@ this.keySuffix = String(_u.randomSeed())
      * NOTE: Do not `setState()` in this method.
      */
     renderMenu = (): JSX.Element => {
-        const { app } = _u.getApp()
+        const { app, appPlatform } = _u.getApp()
         const items = [
             {
                 label: "About",
@@ -686,7 +686,11 @@ this.keySuffix = String(_u.randomSeed())
                 ]
             },
         ]
-        return <Menubar key="calculator-menu" model={items} id="app-main-menu" />
+        if (appPlatform == "macOS") {
+            return <></> // on the macOS app we use the system mwnubar instead and so do not need our own at all
+        } else {
+            return <Menubar key="calculator-menu" model={items} id="app-main-menu" />
+        }
     }
 
     /**

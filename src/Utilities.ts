@@ -244,7 +244,7 @@ export function isDebugging(): boolean {
 /**
  * Return an object with some version and build information about our iOS app.
  */
-export function getApp(): { version: string, app: string, appVersion: string, appBuild: string } {
+export function getApp(): { version: string, app: string, appVersion: string, appBuild: string, appPlatform: string } {
 	let standalone = false
 	if (window.matchMedia('(display-mode: standalone)').matches) {
 		standalone = true
@@ -256,7 +256,8 @@ export function getApp(): { version: string, app: string, appVersion: string, ap
 		version: process.env.REACT_APP_VERSION || 'unknown',
 		app: process.env.REACT_APP_IOS_VERSION ? osPlatform : (standalone ? 'standalone' : ''),
 		appVersion: process.env.REACT_APP_IOS_VERSION || '',
-		appBuild: process.env.REACT_APP_IOS_BUILD || ''
+		appBuild: process.env.REACT_APP_IOS_BUILD || '',
+		appPlatform: osPlatform || ''
 	}
 }
 
