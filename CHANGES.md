@@ -1,5 +1,9 @@
 #  Version History
 
+## 3.1.3 - 25 April 2022
+
+* Update Sass dependency
+
 ## 3.1.2 - 6 March 2019
 
 * Adds explicit option to print the table of subcaucuses from the share menu
