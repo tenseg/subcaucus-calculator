@@ -244,19 +244,19 @@ export class Analyzer extends React.Component<Props, State> {
 
         const fontFamily = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen-Sans,Ubuntu,Cantarell,'Helvetica Neue',sans-serif"
 
-        return ([<Chart key="chart" className="chart-element" type="horizontalBar" data={data} options={{
-            devicePixelRatio: 4,
+        return ([<Chart key="chart" className="chart-element" type="bar" data={data} options={{
+            indexAxis: 'y',
             maintainAspectRatio: false,
-            aspectRatio: 1,
-            legend: {
-                display: false,
-                labels: {
-                    fontFamily: fontFamily,
-                    fontColor: 'black',
-                },
+            aspectRatio: .8,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#495057'
+                    }
+                }
             },
             scales: {
-                yAxes: [{
+                y: {
                     ticks: {
                         fontFamily: fontFamily,
                         fontColor: 'black',
@@ -265,14 +265,14 @@ export class Analyzer extends React.Component<Props, State> {
                     gridLines: {
                         display: false,
                     },
-                }],
-                xAxes: [{
+                },
+                x: {
                     ticks: {
                         fontFamily: fontFamily,
                         fontColor: 'black',
                         min: 0,
                     },
-                }]
+                }
             },
             tooltips: {
                 titleFontFamily: fontFamily,
@@ -339,9 +339,9 @@ export class Analyzer extends React.Component<Props, State> {
             >
                 <p>
                     This analysis is based on the words found in each subcaucus name. Below is a list of substitutions that will be made to allow you to group certain words together.
-                    </p><p>
+                </p><p>
                     The first word on a line is the term that will be replaced, and any other words on the line will be the replacement value. Any single word on a line by itself will force the analysis to ignore that word.
-                    </p><p>
+                </p><p>
                     Typically this is used to bring together variant forms of a name, for example including both "hillary Hillary Clinton" and "clinton Hillary Clinton" will make sure that both the first name and the last name are analyzed as the same term.
                 </p>
             </ValueCard >

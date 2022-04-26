@@ -15,7 +15,6 @@ import { Decoder, object, number } from '@mojotech/json-type-validation'
 import * as _u from './Utilities'
 import { Snapshot } from './Snapshot'
 import { SubCalcTwo } from './SubCalcTwo';
-import { isArray } from 'util';
 
 declare global {
 
@@ -548,7 +547,7 @@ export class SubCalc {
 			_u.debug(e)
 		}
 
-		if (isArray(json)) {
+		if (Array.isArray(json)) {
 			json.forEach((jsnap) => {
 				const decoded = Snapshot.decoder.run(jsnap)
 
