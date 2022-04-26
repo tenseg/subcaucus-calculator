@@ -15,13 +15,13 @@ import { TSMap } from 'typescript-map'
 // see https://www.primefaces.org/primereact
 import { Button } from 'primereact/button'
 import { Menubar } from 'primereact/menubar'
-import { Chart } from 'primereact/chart';
+import { Chart } from 'primereact/chart'
 
 // local to this app
 import * as _u from './Utilities'
 import { Snapshot } from './Snapshot'
-import { ValueCard } from './ValueCard';
-import { ShowJSON } from './ShowJSON';
+import { ValueCard } from './ValueCard'
+import { ShowJSON } from './ShowJSON'
 
 /**
  * Properties for the snapshot loader.
