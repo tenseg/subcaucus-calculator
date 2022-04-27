@@ -1,9 +1,5 @@
 #  Version History
 
-## 3.1.3 - 26 April 2022
-
-* Update mmultiple dependencies
-
 ## 3.1.2 - 6 March 2019
 
 * Adds explicit option to print the table of subcaucuses from the share menu

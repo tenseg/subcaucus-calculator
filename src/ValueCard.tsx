@@ -45,7 +45,6 @@ interface Props {
     valueLabel?: string
     allowEmpty?: boolean
     historyKey?: string
-    children: React.ReactNode;
     onSave: ((value?: string) => void)
 }
 
@@ -240,9 +239,9 @@ export class ValueCard extends React.Component<Props, State> {
         event.stopPropagation()
     }
 
-    /**
-     * Helper for creating id's for the card's DOM elements.
-     */
+	/**
+	 * Helper for creating id's for the card's DOM elements.
+	 */
     idPlus = (suffix: string): string => {
         return `${this.props.id}-${suffix}`
     }

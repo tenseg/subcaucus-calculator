@@ -6,7 +6,7 @@
  * Copyright 2019 by Tenseg LLC
  * Made available under the MIT License
  */
-
+ 
 $form-margin: 0.8rem;
 $form-overhang: 0 - $form-margin;
 $phone: "only screen and (max-width : 400px)";
@@ -26,21 +26,21 @@ $delegate-width: 80px;
 
 body {
     background-color: $body-color;
-
+    
     @media print {
         background-color: white;
     }
-
+    
     .p-component {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+        font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
     }
-
+    
 }
 
 #app {
     position: relative;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
-
+    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+    
     #app-byline,
     #app-instruction-button,
     #app-about-button {
@@ -52,68 +52,68 @@ body {
         background-color: $header-color;
         color: white;
         text-align: left;
-
+        
         @media print {
             background-color: white;
             color: black;
         }
-
+        
         .p-button-text {
             padding: 0;
         }
-
+        
         &:hover {
             background-color: lighten($header-color, 25%)
         }
     }
-
+    
     #app-byline {
         display: flex;
         justify-content: space-between;
         font-size: 9px;
         text-align: left;
-
+        
         .p-button-text {
             display: none;
         }
     }
-
+    
     #credit-line {
         display: block;
-
+        
         @media print {
             &::after {
                 content: " - visit https://subcalc.tenseg.net"
             }
         }
     }
-
+    
     #app-version {
         display: block;
         font-size: 9px;
         font-weight: 100;
         text-align: right;
         color: lighten($header-color, 40%);
-
+        
         @media print {
             background-color: white;
             color: black;
             padding-top: 0;
         }
     }
-
+    
     #app-header {
         display: flex;
-
+        
         #app-about-button {
             flex: 1 0 5rem;
         }
-
+        
         #app-instruction-button {
             flex: 0 1 2.5rem;
         }
     }
-
+    
     #app-main-menu {
         z-index: 2;
         position: fixed;
@@ -122,75 +122,73 @@ body {
         border: none;
         border-radius: 0;
         background-color: $header-color;
-
+        
         @media print {
             display: none;
         }
-
-        &>.p-menubar-root-list {
-
-            &>.p-menuitem {
-
+        
+        & > .p-menubar-root-list {
+            
+            & > .p-menuitem {
+                
                 &.p-menuitem-active {
-                    &>.p-menuitem-link {
+                    & > .p-menuitem-link {
                         background-color: lighten($header-color, 25%);
-
-
+                        
+                        
                         &:hover:enabled {
                             background-color: lighten($header-color, 25%);
                         }
                     }
-
-                    &>.p-submenu-list {
+                    
+                    & > .p-submenu-list {
                         margin-top: -2px;
                         border-color: lighten($header-color, 25%);
-
-                        .p-menuitem.p-menuitem-active>.p-menuitem-link {
+                        
+                        .p-menuitem.p-menuitem-active > .p-menuitem-link {
                             background-color: lighten($header-color, 55%);
-
+                            
                             &:hover:enabled {
                                 background-color: lighten($header-color, 55%);
                             }
                         }
                     }
                 }
-
-                &>.p-menuitem-link {
+                
+                & > .p-menuitem-link {
                     padding-bottom: $form-margin;
-
+                    
                     &:hover:enabled {
                         background-color: lighten($header-color, 25%);
                     }
-
-                    &>.p-menuitem-icon,
-                    &>.p-menuitem-text {
+                    
+                    & > .p-menuitem-icon,
+                    & > .p-menuitem-text {
                         color: white;
                     }
-
-                    &>.p-submenu-icon {
+                    
+                    & > .p-submenu-icon{
                         display: none;
                     }
-
+                    
                 }
             }
         }
     }
-
+    
     #app-content {
         position: relative;
         margin: auto;
         max-width: $app-width;
-
         @media print {
             max-width: 80%;
         }
-
         padding: 0;
 
         #meeting-info {
             padding-top: $menu-height;
 
-            @media print {
+            @media print {                
                 &:before {
                     display: block;
                     margin: 0 $form-margin $form-margin $form-margin;
@@ -199,7 +197,7 @@ body {
                     font-size: 12px;
                 }
             }
-
+            
             .not-button,
             .button,
             button.p-button {
@@ -210,17 +208,15 @@ body {
                 border-radius: 0;
                 border: none;
                 background-color: $meeting-info-color;
-
                 @media print {
                     background-color: white;
                 }
-
                 color: black;
                 cursor: default;
                 font-size: 18px;
                 font-weight: 900;
             }
-
+            
             .button,
             button.p-button {
                 cursor: pointer;
@@ -229,33 +225,33 @@ body {
                     background-color: darken($meeting-info-color, 10%)
                 }
             }
-
+            
             #meeting-name {
                 border-bottom: 1px solid $rule-color;
                 text-align: left;
-
+                
                 @media print {
                     border-top: 1px solid $rule-color;
                 }
             }
-
+            
             #delegates-allowed {
                 text-align: right;
             }
-
+            
             .snapshot {
                 font-weight: 100;
-
+                
                 &::before {
                     content: " — ";
                 }
             }
-
+        
         }
-
+        
         .analyzer {
             position: relative;
-
+            
             #analyzer-settings-button {
                 position: absolute;
                 top: $menu-height;
@@ -264,23 +260,22 @@ body {
                 background-color: white;
                 border-color: $rule-color;
                 color: $rule-color;
-
                 &:hover:enabled {
                     background-color: $rule-color;
                     color: white;
                 }
-
+                
                 @media print {
                     display: none;
                 }
             }
         }
-
+        
         #loader-container,
         #analyzer-container,
         #subcaucus-container {
             background: white;
-
+            
             #loader-header,
             #analyzer-header,
             #subcaucus-header {
@@ -288,55 +283,55 @@ body {
                 position: sticky;
                 top: $menu-height;
                 display: flex;
-
+                
                 #subcaucus-name-head {
                     flex: 1 0 5em;
                 }
-
+                
                 #subcaucus-count-head {
                     flex: 0 0 ($count-width + 50px);
                     width: ($count-width + 50px);
                     text-align: right;
                 }
-
+                
                 #subcaucus-delegate-head {
                     flex: 0 0 $delegate-width;
                     width: $delegate-width;
                     text-align: center;
                 }
-
+                
                 button.p-button {
                     border: none;
                     border-radius: 0;
                     background-color: black;
                     text-align: left;
-
+                    
                     &.p-disabled {
                         opacity: 1;
                         filter: none;
                     }
                 }
-
+                
                 .pi-circle-off,
                 .fa-circle {
                     color: #555;
                 }
             }
-
+            
             #analyzer-chart {
                 padding: $form-margin;
                 padding-bottom: 0;
             }
-
+            
             #analyzer-buttons {
                 display: flex;
                 padding: ($form-margin / 2);
-
+                
                 button {
                     flex: 1 0 30px;
                     width: 30px;
                     margin: ($form-margin / 2);
-
+                    
                     @mixin colorButton($red, $green, $blue) {
                         $bgcolor: rgba($red, $green, $blue, 0.2);
                         $fgcolor: rgb($red, $green, $blue);
@@ -344,80 +339,78 @@ body {
                         background-color: $bgcolor;
                         border-color: $fgcolor;
                         color: $fgcolor;
-
+                        
                         @media print {
                             background-color: white;
                             border-color: white;
                             color: white;
                         }
-
+                        
                         &:hover,
                         &.p-disabled {
                             background-color: $fgcolor;
                             border-color: $fgcolor;
                             color: white;
                             opacity: 1.0;
-
+                            
                             @media print {
                                 background-color: $bgcolor;
                                 color: black;
                             }
                         }
                     }
-
+                    
                     &.counting-members {
                         @include colorButton(54, 162, 235);
                     }
-
                     &.counting-delegates {
                         @include colorButton(75, 192, 192);
                     }
-
                     &.counting-subcaucuses {
                         @include colorButton(255, 159, 64);
                     }
                 }
             }
-
+            
             .subcaucus-row {
                 position: relative;
                 display: flex;
                 border-bottom: 1px solid $rule-color;
-
+                
                 textarea,
                 input[type='text'],
                 input[type='number'] {
                     background-color: transparent;
                     border: none;
                 }
-
+                
                 // see: https://stackoverflow.com/a/22559163
                 // see: https://stackoverflow.com/q/51660812
                 input[type='number'] {
-                    -moz-appearance: textfield;
+                    -moz-appearance:textfield;
                 }
-
+                
                 input::-webkit-outer-spin-button,
                 input::-webkit-inner-spin-button {
                     -webkit-appearance: none;
                     margin: 0;
                 }
-
+                
                 textarea {
                     resize: none;
                 }
-
+                
                 // .subcaucus-remove-button {
                 //     flex-grow: 0;
                 //     margin: $form-margin;
                 //     border: none;
                 //     background-color: $body-color;
-
+                    
                 //     &:hover {
                 //         background-color: lighten($body-color, 25%)
                 //     }
                 // }
-
+                
                 .subcaucus-id {
                     position: absolute;
                     top: 2px;
@@ -425,12 +418,12 @@ body {
                     color: $rule-color;
                     font-size: 50%;
                 }
-
+                
                 .subcaucus-field {
                     margin-right: $form-margin;
                     font-size: 18px;
                 }
-
+                
                 .subcaucus-name {
                     flex: 1 0 5em;
                     margin-top: 0;
@@ -438,14 +431,14 @@ body {
                     padding-top: 14px;
                     padding-left: 0;
                 }
-
+                
                 .subcaucus-count {
                     flex: 0 0 $count-width;
                     width: $count-width;
                     padding-top: 14px;
                     text-align: right;
                 }
-
+                
                 .subcaucus-delegates-button {
                     position: relative;
                     flex: 0 0 $delegate-width;
@@ -456,18 +449,18 @@ body {
                     text-align: center;
                     font-size: 20px;
                     font-weight: 700;
-
+                    
                     .p-button-text {
                         $shift: 0.12em;
                         padding-top: 0.429em + $shift;
                         padding-bottom: 0.429em - $shift;
                     }
-
+                    
                     .pi {
                         $shift: 6%;
                         top: 50% + $shift;
                     }
-
+                    
                     .shape {
                         position: absolute;
                         top: calc(56% - 5px);
@@ -482,26 +475,25 @@ body {
                             bottom: 0;
                             left: 0;
                             border-radius: 50%;
-
+                            
                             &.won {
                                 border: 2px solid lighten($success-color, 20%);
                                 background-color: lighten($success-color, 20%);
-
+                                
                                 @media print {
                                     border-color: $rule-color;
                                     background-color: $rule-color;
                                 }
                             }
-
                             &.lost {
                                 border: 2px solid lighten($success-color, 20%);
-
+                                
                                 @media print {
                                     border-color: $rule-color;
                                 }
                             }
                         }
-
+                        
                         .plus {
                             position: absolute;
                             top: 0;
@@ -510,7 +502,7 @@ body {
                             left: 4px;
                             border: none;
                             background-color: lighten($success-color, 20%);
-
+                            
                             @media print {
                                 background-color: $rule-color;
                             }
@@ -522,47 +514,44 @@ body {
                                 bottom: 4px;
                                 left: -4px;
                                 background-color: lighten($success-color, 20%);
-
                                 @media print {
                                     background-color: $rule-color;
                                 }
-
                                 content: "";
                             }
                         }
                     }
                 }
-
+                
                 &.has-delegates {
-
+                    
                     .subcaucus-delegates-button {
                         background-color: $success-color;
                         color: white;
-
+                        
                         &:hover:enabled {
                             background-color: lighten($success-color, 25%);
                         }
                     }
                 }
-
+                
                 &.no-delegates {
                     background-color: lighten($body-color, 65%);
 
                     .subcaucus-delegates-button {
                         background-color: lighten($body-color, 55%);
                         color: $body-color;
-
+                        
                         &:hover:enabled {
                             background-color: lighten($body-color, 60%);
                         }
                     }
                 }
-
+                
                 @media print {
                     &.empty {
                         display: none;
                     }
-
                     &.has-delegates,
                     &.has-delegates .subcaucus-delegates-button,
                     &.no-delegates,
@@ -573,40 +562,40 @@ body {
                     }
                 }
             }
-
+            
             #subcaucus-footer {
                 margin-top: $form-margin;
-
+                
                 @media print {
                     display: none;
                 }
-
+                
                 .p-button {
                     margin: 0 0 $form-margin $form-margin;
                 }
-
+                
                 #add-subcaucus-button {
                     background-color: $header-color;
                     border-color: $header-color;
-
+                    
                     &:hover:enabled {
                         background-color: lighten($header-color, 25%)
                     }
                 }
-
+                
                 #add-meeting-button {
                     background-color: $header-color;
                     border-color: $header-color;
-
+                    
                     &:hover:enabled {
                         background-color: lighten($header-color, 25%)
                     }
                 }
-
+                
                 #remove-empty-subcaucuses-button {
                     background-color: $body-color;
                     border-color: $body-color;
-
+                    
                     &:hover:enabled {
                         background-color: lighten($body-color, 25%)
                     }
@@ -615,7 +604,7 @@ body {
                 #empty-trash-button {
                     background-color: $body-color;
                     border-color: $body-color;
-
+                    
                     &:hover:enabled {
                         background-color: lighten($body-color, 25%)
                     }
@@ -625,27 +614,27 @@ body {
                     background-color: white;
                     color: $body-color;
                     border-color: $body-color;
-
+                    
                     &:hover:enabled {
                         background-color: lighten($body-color, 50%)
                     }
                 }
             }
         }
-
+        
         #summary-container {
             background-color: $summary-color;
             cursor: pointer;
-
+                
             &:hover {
                 background-color: lighten($summary-color, 5%)
             }
-
+            
             @media print {
                 border-bottom: 1px solid $rule-color;
                 page-break-inside: avoid;
             }
-
+            
             .summary-row {
                 position: relative;
                 display: flex;
@@ -657,10 +646,9 @@ body {
                 strong {
                     font-weight: 900;
                 }
-
+                
                 &.danger {
                     color: $body-color;
-
                     @media print {
                         color: black;
                     }
@@ -672,10 +660,10 @@ body {
                     margin-left: $form-margin;
                     font-weight: 100;
                 }
-
+                
                 // see https://stackoverflow.com/a/12646655/383737
                 // there may be a better alternative to the RTL trick
-
+                
                 .summary-count {
                     flex: 0 0 $count-width;
                     width: $count-width;
@@ -683,7 +671,7 @@ body {
                     text-align: right;
                     direction: rtl;
                 }
-
+                
                 .summary-delegates {
                     flex: 0 0 $delegate-width;
                     width: $delegate-width;
@@ -693,30 +681,30 @@ body {
                 }
             }
         }
-
+        
         .analyzer {
             #analyzer-words-head {
                 flex: 1 0 5em;
             }
-
+            
             #analyzer-counts-head {
                 flex: 0 0 15em;
                 width: 15em;
                 text-align: right !important;
             }
-
+            
             .analyzer-row {
                 display: flex;
                 width: 100%;
                 padding: $form-margin;
                 border-bottom: 1px solid $rule-color;
-
+                
                 .analyzer-word {
                     flex: 2 0 5em;
                     width: 5em;
                     font-weight: 900;
                 }
-
+                
                 .analyzer-count {
                     flex: 1 0 5em;
                     width: 5em;
@@ -724,147 +712,147 @@ body {
                 }
             }
         }
-
+        
         .loader {
 
             #loader-name-head {
                 flex: 1 0 5em;
             }
-
+            
             #loader-timestamp-head {
                 flex: 0 0 15em;
                 width: 15em;
                 text-align: right !important;
             }
-
+            
             .loader-meetings {
-
+                
                 .p-accordion-tab {
                     margin: 0;
-
+                
                     .p-accordion-header {
                         margin: 0;
-
+                        
                         .p-accordion-header-text {
                             width: calc(100% - 30px);
                         }
                     }
-
-                    .loader-meeting-accordion-header>a {
+                    
+                    .loader-meeting-accordion-header > a {
                         border: none !important;
                         border-bottom: 1px solid $rule-color !important;
                         border-radius: 0 !important;
                     }
-
+                                    
                     .p-accordion-content {
                         padding: 0;
                         border: none !important;
                         border-radius: 0 !important;
                     }
                 }
-
+                
                 .p-accordion-header a {
                     padding: $form-margin $form-margin/2;
                 }
-
+                
                 .p-accordion-header:not(.p-disabled).p-highlight.trashed a {
                     background-color: lighten($body-color, 50%);
                     color: black;
                 }
-
+                
                 .p-accordion-header:not(.p-disabled).p-highlight.saved a {
                     background-color: lighten($header-color, 50%);
                     color: black;
                 }
-
+                
                 .p-accordion-header:not(.p-disabled).p-highlight {
-
+                    
                     &.saved,
                     &.trashed {
-
+                        
                         color: black;
 
-                        a .p-accordion-toggle-icon {
+                         a .p-accordion-toggle-icon {
                             color: black;
-                        }
+                         }
                     }
-
+                    
                     &.saved a {
                         background-color: lighten($header-color, 50%);
                     }
-
+                    
                     &.trashed a {
                         background-color: lighten($body-color, 50%);
                     }
                 }
-
+                
                 .loader-meeting-header {
                     display: flex;
                     width: 100%;
-
+                    
                     .loader-meeting-name {
                         flex: 2 0 5em;
                         width: 5em;
                         font-weight: 900;
                     }
-
+                    
                     .loader-meeting-timestamp {
                         flex: 1 0 5em;
                         width: 5em;
                         text-align: right;
                     }
                 }
-
+                
                 .loader-snapshot {
                     display: flex;
                     padding: $form-margin/2 $form-margin;
                     border-bottom: 1px solid $rule-color;
-
+                    
                     &:hover {
                         background-color: yellow;
                     }
-
+                    
                     .loader-snapshot-button {
                         flex: 1 0 5em;
                         width: 5em;
                         margin-right: $form-margin;
                         padding-top: 7px;
-
+                        
                         &:hover {
                             cursor: pointer;
                         }
-
+                        
                         .loader-snapshot-revised {
                             float: right;
                         }
                     }
-
+                    
                     .loader-snapshot-actions {
                         flex: 0 0 2em;
                         width: 2em;
                     }
-
+                    
                     .fa-clock {
                         width: 2em;
                     }
-
+                    
                     .loader-snapshot-trash-button {
                         background-color: white;
                         color: $body-color;
                         border-color: $body-color;
-
+                        
                         &:hover:enabled {
                             background-color: lighten($body-color, 50%)
                         }
                     }
-
+                    
                     .loader-snapshot-fake-button {
                         background-color: transparent;
                         color: transparent;
                         border-color: transparent;
                         width: 0;
                         overflow: hidden;
-
+                        
                         &:hover:enabled {
                             background-color: transparent
                         }
@@ -873,10 +861,10 @@ body {
             }
         }
     }
-
+    
     .valuecard-wrapper {
-
-        $valuecard-top-margin: (5 * $form-margin);
+        
+        $valuecard-top-margin: ( 5 * $form-margin );
         z-index: 10;
         position: fixed;
         top: 0;
@@ -885,28 +873,28 @@ body {
         right: 0;
 
         .valuecard-inner-wrapper {
-
+            
             height: 100%;
             padding-top: $valuecard-top-margin;
             padding-bottom: 200px;
             overflow: scroll;
             -webkit-overflow-scrolling: touch;
-
+        
             .valuecard {
                 position: relative;
                 min-width: 300px;
                 max-width: 500px;
                 margin: auto;
-
-                .p-card {
+                
+                .p-card  {
                     background-color: $card-color;
-
+                    
                     .picture-container {
                         position: relative;
                         height: 0;
                         padding-top: 270px / 500px * 100%;
                         overflow: hidden;
-
+                        
                         .p-button {
                             position: absolute;
                             top: 0;
@@ -915,16 +903,16 @@ body {
                             border: none;
                             background-color: transparent;
                             color: white;
-
+                            
                             &:hover {
                                 color: $card-color;
                             }
                         }
-
+                        
                         &:after {
                             content: " "
                         }
-
+                        
                         img {
                             position: absolute;
                             top: 0;
@@ -933,10 +921,9 @@ body {
                             height: 100%;
                         }
                     }
-
                     .p-card-content {
                         margin-bottom: 0 - $form-margin;
-
+                        
                         input,
                         textarea {
                             width: 100%;
@@ -945,22 +932,22 @@ body {
 
                     .p-card-footer {
                         text-align: left;
-
+                        
                         .p-button {
                             margin-top: $form-margin;
                             margin-right: $form-margin;
                         }
                     }
-
+                    
                     .fineprint {
                         position: absolute;
                         bottom: $form-margin;
                         right: $form-margin;
                         font-size: 75%
                     }
-
+                    
                 }
-
+                
                 .success-color {
                     color: $success-color;
                 }
@@ -985,44 +972,44 @@ body {
     background-color: $meeting-info-color;
     border-top: 1px solid $rule-color;
     border-bottom: 1px solid $rule-color;
-
+    
     .cell {
         width: 1px;
         flex-grow: 3;
         margin: $form-margin;
-
+        
         @media #{$phone} {
             flex-grow: 2;
         }
-
+        
         &.number {
             flex-grow: 1;
-
+            
             label {
                 text-align: right;
             }
         }
-
+        
         label {
             right: 0.25em;
             white-space: nowrap;
         }
-
+        
         input {
             width: 100%;
             padding: 0 0.25em;
             border: none;
             background-color: transparent;
-
+            
             &.number {
                 text-align: right;
             }
         }
     }
-
+    
     &.meeting-info {
         padding-bottom: 0;
-
+        
         .cell {
             margin-bottom: 0.15em;
 
@@ -1030,9 +1017,9 @@ body {
                 margin-top: -0.5em;
                 padding-bottom: 0;
                 font-size: 18px;
-                font-weight: 900;
+                font-weight: 900;                
             }
-        }
+        }       
     }
 }
 
@@ -1046,31 +1033,31 @@ body {
     position: absolute;
     width: 1px;
 }
-
+ 
 .debugging {
     z-index: -100;
     margin: 40px 20px 0 20px;
     padding: 20px 20px;
     overflow: hidden;
     background-color: rgba(255, 255, 255, 0.65);
-
+    
     @media print {
         page-break-before: always;
     }
-
+    
     .columns {
         width: 100%;
-
+        
         .column {
             display: inline-block;
             width: 50%;
             vertical-align: top;
-
+            
             @media #{$phone} {
                 display: block;
                 width: 100%;
             }
-
+            
         }
     }
 }

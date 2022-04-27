@@ -12,9 +12,9 @@ import * as React from 'react'
 // see https://www.primefaces.org/primereact
 import { Button } from 'primereact/button'
 import { Menubar } from 'primereact/menubar'
-import { Toast } from 'primereact/toast'
+import { Growl } from 'primereact/growl'
 import 'primereact/resources/primereact.min.css'
-import 'primereact/resources/themes/nova/theme.css'
+import 'primereact/resources/themes/nova-light/theme.css'
 import 'primeicons/primeicons.css'
 import '@fortawesome/fontawesome-free/css/all.css';
 
@@ -159,7 +159,7 @@ this.keySuffix = String(_u.randomSeed())
      * used to share alerts with the user. This reference
      * is set during the `render()` stage.
      */
-    growl: Toast | null = null
+    growl: Growl | null = null
 
     /**
      * Default settings for our tooltips.
@@ -539,7 +539,7 @@ this.keySuffix = String(_u.randomSeed())
      * NOTE: Do not `setState()` in this method.
      */
     renderMenu = (): JSX.Element => {
-        const { app, appPlatform } = _u.getApp()
+        const { app } = _u.getApp()
         const items = [
             {
                 label: "About",
@@ -686,11 +686,7 @@ this.keySuffix = String(_u.randomSeed())
                 ]
             },
         ]
-        if (appPlatform == "macOS") {
-            return <></> // on the macOS app we use the system mwnubar instead and so do not need our own at all
-        } else {
-            return <Menubar key="calculator-menu" model={items} id="app-main-menu" />
-        }
+        return <Menubar key="calculator-menu" model={items} id="app-main-menu" />
     }
 
     /**
@@ -935,13 +931,13 @@ this.keySuffix = String(_u.randomSeed())
                         ? <div className="summary-row">
                             <div className="summary-label">
                                 Total members of viable subcaucuses
-                            </div>
+                    </div>
                             <div className="summary-count">
                                 {this.subcalc.snapshot.viableParticipants.toCommaString()}
                             </div>
                             <div className="summary-delegates">
                                 &nbsp;
-                            </div>
+                    </div>
                         </div>
                         : ''
                 }
@@ -1051,6 +1047,7 @@ this.keySuffix = String(_u.randomSeed())
                                 icon="fa fa-fw fa-trash"
                                 disabled={noEmpties}
                                 tooltip="Remove subcaucuses that have no members"
+                                tooltipOptions={this.tooltipOptions}
                                 onClick={() => this.addCardState(CardFor.RemovingEmpties)}
                             />
                             <Button id="participants-button"
@@ -1058,6 +1055,7 @@ this.keySuffix = String(_u.randomSeed())
                                 icon="fa fa-fw fa-user"
                                 disabled={allEmpty}
                                 tooltip="Participants"
+                                tooltipOptions={this.tooltipOptions}
                                 onClick={() => this.addCardState(CardFor.Participants)}
                             />
                             {_u.isDebugging()
@@ -1067,6 +1065,7 @@ this.keySuffix = String(_u.randomSeed())
                                         icon="fa fa-fw fa-sync-alt"
                                         className="p-button-success"
                                         tooltip="Get new random seed for the coin"
+                                        tooltipOptions={this.tooltipOptions}
                                         onClick={() => {
                                             this.subcalc.reviseSnapshot({ seed: _u.randomSeed() })
                                             this.growlAlert(`Random seed is now ${this.subcalc.snapshot.seed}.`, 'success', 'New Random Coin')
@@ -1079,6 +1078,7 @@ this.keySuffix = String(_u.randomSeed())
                                         icon="fa fa-fw fa-chart-pie"
                                         className="p-button-success"
                                         tooltip="Show analysis"
+                                        tooltipOptions={this.tooltipOptions}
                                         onClick={() => {
                                             this.setState({ present: Presenting.Analyzing })
                                         }}
@@ -1103,9 +1103,11 @@ this.keySuffix = String(_u.randomSeed())
         return (
             <footer>
                 <Button id="app-byline"
+                    href="https://tenseg.net"
                     label="&nbsp;"
                     onClick={() => this.addCardState(CardFor.ShowingBy)}
                 >
+                    <div id="app-version">v {process.env.REACT_APP_VERSION}{process.env.REACT_APP_IOS_VERSION ? ' iOS' : ''}</div>
                     <div id="credit-line">Brought to you by Tenseg LLC</div>
                 </Button>
             </footer>
@@ -1198,7 +1200,7 @@ this.keySuffix = String(_u.randomSeed())
                         : ''}
                     {this.renderByline()}
                     {this.renderNextCard()}
-                    <Toast ref={(el) => this.growl = el} />
+                    <Growl ref={(el) => this.growl = el} />
                 </div>
                 {this.renderDebuggingInfo()}
             </div>
