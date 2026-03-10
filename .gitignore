@@ -8,3 +8,6 @@ build
 *-lock.*
 local-notes
 *.log
+.env
+__scripts/tmp/*
+!__scripts/tmp/.gitkeep
