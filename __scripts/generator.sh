@@ -33,9 +33,6 @@ echo "\n---\yarn run build\n---\n" >> $WORKINGFILE
 nvm use >> $WORKINGFILE 2>&1
 yarn run build >> $WORKINGFILE 2>&1
 
-echo "\n---\nphp please ssg:generate --workers=$WORKERS\n---\n" >> $WORKINGFILE
-php $BASE/please ssg:generate --workers=$WORKERS >> $WORKINGFILE 2>&1
-
 if [[ -n $CLOUDFLARE_ACCOUNT_ID ]] && [[ -n $CLOUDFLARE_WRANGLER_PROJECT ]]
 then
     export CLOUDFLARE_ACCOUNT_ID=$CLOUDFLARE_ACCOUNT_ID
