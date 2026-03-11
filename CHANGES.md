@@ -1,8 +1,13 @@
 #  Version History
 
+## 3.1.4 - 11 March 2026
+
+* Update multiple dependencies with dependabot
+* Update references to 2026-2027 call document
+
 ## 3.1.3 - 26 April 2022
 
-* Update mmultiple dependencies
+* Update multiple dependencies
 
 ## 3.1.2 - 6 March 2019
 

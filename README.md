@@ -1,6 +1,6 @@
 # Subcaucus Calculator
 
-The Minnesota DFL Subcaucus Calculator (or SubCalc) assists convenors of precinct caucuses and conventions in Minnesota. The Minnesota Democratic Farmer Labor (DFL) party uses a wonderful, but somewhat arcane, “walking subcaucus” process that is simple enough to do, but rather difficult to tabulate. This app calculates the number of delegates each subcaucus gets when you enter the total number of delegates your precinct or convention is allowed and how many members are in each subcaucus. The rules it follows appeared on page 4 of the [DFL 2018-2019 Official Call](https://www.dfl.org/wp-content/uploads/2018/04/2017-12-14-Call-Amended-2-December-2017-Final2c-Rev-B.pdf), including the proper treatment of remainders. It makes the math involved in a walking subcaucus disappear. The app could be used to facilitate a “walking subcaucus” or “[proportional representation](http://en.wikipedia.org/wiki/Proportional_representation)” system for any group.
+The Minnesota DFL Subcaucus Calculator (or SubCalc) assists convenors of precinct caucuses and conventions in Minnesota. The Minnesota Democratic Farmer Labor (DFL) party uses a wonderful, but somewhat arcane, “walking subcaucus” process that is simple enough to do, but rather difficult to tabulate. This app calculates the number of delegates each subcaucus gets when you enter the total number of delegates your precinct or convention is allowed and how many members are in each subcaucus. The rules it follows appeared on page 23 of the [DFL 2026-2027 Official Call](https://dfl.org/wp-content/uploads/2025/10/2025-09-27-2026-2027-DFL-Official-Call-Rev-A-FINAL.pdf), including the proper treatment of remainders. It makes the math involved in a walking subcaucus disappear. The app could be used to facilitate a “walking subcaucus” or “[proportional representation](http://en.wikipedia.org/wiki/Proportional_representation)” system for any group.
 
 SubCalc is a progressive web application built on the [Create React App framework](README-CRA.md). This web application runs as the Minnesota DFL Subcaucus Calculator at [subcalc.tenseg.net](https://subcalc.tenseg.net). This project is also the submodule at the heard of the [SubCalc iPhone app](https://github.com/tenseg/subcaucus-calculator-ios).
 
@@ -26,7 +26,7 @@ SubCalc only has to save the “coin’s” random seed in order to reproduce th
 
 ## Building the subcaucus calculator
 
-You can find a lot more detail about building this React app in the [Create React App readme](README-CRA.md), but here are a few basics. You will need [yarn](https://yarnpkg.com) to build and use this app. (Feel free to use [npm](https://www.npmjs.com/) as an alternative to yarn, but the instructions below are based on yarn.)
+You can find a lot more detail about building this React app in the [Create React App readme](README-CRA.md), but here are a few basics. You will need [yarn](https://yarnpkg.com) to build and use this app. (An attempt to switch to [npm](https://www.npmjs.com/) led to unexpected consequences, so we are sticking with yarn on this project.)
 
 Once you clone this repository you will have to make sure all the dependencies are loaded to your copy with:
 
