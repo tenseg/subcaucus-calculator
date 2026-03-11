@@ -9,10 +9,8 @@ source $HOME/.zshrc # to rely on 1Password CLI for authentication to Cloudflare
 source $BASE/.env # to get Cloudflare account and project info for deployment
 
 LOCAL=$BASE/build
-PATH=$SSG_PATH_HACK
-REMOTE=$SSG_REMOTE
-WORKINGFILE=$STORAGE/working-ssg.log
-COMPLETEDFILE=$STORAGE/completed-ssg.log
+WORKINGFILE=$STORAGE/working-generater.log
+COMPLETEDFILE=$STORAGE/completed-generater.log
 NOW=$(/bin/date +%s)
 
 if [ ! -d $STORAGE ]
@@ -25,11 +23,11 @@ then
     echo Already Processing
     exit
 fi
-
+    
 echo $NOW started
 echo $NOW > $WORKINGFILE
 
-echo "\n---\yarn run build\n---\n" >> $WORKINGFILE
+echo "\n---\nyarn run build\n---\n" >> $WORKINGFILE
 nvm use >> $WORKINGFILE 2>&1
 yarn run build >> $WORKINGFILE 2>&1
 
