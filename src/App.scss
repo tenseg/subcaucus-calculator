@@ -24,6 +24,10 @@ $menu-height: 42px;
 $count-width: 60px;
 $delegate-width: 80px;
 
+html {
+    font-size: 14px;
+}
+
 body {
     background-color: $body-color;
 
@@ -1072,5 +1076,24 @@ body {
             }
 
         }
+    }
+}
+
+@media screen and (max-width: 960px) {
+     .p-menubar .p-menubar-button {
+         display: none;
+    }
+     .p-menubar {
+         position: inherit;
+    }
+     .p-menubar .p-menubar-root-list {
+         display: flex;
+         align-items: center;
+         position: unset;
+         padding: unset;
+         background: inherit;
+         border: unset;
+         box-shadow: unset;
+         width: unset;
     }
 }

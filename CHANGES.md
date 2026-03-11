@@ -1,5 +1,10 @@
 #  Version History
 
+
+## 3.1.5 - 11 March 2026
+
+* Fix font size and mobile menu appearance
+
 ## 3.1.4 - 11 March 2026
 
 * Update multiple dependencies with dependabot
