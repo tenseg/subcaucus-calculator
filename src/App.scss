@@ -1096,4 +1096,30 @@ body {
          box-shadow: unset;
          width: unset;
     }
+
+    .p-menubar .p-menubar-root-list .p-menuitem,
+    .p-menubar .p-menubar-root-list > .p-menuitem {
+        width: unset;
+        position: relative;
+    }
+
+    .p-menubar .p-menubar-root-list > .p-menuitem > .p-menuitem-link {
+        // padding: unset;
+        // color: unset;
+        border-radius: 3px;
+        // transition: unset;
+        // user-select: unset;
+    }
+
+    .p-menubar .p-menubar-root-list .p-submenu-list {
+        width: 12.5rem;
+        position: absolute;
+        // box-shadow: inherit;
+        border: 1px solid;
+    }
+
+    .p-menubar .p-menubar-root-list ul li a {
+        padding-left: 0.857rem;
+    }
+
 }
